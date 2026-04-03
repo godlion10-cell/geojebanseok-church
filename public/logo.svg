@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 160" fill="none">
+  <!-- Background transparent -->
+
+  <!-- Left Symbol: Abstract Cross/Rock -->
+  <g>
+    <!-- Gold accent (top-left corner piece) -->
+    <path d="M28 8 Q28 8 28 8 L56 8 Q56 8 56 34 L56 56 Q42 56 28 42 Z" fill="#928747"/>
+    
+    <!-- Left curved pillar -->
+    <path d="M8 56 Q8 20 28 8 L28 42 Q28 56 28 70 L28 140 Q8 140 8 120 Z" fill="#2B5762" opacity="0.6"/>
+    
+    <!-- Right tall pillar (main cross vertical) -->
+    <path d="M38 8 L56 8 L56 140 L38 140 Z" fill="#2B5762"/>
+    
+    <!-- Cross horizontal bar -->
+    <path d="M22 52 L72 52 L72 72 L22 72 Z" fill="#2B5762"/>
+  </g>
+
+  <!-- Tagline: 은혜 위에 바로 서는 -->
+  <text x="170" y="30" font-family="'Noto Sans KR', 'Malgun Gothic', sans-serif" font-size="14" fill="#2B5762" letter-spacing="3">은혜 위에 바로 서는</text>
+
+  <!-- Main Title: 반석교회 -->
+  <text x="110" y="115" font-family="'Noto Sans KR', 'Malgun Gothic', sans-serif" font-weight="900" font-size="72" fill="#2B5762" letter-spacing="2">반석교회</text>
+</svg>

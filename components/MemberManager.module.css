@@ -1,0 +1,199 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.primaryBtn {
+  padding: 0.6rem 1.2rem;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.primaryBtn:hover {
+  background-color: #002244;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.secondaryBtn {
+  padding: 0.4rem 0.8rem;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.secondaryBtn:hover {
+  background-color: #e0e0e0;
+}
+
+.dangerBtn {
+  padding: 0.4rem 0.8rem;
+  background-color: #fff0f0;
+  color: #e53935;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.dangerBtn:hover {
+  background-color: #ffebee;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
+}
+
+.memberTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.memberTable th {
+  background: #f8f9fa;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid #eee;
+}
+
+.memberTable td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  color: var(--color-text-main);
+}
+
+.memberTable tr:hover td {
+  background-color: #fafbfc;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.roleBadge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+/* Modal Overlay (Glassmorphism) */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-normal);
+}
+
+.modalOverlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modalContent {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(20px) scale(0.95);
+  transition: transform var(--transition-normal);
+}
+
+.modalOverlay.active .modalContent {
+  transform: translateY(0) scale(1);
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.formGroup {
+  margin-bottom: 1.2rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color var(--transition-fast);
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.searchBar {
+  padding: 0.6rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  width: 250px;
+  font-size: 0.95rem;
+}
+
+.searchBar:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}

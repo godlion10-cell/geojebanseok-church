@@ -1,0 +1,259 @@
+/* CMS Premium Design System */
+.cmsWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem;
+  font-family: 'Inter', 'Noto Sans KR', sans-serif;
+  color: #333;
+}
+
+.cmsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 2rem;
+  border-bottom: 3px solid #f8f1f1;
+  margin-bottom: 3rem;
+}
+
+.cmsHeader h1 {
+  font-size: 2.2rem;
+  color: #5b272f;
+  margin: 0 0 0.5rem 0;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  color: #888;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+}
+
+.logoutBtn {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  padding: 0.8rem 1.8rem;
+  border-radius: 50px;
+  cursor: pointer;
+  color: #666;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.logoutBtn:hover {
+  background: #eee;
+  color: #333;
+}
+
+.saveBtn {
+  background: linear-gradient(135deg, #5b272f 0%, #3a181e 100%);
+  color: white;
+  border: none;
+  padding: 0.9rem 2.8rem;
+  border-radius: 50px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(91, 39, 47, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.saveBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(91, 39, 47, 0.35);
+}
+
+.saveBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cmsMain {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 3rem;
+}
+
+.categorySidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.catBtn {
+  text-align: left;
+  padding: 1.2rem 1.5rem;
+  border: none;
+  background: white;
+  color: #666;
+  border-radius: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s;
+  border: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.95rem;
+}
+
+.catBtn:hover {
+  background: #fdf5ea;
+  color: #5b272f;
+  border-color: #f5ead5;
+  transform: translateX(5px);
+}
+
+.catBtnActive {
+  background: #5b272f;
+  color: white !important;
+  border-color: #5b272f;
+  box-shadow: 0 8px 20px rgba(91, 39, 47, 0.15);
+}
+
+.editorCard {
+  background: white;
+  padding: 3.5rem;
+  border-radius: 24px;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.06);
+  border: 1px solid #f0f0f0;
+  min-height: 500px;
+}
+
+.sectionForm h3 {
+  font-size: 1.6rem;
+  margin: 0 0 2.5rem 0;
+  color: #333;
+  border-left: 6px solid #c19c72;
+  padding-left: 1.2rem;
+  font-weight: 800;
+}
+
+.formGroup {
+  margin-bottom: 2rem;
+}
+
+.formGroup label {
+  display: block;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #5b272f;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.formGroup input, 
+.formGroup textarea, 
+.formGroup select {
+  width: 100%;
+  padding: 1.1rem;
+  border: 2px solid #f0f0f0;
+  border-radius: 14px;
+  font-size: 1rem;
+  background: #fafafb;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.formGroup input:focus, 
+.formGroup textarea:focus {
+  border-color: #c19c72;
+  background: white;
+  outline: none;
+  box-shadow: 0 0 0 5px rgba(193, 156, 114, 0.12);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.previewArea {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+}
+
+.iframeWrap {
+  height: 400px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #eee;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+/* Login UI */
+.loginContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  padding: 1rem;
+}
+
+.loginCard {
+  background: white;
+  padding: 4rem;
+  border-radius: 30px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+  border: 1px solid #f5ead5;
+}
+
+.loginCard h2 {
+  font-size: 2rem;
+  color: #5b272f;
+  margin-bottom: 1rem;
+  font-weight: 800;
+}
+
+.loginCard p {
+  color: #888;
+  margin-bottom: 2.5rem;
+  font-size: 1.1rem;
+}
+
+.loginInput {
+  width: 100%;
+  padding: 1.2rem;
+  margin-bottom: 2rem;
+  border: 2px solid #f0f0f0;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  text-align: center;
+  transition: 0.2s;
+}
+
+.loginInput:focus {
+  border-color: #c19c72;
+  outline: none;
+}
+
+.loginBtn {
+  width: 100%;
+  padding: 1.2rem;
+  background: #5b272f;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.loginBtn:hover {
+  background: #3a181e;
+  transform: translateY(-2px);
+}

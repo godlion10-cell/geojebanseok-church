@@ -1,0 +1,533 @@
+"use client";
+
+import { useState, useEffect } from 'react';
+import { getContentItems, addContentItem, updateContentItem, deleteContentItem, initializeBaseData } from '@/app/actions/content';
+import { getSchedules, addSchedule, updateSchedule, deleteSchedule, initializeSchedules } from '@/app/actions/schedule';
+import css from './cms.module.css';
+
+type ContentItem = {
+  id: string;
+  type: string;
+  category: string | null;
+  title: string;
+  url: string | null;
+  content: string | null;
+};
+
+type Schedule = {
+  id: string;
+  title: string;
+  time: string;
+  place: string;
+  officer: string;
+  order: number;
+};
+
+// 기본(Fallback) 데이터 — 홈페이지 이미지와 동일한 내용
+const DEFAULT_NEWS = [
+  { title: '환영 및 등록 안내', content: '환영하고 축복합니다. 반석교회는 대한예수교 장로회 합동 측 소속입니다.\n• 유튜브: @petros-church\n• 온라인 헌금: 신협 131-017-687642\n• 다음세대 후원: 신협 131-018-242250' },
+  { title: '이번 주 예배 주제', content: '• 주일오전: 무릎 꿇으신 기도자 (눅 22:39~44)\n• 수요저녁: 창세기 45:4-10\n• 금요기도: [기도] 책\n• 새벽예배: QT책 진도를 따라' },
+  { title: '고난주일 및 성찬식', content: '오늘은 고난주일(종려주일)로 보냅니다. 오늘 오전 예배 중 성찬식이 경건하게 진행됩니다.' },
+  { title: '이음돌 아우팅 안내', content: '오늘은 점심 식사가 없으며, 각 이음돌 모임별로 아우팅 시간을 보냅니다.\n※ 단, 주일학교와 어르신들에게는 김밥을 제공해 드립니다.' },
+  { title: '다음세대 예배 소식', content: '• 주일청소년: 예수님의 십자가 (막 15장)\n• 주일어린이: 구레네 시몬 (막 15:21). 사순절 가정학습지를 함께해요.' },
+  { title: '고난주간 특별새벽기도', content: '내일부터 고난주간 특별 새벽기도를 준비합니다.\n• 기간: 3월 30일(월) ~ 4월 3일(금)' },
+];
+
+const DEFAULT_SERMONS = [
+  { title: '무릎 꿇으신 기도자', category: '주일오전 설교', content: '이주민 목사', url: '' },
+  { title: '요셉 시리즈 (창세기)', category: '수요예배 말씀', content: '이주민 목사', url: '' },
+  { title: '생명의 삶 (매일 새벽)', category: '큐티(QT) 안내', content: '경건의 시간', url: '' },
+];
+
+const DEFAULT_SCHEDULES = [
+  { title: '주일대예배 (1부)', time: '오전 09:00', place: '2층 본당', officer: '이주민 목사', order: 1 },
+  { title: '주일대예배 (2부)', time: '오전 11:00', place: '2층 본당', officer: '이주민 목사', order: 2 },
+  { title: '주일오후예배', time: '오후 14:00', place: '2층 본당', officer: '이주민 목사', order: 3 },
+  { title: '중고등부예배', time: '오전 10:00', place: '3층 교육관', officer: '김민정 전도사', order: 4 },
+  { title: '주일학교예배', time: '오전 11:00', place: '3층 교육관', officer: '김민정 전도사', order: 5 },
+  { title: '수요저녁예배', time: '저녁 19:30', place: '2층 본당', officer: '이주민 목사', order: 6 },
+  { title: '금요기도회', time: '저녁 20:00', place: '2층 본당', officer: '이주민 목사', order: 7 },
+  { title: '새벽예배', time: '오전 05:30', place: '2층 본당', officer: '이주민 목사', order: 8 },
+];
+
+export default function CMSPage() {
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [password, setPassword] = useState('');
+  const [activeTab, setActiveTab] = useState<'news' | 'sermon' | 'schedule'>('news');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Data states
+  const [newsItems, setNewsItems] = useState<ContentItem[]>([]);
+  const [sermons, setSermons] = useState<ContentItem[]>([]);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+
+  // Edit modal state
+  const [editModal, setEditModal] = useState<{
+    open: boolean;
+    mode: 'add' | 'edit';
+    id?: string;
+    data: Record<string, string>;
+  }>({ open: false, mode: 'add', data: {} });
+
+  useEffect(() => {
+    const auth = localStorage.getItem('banseok_cms_auth');
+    if (auth === 'true') {
+      setIsAuthorized(true);
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [newsRes, sermonRes, scheduleRes] = await Promise.all([
+        getContentItems('NEWS'),
+        getContentItems('SERMON'),
+        getSchedules()
+      ]);
+
+      if (newsRes.success) setNewsItems(newsRes.data || []);
+      if (sermonRes.success) setSermons(sermonRes.data || []);
+      if (scheduleRes.success) setSchedules(scheduleRes.data || []);
+    } catch (err: any) {
+      console.error('데이터 로딩 실패:', err);
+    }
+    setLoading(false);
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === '1234') {
+      setIsAuthorized(true);
+      localStorage.setItem('banseok_cms_auth', 'true');
+      fetchData();
+    } else {
+      alert('비밀번호가 올바르지 않습니다.');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthorized(false);
+    localStorage.removeItem('banseok_cms_auth');
+  };
+
+  // 기본 데이터를 DB에 일괄 등록하는 초기화 기능
+  const handleInitialize = async (type: 'news' | 'sermon' | 'schedule') => {
+    if (!confirm(`기본 ${type === 'news' ? '교회 소식' : type === 'sermon' ? '설교 말씀' : '예배 시간표'} 데이터를 일괄 등록하시겠습니까?\n(기존 데이터가 있으면 추가됩니다)`)) return;
+    
+    setSaving(true);
+    try {
+      let res;
+      if (type === 'news') {
+        const items = DEFAULT_NEWS.map(item => ({
+          category: '', title: item.title, url: '', content: item.content
+        }));
+        res = await initializeBaseData('news', items);
+      } else if (type === 'sermon') {
+        const items = DEFAULT_SERMONS.map(item => ({
+          category: item.category, title: item.title, url: item.url, content: item.content
+        }));
+        res = await initializeBaseData('sermon', items);
+      } else {
+        res = await initializeSchedules(DEFAULT_SCHEDULES);
+      }
+
+      if (!res?.success) {
+        throw new Error(res?.error || '서버 오류');
+      }
+
+      alert('기본 데이터가 등록되었습니다!');
+      fetchData();
+    } catch (err: any) {
+      console.error('초기화 에러:', err);
+      alert(`초기화 중 오류가 발생했습니다.\n상세: ${err?.message || err}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // 콘텐츠(소식/설교) 저장
+  const handleContentSave = async () => {
+    setSaving(true);
+    try {
+      const fd = new FormData();
+      fd.set('type', activeTab.toUpperCase());
+      fd.set('category', editModal.data.category || '');
+      fd.set('title', editModal.data.title || '');
+      fd.set('url', editModal.data.url || '');
+      fd.set('content', editModal.data.content || '');
+
+      let res;
+      if (editModal.mode === 'edit' && editModal.id) {
+        res = await updateContentItem(editModal.id, fd);
+      } else {
+        res = await addContentItem(fd);
+      }
+
+      if (res.success) {
+        alert('저장되었습니다.');
+        setEditModal({ open: false, mode: 'add', data: {} });
+        fetchData();
+      } else {
+        alert(res.error || '저장 실패');
+      }
+    } catch (err: any) {
+      alert(`오류: ${err.message || '저장 중 문제가 발생했습니다.'}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // 시간표 저장
+  const handleScheduleSave = async () => {
+    setSaving(true);
+    try {
+      const data = {
+        title: editModal.data.title || '',
+        time: editModal.data.time || '',
+        place: editModal.data.place || '',
+        officer: editModal.data.officer || '',
+        order: parseInt(editModal.data.order || '0'),
+      };
+
+      let res;
+      if (editModal.mode === 'edit' && editModal.id) {
+        res = await updateSchedule(editModal.id, data);
+      } else {
+        res = await addSchedule(data);
+      }
+
+      if (res.success) {
+        alert('저장되었습니다.');
+        setEditModal({ open: false, mode: 'add', data: {} });
+        fetchData();
+      } else {
+        alert(res.error || '저장 실패');
+      }
+    } catch (err: any) {
+      alert(`오류: ${err.message || '저장 중 문제가 발생했습니다.'}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // 삭제
+  const handleDelete = async (id: string, type: 'content' | 'schedule') => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    const res = type === 'schedule' ? await deleteSchedule(id) : await deleteContentItem(id);
+    if (res.success) fetchData();
+    else alert('삭제 실패');
+  };
+
+  // 편집 모달 열기
+  const openEdit = (item: any, type: 'news' | 'sermon' | 'schedule') => {
+    if (type === 'schedule') {
+      setEditModal({
+        open: true, mode: 'edit', id: item.id,
+        data: { title: item.title, time: item.time, place: item.place, officer: item.officer, order: String(item.order) }
+      });
+    } else {
+      setEditModal({
+        open: true, mode: 'edit', id: item.id,
+        data: { title: item.title, category: item.category || '', url: item.url || '', content: item.content || '' }
+      });
+    }
+  };
+
+  const openAdd = () => {
+    if (activeTab === 'schedule') {
+      setEditModal({ open: true, mode: 'add', data: { title: '', time: '', place: '', officer: '', order: '0' } });
+    } else {
+      setEditModal({ open: true, mode: 'add', data: { title: '', category: '', url: '', content: '' } });
+    }
+  };
+
+  // 입력 변경 핸들러
+  const updateField = (field: string, value: string) => {
+    setEditModal(prev => ({ ...prev, data: { ...prev.data, [field]: value } }));
+  };
+
+  // ===== 로그인 화면 =====
+  if (!isAuthorized) {
+    return (
+      <div className={css.loginContainer}>
+        <div className={css.loginCard}>
+          <h2>반석교회 관리자</h2>
+          <p>비밀번호를 입력하여 접속하세요.</p>
+          <form onSubmit={handleLogin}>
+            <input
+              type="password"
+              className={css.loginInput}
+              placeholder="비밀번호 입력"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoFocus
+            />
+            <button type="submit" className={css.loginBtn}>로그인</button>
+          </form>
+          <p style={{ marginTop: '2rem', fontSize: '0.8rem', color: '#ccc' }}>초기 비밀번호: 1234</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ===== 현재 표시할 데이터 결정 (DB가 비면 기본값 표시) =====
+  const displayNews = newsItems.length > 0 ? newsItems : DEFAULT_NEWS.map((n, i) => ({ id: `default-n${i}`, type: 'NEWS', category: null, title: n.title, url: null, content: n.content }));
+  const displaySermons = sermons.length > 0 ? sermons : DEFAULT_SERMONS.map((s, i) => ({ id: `default-s${i}`, type: 'SERMON', category: s.category, title: s.title, url: s.url, content: s.content }));
+  const displaySchedules = schedules.length > 0 ? schedules : DEFAULT_SCHEDULES.map((s, i) => ({ id: `default-sc${i}`, ...s }));
+
+  const isDefault = (id: string) => id.startsWith('default-');
+
+  return (
+    <div className={css.cmsWrapper}>
+      {/* Header */}
+      <div className={css.cmsHeader}>
+        <div>
+          <h1>홈페이지 콘텐츠 관리</h1>
+          <p className={css.subtitle}>메인 화면에 표시되는 소식, 설교, 예배 안내를 실시간으로 관리하세요.</p>
+        </div>
+        <div className={css.headerActions}>
+          <button className={css.logoutBtn} onClick={() => fetchData()}>🔄 새로고침</button>
+          <button className={css.logoutBtn} onClick={handleLogout}>로그아웃</button>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className={css.cmsMain}>
+        <aside className={css.categorySidebar}>
+          <button className={`${css.catBtn} ${activeTab === 'news' ? css.catBtnActive : ''}`} onClick={() => setActiveTab('news')}>📢 교회 소식</button>
+          <button className={`${css.catBtn} ${activeTab === 'sermon' ? css.catBtnActive : ''}`} onClick={() => setActiveTab('sermon')}>📺 설교 말씀</button>
+          <button className={`${css.catBtn} ${activeTab === 'schedule' ? css.catBtnActive : ''}`} onClick={() => setActiveTab('schedule')}>🗓️ 예배 안내</button>
+        </aside>
+
+        <main className={css.editorCard}>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#999' }}>로딩 중...</div>
+          ) : (
+            <>
+              {/* Header & Actions */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h3 style={{ margin: 0, fontSize: '1.4rem', color: '#5b272f', borderLeft: '5px solid #c19c72', paddingLeft: '1rem' }}>
+                  {activeTab === 'news' ? '📢 교회 소식' : activeTab === 'sermon' ? '📺 설교 말씀' : '🗓️ 예배 시간표'}
+                  <span style={{ fontSize: '0.85rem', color: '#999', marginLeft: '0.8rem', fontWeight: 400 }}>
+                    ({activeTab === 'news' ? newsItems.length : activeTab === 'sermon' ? sermons.length : schedules.length}개 등록됨)
+                  </span>
+                </h3>
+                <div style={{ display: 'flex', gap: '0.8rem' }}>
+                  {(activeTab === 'news' ? newsItems : activeTab === 'sermon' ? sermons : schedules).length === 0 && (
+                    <button className={css.logoutBtn} style={{ fontSize: '0.85rem' }} onClick={() => handleInitialize(activeTab)} disabled={saving}>
+                      {saving ? '등록 중...' : '📥 기본 데이터 일괄 등록'}
+                    </button>
+                  )}
+                  <button className={css.saveBtn} style={{ padding: '0.7rem 1.5rem' }} onClick={openAdd}>
+                    + {activeTab === 'news' ? '소식' : activeTab === 'sermon' ? '설교' : '시간표'} 추가
+                  </button>
+                </div>
+              </div>
+
+              {/* ===== 교회 소식 미리보기 ===== */}
+              {activeTab === 'news' && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.2rem' }}>
+                  {displayNews.map((news, idx) => (
+                    <div key={news.id} style={{
+                      background: '#fdfbf7',
+                      border: '1px solid #f0e8dc',
+                      borderRadius: '16px',
+                      padding: '1.5rem',
+                      position: 'relative',
+                      transition: 'all 0.2s',
+                      opacity: isDefault(news.id) ? 0.65 : 1,
+                    }}>
+                      {isDefault(news.id) && (
+                        <div style={{ position: 'absolute', top: '8px', right: '10px', fontSize: '0.7rem', background: '#f5ead5', padding: '2px 8px', borderRadius: '8px', color: '#b8860b' }}>기본값</div>
+                      )}
+                      <h4 style={{ margin: '0 0 0.8rem', fontSize: '1.05rem', color: '#5b272f' }}>{idx + 1}. {news.title}</h4>
+                      {news.content && (
+                        <p style={{ margin: 0, fontSize: '0.88rem', color: '#666', whiteSpace: 'pre-line', lineHeight: 1.6, maxHeight: '120px', overflow: 'hidden' }}>{news.content}</p>
+                      )}
+                      {!isDefault(news.id) && (
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+                          <button onClick={() => openEdit(news, 'news')} style={{ padding: '0.4rem 1rem', border: '1px solid #ddd', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '0.8rem' }}>✏️ 수정</button>
+                          <button onClick={() => handleDelete(news.id, 'content')} style={{ padding: '0.4rem 1rem', border: '1px solid #f5c6c6', borderRadius: '8px', background: '#fff5f5', cursor: 'pointer', fontSize: '0.8rem', color: '#e74c3c' }}>🗑️ 삭제</button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ===== 설교 말씀 미리보기 ===== */}
+              {activeTab === 'sermon' && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.2rem' }}>
+                  {displaySermons.map((sermon) => (
+                    <div key={sermon.id} style={{
+                      background: '#fdfbf7',
+                      border: '1px solid #f0e8dc',
+                      borderRadius: '16px',
+                      padding: '1.5rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      position: 'relative',
+                      opacity: isDefault(sermon.id) ? 0.65 : 1,
+                    }}>
+                      {isDefault(sermon.id) && (
+                        <div style={{ position: 'absolute', top: '8px', right: '10px', fontSize: '0.7rem', background: '#f5ead5', padding: '2px 8px', borderRadius: '8px', color: '#b8860b' }}>기본값</div>
+                      )}
+                      <div style={{ width: '50px', height: '50px', borderRadius: '14px', background: '#f5ead5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', flexShrink: 0 }}>
+                        {sermon.category === '큐티(QT) 안내' ? '🔗' : '📖'}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: '1rem', color: '#5b272f' }}>{sermon.category || '설교말씀'}</div>
+                        <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '2px' }}>{sermon.title}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#999', marginTop: '2px' }}>{sermon.content}</div>
+                      </div>
+                      {!isDefault(sermon.id) && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                          <button onClick={() => openEdit(sermon, 'sermon')} style={{ padding: '0.3rem 0.8rem', border: '1px solid #ddd', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '0.75rem' }}>✏️</button>
+                          <button onClick={() => handleDelete(sermon.id, 'content')} style={{ padding: '0.3rem 0.8rem', border: '1px solid #f5c6c6', borderRadius: '8px', background: '#fff5f5', cursor: 'pointer', fontSize: '0.75rem', color: '#e74c3c' }}>🗑️</button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ===== 예배 시간표 미리보기 ===== */}
+              {activeTab === 'schedule' && (
+                <div style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid #f0e8dc' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: '#5b272f', color: 'white' }}>
+                        <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 700 }}>예배 명칭</th>
+                        <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 700 }}>시간</th>
+                        <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 700 }}>장소</th>
+                        <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 700 }}>담당</th>
+                        <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 700, width: '100px' }}>관리</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {displaySchedules.map((schedule, idx) => (
+                        <tr key={schedule.id} style={{ background: idx % 2 === 0 ? '#fdfbf7' : 'white', borderBottom: '1px solid #f0e8dc', opacity: isDefault(schedule.id) ? 0.65 : 1 }}>
+                          <td style={{ padding: '1rem', fontWeight: 700, color: '#5b272f' }}>
+                            {schedule.title}
+                            {isDefault(schedule.id) && <span style={{ fontSize: '0.65rem', background: '#f5ead5', padding: '1px 6px', borderRadius: '6px', color: '#b8860b', marginLeft: '0.5rem' }}>기본</span>}
+                          </td>
+                          <td style={{ padding: '1rem', textAlign: 'center', color: '#c19c72', fontWeight: 600 }}>{schedule.time}</td>
+                          <td style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>{schedule.place}</td>
+                          <td style={{ padding: '1rem', textAlign: 'center', color: '#666', whiteSpace: 'nowrap' }}>{schedule.officer}</td>
+                          <td style={{ padding: '1rem', textAlign: 'center' }}>
+                            {!isDefault(schedule.id) ? (
+                              <div style={{ display: 'flex', gap: '0.3rem', justifyContent: 'center' }}>
+                                <button onClick={() => openEdit(schedule, 'schedule')} style={{ padding: '0.3rem 0.6rem', border: '1px solid #ddd', borderRadius: '6px', background: 'white', cursor: 'pointer', fontSize: '0.75rem' }}>✏️</button>
+                                <button onClick={() => handleDelete(schedule.id, 'schedule')} style={{ padding: '0.3rem 0.6rem', border: '1px solid #f5c6c6', borderRadius: '6px', background: '#fff5f5', cursor: 'pointer', fontSize: '0.75rem', color: '#e74c3c' }}>🗑️</button>
+                              </div>
+                            ) : (
+                              <span style={{ fontSize: '0.75rem', color: '#ccc' }}>—</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* 안내 메시지 */}
+              {(activeTab === 'news' ? newsItems : activeTab === 'sermon' ? sermons : schedules).length === 0 && (
+                <div style={{ marginTop: '1.5rem', padding: '1.2rem 1.5rem', background: '#fdf5ea', borderRadius: '12px', border: '1px solid #f5ead5', fontSize: '0.9rem', color: '#b8860b' }}>
+                  💡 현재 기본 데이터가 표시되고 있습니다. <strong>"기본 데이터 일괄 등록"</strong> 버튼을 눌러 DB에 저장하면, 이후 자유롭게 수정하고 삭제할 수 있습니다.
+                </div>
+              )}
+            </>
+          )}
+        </main>
+      </div>
+
+      {/* ===== 편집 모달 ===== */}
+      {editModal.open && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+          <div style={{ background: 'white', borderRadius: '24px', padding: '2.5rem', width: '100%', maxWidth: '550px', maxHeight: '90vh', overflow: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }}>
+            <h3 style={{ margin: '0 0 2rem', fontSize: '1.4rem', color: '#5b272f' }}>
+              {editModal.mode === 'edit' ? '✏️ 항목 수정' : '➕ 새 항목 추가'}
+            </h3>
+
+            {activeTab === 'schedule' ? (
+              // 시간표 편집 폼
+              <div style={{ display: 'grid', gap: '1.2rem' }}>
+                <div className={css.formGroup}>
+                  <label>예배 명칭</label>
+                  <input value={editModal.data.title || ''} onChange={e => updateField('title', e.target.value)} placeholder="예: 주일대예배 (1부)" />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className={css.formGroup}>
+                    <label>예배 시간</label>
+                    <input value={editModal.data.time || ''} onChange={e => updateField('time', e.target.value)} placeholder="예: 오전 11:00" />
+                  </div>
+                  <div className={css.formGroup}>
+                    <label>장소</label>
+                    <input value={editModal.data.place || ''} onChange={e => updateField('place', e.target.value)} placeholder="예: 2층 본당" />
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className={css.formGroup}>
+                    <label>담당자</label>
+                    <input value={editModal.data.officer || ''} onChange={e => updateField('officer', e.target.value)} placeholder="예: 이주민 목사" />
+                  </div>
+                  <div className={css.formGroup}>
+                    <label>정렬 순서</label>
+                    <input type="number" value={editModal.data.order || '0'} onChange={e => updateField('order', e.target.value)} />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // 소식/설교 편집 폼
+              <div style={{ display: 'grid', gap: '1.2rem' }}>
+                <div className={css.formGroup}>
+                  <label>제목</label>
+                  <input value={editModal.data.title || ''} onChange={e => updateField('title', e.target.value)} placeholder="제목을 입력하세요" />
+                </div>
+                {activeTab === 'sermon' && (
+                  <div className={css.formGroup}>
+                    <label>카테고리</label>
+                    <input value={editModal.data.category || ''} onChange={e => updateField('category', e.target.value)} placeholder="예: 주일오전 설교, 수요예배 말씀" />
+                  </div>
+                )}
+                {activeTab === 'sermon' && (
+                  <div className={css.formGroup}>
+                    <label>유튜브 링크 (선택)</label>
+                    <input value={editModal.data.url || ''} onChange={e => updateField('url', e.target.value)} placeholder="https://youtube.com/..." />
+                  </div>
+                )}
+                <div className={css.formGroup}>
+                  <label>내용</label>
+                  <textarea
+                    value={editModal.data.content || ''}
+                    onChange={e => updateField('content', e.target.value)}
+                    rows={6}
+                    placeholder={activeTab === 'news' ? '교회 소식 내용을 입력하세요.\n줄바꿈은 엔터(Enter)로 가능합니다.' : '설교자 이름 등 부가 정보'}
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', justifyContent: 'flex-end' }}>
+              <button className={css.logoutBtn} onClick={() => setEditModal({ open: false, mode: 'add', data: {} })}>취소</button>
+              <button
+                className={css.saveBtn}
+                disabled={saving}
+                onClick={activeTab === 'schedule' ? handleScheduleSave : handleContentSave}
+              >
+                {saving ? '저장 중...' : '💾 저장하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

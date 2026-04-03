@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Hashed password for Admin
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Member {
+  id               String     @id @default(uuid())
+  name             String
+  phone            String?
+  address          String?
+  dateOfBirth      DateTime?
+  role             String     // 목사, 장로, 권사, 집사, 성도
+  registrationDate DateTime   @default(now())
+  offerings        Offering[]
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+model Offering {
+  id           String   @id @default(uuid())
+  memberId     String
+  member       Member   @relation(fields: [memberId], references: [id])
+  date         DateTime
+  amount       Float
+  offeringType String   // 십일조, 감사헌금, 주일헌금, 건축헌금 등
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ContentItem {
+  id        String   @id @default(uuid())
+  type      String   // e.g., "NEWS", "SERMON", "BULLETIN", "NOTICE"
+  category  String?  // e.g., "주일오전", "수요예배" (설교용) 또는 "안내", "소식" (뉴스용)
+  title     String
+  url       String?  // PDF/Image link for bulletin, YouTube URL, or Image path
+  content   String?  // Text content for notices or news
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorshipSchedule {
+  id        String   @id @default(uuid())
+  title     String   // e.g., "주일대예배 (1부)"
+  time      String   // e.g., "오전 09:00"
+  place     String   // e.g., "2층 본당"
+  officer   String   // e.g., "이주민 목사"
+  order     Int      @default(0) // 정렬 순서
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
