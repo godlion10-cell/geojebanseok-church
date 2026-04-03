@@ -418,7 +418,7 @@ export default function CMSPage() {
                 >
                   <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.6 }}>📤</div>
                   <p style={{ fontSize: '1.2rem', fontWeight: 700, color: '#5b272f', margin: '0 0 0.5rem' }}>
-                    사진 또는 영상을 여기에 드래그하세요
+                    사진, PDF파일, 동영상을 여기에 드래그하세요
                   </p>
                   <p style={{ color: '#999', fontSize: '0.9rem', margin: 0 }}>
                     또는 클릭하여 파일 선택 (주보 사진, 교회 활동 사진, 설교 영상 등)
