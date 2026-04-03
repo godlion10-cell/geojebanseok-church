@@ -253,14 +253,14 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
             <table className={styles.scheduleTable}>
               <tbody>
                 {(schedules.length > 0 ? schedules : [
-                  { id: 'fs1', title: '주일대예배 (1부)', time: '오전 09:00', place: '2층 본당', officer: '이주민 목사' },
-                  { id: 'fs2', title: '주일대예배 (2부)', time: '오전 11:00', place: '2층 본당', officer: '이주민 목사' },
-                  { id: 'fs3', title: '주일오후예배', time: '오후 14:00', place: '2층 본당', officer: '이주민 목사' },
-                  { id: 'fs4', title: '중고등부예배', time: '오전 10:00', place: '3층 교육관', officer: '김민정 전도사' },
-                  { id: 'fs5', title: '주일학교예배', time: '오전 11:00', place: '3층 교육관', officer: '김민정 전도사' },
-                  { id: 'fs6', title: '수요저녁예배', time: '저녁 19:30', place: '2층 본당', officer: '이주민 목사' },
-                  { id: 'fs7', title: '금요기도회', time: '저녁 20:00', place: '2층 본당', officer: '이주민 목사' },
-                  { id: 'fs8', title: '새벽예배', time: '오전 05:30', place: '2층 본당', officer: '이주민 목사' },
+                  { id: 'fs1', title: '주일대예배 (1부)', time: '오전 9시', place: '2층 본당', officer: '이주민 목사' },
+                  { id: 'fs2', title: '주일대예배 (2부)', time: '오전 11시', place: '2층 본당', officer: '이주민 목사' },
+                  { id: 'fs3', title: '주일오후예배', time: '오후 2시', place: '2층 본당', officer: '이주민 목사' },
+                  { id: 'fs4', title: '중고등부예배', time: '오전 10시', place: '3층 교육관', officer: '김민정 전도사' },
+                  { id: 'fs5', title: '주일학교예배', time: '오전 11시', place: '3층 교육관', officer: '김민정 전도사' },
+                  { id: 'fs6', title: '수요저녁예배', time: '저녁 7시 30분', place: '2층 본당', officer: '이주민 목사' },
+                  { id: 'fs7', title: '금요기도회', time: '저녁 8시', place: '2층 본당', officer: '이주민 목사' },
+                  { id: 'fs8', title: '새벽예배', time: '새벽 5시 30분', place: '2층 본당', officer: '이주민 목사' },
                 ]).map((schedule: any) => (
                   <tr
                     key={schedule.id}
@@ -279,7 +279,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
                       {schedule.title}
                     </th>
                     <td><span className={styles.time}>{schedule.time}</span></td>
-                    <td>{schedule.place}</td>
+                    <td style={{ whiteSpace: 'nowrap' }}>{schedule.place}</td>
                     <td style={{ whiteSpace: 'nowrap' }}>{schedule.officer}</td>
                   </tr>
                 ))}

@@ -1,4 +1,4 @@
-'use server';
+// AI 분석 API Route
 
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -23,7 +23,9 @@ export async function POST(request: NextRequest) {
     const mimeType = file.type || 'image/jpeg';
     const isVideo = mimeType.startsWith('video/');
 
-    const prompt = `당신은 한국 교회 웹사이트 관리 AI 어시스턴트입니다.
+    const instruction = formData.get('instruction') as string || '';
+
+    let prompt = `당신은 한국 교회 웹사이트 관리 AI 어시스턴트입니다.
 첨부된 ${isVideo ? '영상' : '이미지'}을 분석하여 교회 홈페이지 콘텐츠로 등록할 수 있도록 아래 JSON 형식으로 응답하세요.
 
 분석 규칙:
@@ -46,6 +48,10 @@ export async function POST(request: NextRequest) {
 
 schedules 배열은 category가 "SCHEDULE"일 때만 채우세요.
 이미지에서 텍스트가 보이면 최대한 정확하게 추출하세요.`;
+
+    if (instruction) {
+      prompt += `\n\n[관리자 추가 지시사항]\n${instruction}\n위 지시사항을 반드시 반영하여 분석 결과를 생성하세요.`;
+    }
 
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 

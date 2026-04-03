@@ -78,6 +78,7 @@ export default function CMSPage() {
   const [aiError, setAiError] = useState('');
   const [aiSaving, setAiSaving] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [aiInstruction, setAiInstruction] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -265,6 +266,9 @@ export default function CMSPage() {
     try {
       const fd = new FormData();
       fd.append('file', aiFile);
+      if (aiInstruction.trim()) {
+        fd.append('instruction', aiInstruction.trim());
+      }
 
       const res = await fetch('/api/analyze', { method: 'POST', body: fd });
       const data = await res.json();
@@ -320,6 +324,7 @@ export default function CMSPage() {
     setAiPreview('');
     setAiResult(null);
     setAiError('');
+    setAiInstruction('');
   };
 
   // ===== 로그인 화면 =====
@@ -444,7 +449,35 @@ export default function CMSPage() {
                     </div>
 
                     {/* 분석 버튼 */}
+                    {/* 지시사항 입력 */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center', minHeight: '200px' }}>
+                      <div style={{ background: 'white', borderRadius: '14px', padding: '1rem', border: '1px solid #f0e8dc' }}>
+                        <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', color: '#5b272f', marginBottom: '0.5rem' }}>
+                          📝 AI에게 지시사항 (선택)
+                        </label>
+                        <textarea
+                          value={aiInstruction}
+                          onChange={(e) => setAiInstruction(e.target.value)}
+                          rows={3}
+                          placeholder={'예시:\n• "교회 소식에서 헌금 안내만 추출해줘"\n• "설교 제목과 성경 본문만 정리해줘"\n• "이번 주 예배 시간표를 업데이트해줘"'}
+                          style={{
+                            width: '100%',
+                            padding: '0.8rem',
+                            border: '2px solid #f0f0f0',
+                            borderRadius: '10px',
+                            fontSize: '0.9rem',
+                            fontFamily: 'inherit',
+                            resize: 'vertical',
+                            background: '#fafafb',
+                            transition: 'border-color 0.2s',
+                          }}
+                          onFocus={(e) => (e.target.style.borderColor = '#c19c72')}
+                          onBlur={(e) => (e.target.style.borderColor = '#f0f0f0')}
+                        />
+                        <p style={{ margin: '0.4rem 0 0', fontSize: '0.78rem', color: '#bbb' }}>
+                          비워두면 AI가 자동으로 판단합니다. 원하는 수정사항을 입력하면 그에 맞게 분석합니다.
+                        </p>
+                      </div>
                       {aiError && (
                         <div style={{ padding: '1rem 1.5rem', background: '#fff5f5', border: '1px solid #f5c6c6', borderRadius: '12px', color: '#e74c3c', fontSize: '0.9rem' }}>
                           ⚠️ {aiError}
