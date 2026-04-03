@@ -1132,10 +1132,7 @@
     gap: 1.5rem;
   }
 
-  .sermonVideoWrap {
-    aspect-ratio: auto;
-    min-height: 280px;
-  }
+
 
   .sermonGrid {
     grid-template-columns: 1fr;
