@@ -165,7 +165,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
             </div>
             <div className={styles.sermonMainInfo}>
               <h3>🔴 실시간 예배 및 최신 설교</h3>
-              <p>주일 오전 11:00 / 수요일 저녁 19:30 등 모든 공예배가 실시간으로 송출됩니다.<br />방송 중이 아닐 때는 가장 최근의 설교 영상이 상영됩니다.</p>
+              <p>주일 오전 11:00 / 수요예배 저녁 7:30 / 금요기도회 저녁 8:00<br />모든 예배가 실시간으로 방영됩니다.<br />방송 중이 아닐 때는 가장 최근의 설교 영상이 상영됩니다.</p>
             </div>
           </div>
 
@@ -217,9 +217,9 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
           <div className={styles.newsGrid}>
             {(newsItems.length > 0 ? newsItems : [
               { id: 'fn1', title: '환영 및 등록 안내', content: '환영하고 축복합니다. 반석교회는 대한예수교 장로회 합동 측 소속입니다.\n• 유튜브: @petros-church\n• 온라인 헌금: 신협 131-017-687642\n• 다음세대 후원: 신협 131-018-242250' },
-              { id: 'fn2', title: '이번 주 예배 주제', content: '• 주일오전:\n  무릎 꿇으신 기도자 (눅 22:39~44)\n• 수요저녁:\n  창세기 45:4-10\n• 금요기도: [기도] 책\n• 새벽예배: QT책 진도를 따라' },
+              { id: 'fn2', title: '이번 주 예배 주제', content: '• 주일오전\n  무릎 꿇으신 기도자\n  (눅 22:39~44)\n• 수요저녁\n  창세기 45:4-10\n• 금요기도\n  [기도] 책\n• 새벽예배\n  QT책 진도를 따라' },
               { id: 'fn3', title: '고난주일 및 성찬식', content: '오늘은 고난주일(종려주일)로 보냅니다. 오늘 오전 예배 중 성찬식이 경건하게 진행됩니다.' },
-              { id: 'fn4', title: '이음돌 아우팅 안내', content: '오늘은 점심 식사가 없으며, 각 이음돌 모임별로 아우팅 시간을 보냅니다.\n※ 단, 주일학교와 어르신들에게는 김밥을 제공해 드립니다.' },
+              { id: 'fn4', title: '이음돌 아우팅 안내', content: '오늘은 점심 식사가 없으며,\n각 이음돌 모임별로 아우팅 시간을 보냅니다.\n\n※ 단, 주일학교와 어르신들에게는\n김밥을 제공해 드립니다.' },
               { id: 'fn5', title: '다음세대 예배 소식', content: '• 주일청소년:\n  예수님의 십자가 (막 15장)\n• 주일어린이:\n  구레네 시몬 (막 15:21)\n  사순절 가정학습지를 함께해요.' },
               { id: 'fn6', title: '고난주간 특별새벽기도', content: '내일부터 고난주간 특별 새벽기도를 준비합니다.\n• 기간: 3월 30일(월) ~ 4월 3일(금)' },
               { id: 'fn7', title: '부활절 및 연합 세례식', content: '다음 주일은 예수님의 부활을 축하하며 세례식도 함께 진행합니다.' },
@@ -258,8 +258,8 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
                   { id: 'fs3', title: '주일오후예배', time: '오후 2시', place: '2층 본당', officer: '이주민 목사' },
                   { id: 'fs4', title: '중고등부예배', time: '오전 10시', place: '3층 교육관', officer: '김민정 전도사' },
                   { id: 'fs5', title: '주일학교예배', time: '오전 11시', place: '3층 교육관', officer: '김민정 전도사' },
-                  { id: 'fs6', title: '수요저녁예배', time: '저녁 7시 30분', place: '2층 본당', officer: '이주민 목사' },
-                  { id: 'fs7', title: '금요기도회', time: '저녁 8시', place: '2층 본당', officer: '이주민 목사' },
+                  { id: 'fs6', title: '수요저녁예배', time: '저녁 7:30', place: '2층 본당', officer: '이주민 목사' },
+                  { id: 'fs7', title: '금요기도회', time: '저녁 8:00', place: '2층 본당', officer: '이주민 목사' },
                   { id: 'fs8', title: '새벽예배', time: '새벽 5시 30분', place: '2층 본당', officer: '이주민 목사' },
                 ]).map((schedule: any) => (
                   <tr
