@@ -48,7 +48,12 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
     <div className={styles.mainContainer}>
       {/* Header */}
       <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
-        <div className={styles.logo}>
+        <div
+          className={styles.logo}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          onDoubleClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+          style={{ cursor: 'pointer' }}
+        >
           <img src="/church-logo.jpg" alt="반석교회 로고" style={{ height: '40px', objectFit: 'contain' }} />
         </div>
         <button
