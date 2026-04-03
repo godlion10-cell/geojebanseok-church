@@ -36,7 +36,10 @@ export async function addContentItem(formData: FormData) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const filename = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
-      const path = join(process.cwd(), 'public', 'uploads', filename);
+      const { mkdir } = await import('fs/promises');
+      const tmpDir = join('/tmp', 'uploads');
+      await mkdir(tmpDir, { recursive: true });
+      const path = join(tmpDir, filename);
       
       await writeFile(path, buffer);
       imagePath = `/uploads/${filename}`;
@@ -77,7 +80,10 @@ export async function updateContentItem(id: string, formData: FormData) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const filename = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
-      const path = join(process.cwd(), 'public', 'uploads', filename);
+      const { mkdir } = await import('fs/promises');
+      const tmpDir = join('/tmp', 'uploads');
+      await mkdir(tmpDir, { recursive: true });
+      const path = join(tmpDir, filename);
       
       await writeFile(path, buffer);
       imagePath = `/uploads/${filename}`;

@@ -276,10 +276,10 @@ export async function POST(request: NextRequest) {
 
     const parsed = JSON.parse(jsonMatch[0]);
 
-    // 파일 저장
+    // 파일 저장 (/tmp 사용 - Vercel은 읽기 전용 파일시스템이므로)
     const { writeFile, mkdir } = await import('fs/promises');
     const { join } = await import('path');
-    const uploadDir = join(process.cwd(), 'public', 'uploads');
+    const uploadDir = join('/tmp', 'uploads');
     await mkdir(uploadDir, { recursive: true });
     const filename = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
     const filePath = join(uploadDir, filename);
@@ -288,7 +288,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       analysis: parsed,
-      uploadedFile: `/uploads/${filename}`,
+      uploadedFile: `data:${mimeType};base64,${base64}`,
       fileName: file.name,
       model: usedModel,
     });
