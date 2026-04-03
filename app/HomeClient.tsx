@@ -163,8 +163,8 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
               const isLive = (
                 // 주일 1부 08:50~10:30
                 (day === 0 && t >= 530 && t <= 630) ||
-                // 주일 2부 10:50~12:30
-                (day === 0 && t >= 650 && t <= 750) ||
+                // 주일 2부 10:40~12:30
+                (day === 0 && t >= 640 && t <= 750) ||
                 // 주일 오후 13:50~15:30
                 (day === 0 && t >= 830 && t <= 930) ||
                 // 수요 저녁 19:20~21:00
