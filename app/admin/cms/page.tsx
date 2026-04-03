@@ -394,7 +394,7 @@ export default function CMSPage() {
                   🤖 AI 스마트 업로드
                 </h3>
                 <p style={{ margin: 0, color: '#888', fontSize: '0.95rem', paddingLeft: '1.5rem' }}>
-                  사진이나 영상을 첨부하면 AI가 자동으로 분석하여 적절한 카테고리에 등록합니다.
+                  사진, PDF파일, 동영상을 첨부하면 AI가 자동으로 분석하여 적절한 카테고리에 등록합니다.
                 </p>
               </div>
 

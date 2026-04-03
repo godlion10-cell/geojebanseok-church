@@ -206,7 +206,8 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
                 <div className={styles.sermonVideoWrap} style={{
                   position: 'relative',
                   background: 'linear-gradient(135deg, #1a0a0e 0%, #2d1520 30%, #3d1a28 60%, #1a0a0e 100%)',
-                  overflow: 'hidden',
+                  aspectRatio: 'auto',
+                  minHeight: '380px',
                 }}>
                   {/* 배경 펄스 효과 */}
                   <div style={{
