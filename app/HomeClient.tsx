@@ -28,17 +28,61 @@ interface HomeClientProps {
   schedules: Schedule[];
 }
 
+// 예배 시간 체크 함수
+function checkIsLive(): boolean {
+  const now = new Date();
+  const day = now.getDay();
+  const t = now.getHours() * 60 + now.getMinutes();
+  return (
+    (day === 0 && t >= 530 && t <= 630) ||   // 주일 1부 08:50~10:30
+    (day === 0 && t >= 640 && t <= 750) ||   // 주일 2부 10:40~12:30
+    (day === 0 && t >= 830 && t <= 930) ||   // 주일 오후 13:50~15:30
+    (day === 3 && t >= 1160 && t <= 1260) || // 수요 저녁 19:20~21:00
+    (day === 5 && t >= 1190 && t <= 1290) || // 금요 기도회 19:50~21:30
+    (day >= 1 && day <= 6 && t >= 320 && t <= 390) // 새벽예배 05:20~06:30
+  );
+}
+
+function getNextWorship(): string {
+  const now = new Date();
+  const day = now.getDay();
+  const worships = [
+    { day: 0, time: '오전 9시', name: '주일대예배 1부' },
+    { day: 0, time: '오전 11시', name: '주일대예배 2부' },
+    { day: 3, time: '저녁 7:30', name: '수요저녁예배' },
+    { day: 5, time: '저녁 8시', name: '금요기도회' },
+  ];
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  for (const w of worships) {
+    if (w.day > day || (w.day === day && w.day === 0)) {
+      return `${days[w.day]}요일 ${w.time} ${w.name}`;
+    }
+  }
+  return `주일 오전 9시 주일대예배`;
+}
+
 export default function HomeClient({ newsItems, sermons, schedules }: HomeClientProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [selectedWorship, setSelectedWorship] = useState('주일대예배 (1부)');
+  const [isLive, setIsLive] = useState(false);
 
+  // 스크롤 감지
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // 🔴 예배 시간 자동 체크 (60초마다)
+  useEffect(() => {
+    setIsLive(checkIsLive()); // 즉시 1회 체크
+    const timer = setInterval(() => {
+      setIsLive(checkIsLive());
+    }, 60000); // 1분마다 자동 체크
+    return () => clearInterval(timer);
   }, []);
 
   const handleNavClick = () => {
@@ -155,120 +199,78 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
         <div className={styles.sermonContainer}>
           {/* Live / Latest Sermon */}
           <div className={styles.sermonMain}>
-            {(() => {
-              const now = new Date();
-              const day = now.getDay(); // 0=일, 1=월, ..., 6=토
-              const hour = now.getHours();
-              const min = now.getMinutes();
-              const t = hour * 60 + min; // 현재 시간(분)
-
-              // 예배 시간 체크 (시작 10분 전 ~ 종료 30분 후)
-              const isLive = (
-                // 주일 1부 08:50~10:30
-                (day === 0 && t >= 530 && t <= 630) ||
-                // 주일 2부 10:40~12:30
-                (day === 0 && t >= 640 && t <= 750) ||
-                // 주일 오후 13:50~15:30
-                (day === 0 && t >= 830 && t <= 930) ||
-                // 수요 저녁 19:20~21:00
-                (day === 3 && t >= 1160 && t <= 1260) ||
-                // 금요 기도회 19:50~21:30
-                (day === 5 && t >= 1190 && t <= 1290) ||
-                // 새벽예배 (월~토) 05:20~06:30
-                (day >= 1 && day <= 6 && t >= 320 && t <= 390)
-              );
-
-              // 다음 예배 안내
-              const getNextWorship = () => {
-                const worships = [
-                  { day: 0, time: '오전 9시', name: '주일대예배 1부' },
-                  { day: 0, time: '오전 11시', name: '주일대예배 2부' },
-                  { day: 3, time: '저녁 7:30', name: '수요저녁예배' },
-                  { day: 5, time: '저녁 8시', name: '금요기도회' },
-                ];
-                const days = ['일', '월', '화', '수', '목', '금', '토'];
-                for (const w of worships) {
-                  if (w.day > day || (w.day === day && w.day === 0)) {
-                    return `${days[w.day]}요일 ${w.time} ${w.name}`;
-                  }
-                }
-                return `주일 오전 9시 주일대예배`;
-              };
-
-              if (isLive) {
-                return (
-                  <>
-                    <div className={styles.sermonVideoWrap}>
-                      <iframe
-                        src="https://www.youtube.com/embed/live?channel=UCc_eP0i4YwSQmQ9du5-RHbA"
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                        title="반석교회 실시간 예배 생중계"
-                      ></iframe>
-                    </div>
-                    <div className={styles.sermonMainInfo}>
-                      <h3>🔴 실시간 예배 중</h3>
-                      <p>지금 반석교회에서 예배가 진행되고 있습니다.<br />함께 은혜를 나눠요!</p>
-                    </div>
-                  </>
-                );
-              }
-
-              return (
-                <>
-                  <div className={styles.sermonVideoWrap} style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'linear-gradient(135deg, #f8f4f0 0%, #eee5dd 50%, #f0e8e0 100%)',
-                    textAlign: 'center',
-                    padding: '2rem',
+            {isLive ? (
+              <>
+                <div className={styles.sermonVideoWrap}>
+                  <iframe
+                    src="https://www.youtube.com/embed/live_stream?channel=UCc_eP0i4YwSQmQ9du5-RHbA&autoplay=1"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    title="반석교회 실시간 예배 생중계"
+                  ></iframe>
+                </div>
+                <div className={styles.sermonMainInfo}>
+                  <h3>🔴 실시간 예배 중</h3>
+                  <p>지금 반석교회에서 예배가 진행되고 있습니다.<br />함께 은혜를 나눠요!<br />
+                  <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer" style={{ color: '#c19c72', textDecoration: 'underline', fontSize: '0.9rem' }}>
+                    유튜브에서 직접 보기 →
+                  </a></p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={styles.sermonVideoWrap} style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'linear-gradient(135deg, #f8f4f0 0%, #eee5dd 50%, #f0e8e0 100%)',
+                  textAlign: 'center',
+                  padding: '2rem',
+                }}>
+                  <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.7 }}>✝️</div>
+                  <h3 style={{ 
+                    color: '#5b272f', 
+                    fontSize: '1.3rem', 
+                    fontWeight: 700, 
+                    margin: '0 0 0.8rem',
+                    fontFamily: 'var(--font-heading)',
                   }}>
-                    <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.7 }}>✝️</div>
-                    <h3 style={{ 
-                      color: '#5b272f', 
-                      fontSize: '1.3rem', 
-                      fontWeight: 700, 
-                      margin: '0 0 0.8rem',
-                      fontFamily: 'var(--font-heading)',
-                    }}>
-                      하나님의 평안이 함께 하시길 기도합니다
-                    </h3>
-                    <p style={{ 
-                      color: '#8b7355', 
-                      fontSize: '0.95rem', 
-                      lineHeight: 1.7, 
-                      margin: '0 0 1.5rem',
-                      maxWidth: '320px',
-                    }}>
-                      현재 예배 시간이 아닙니다.<br />
-                      다음 예배에서 함께 예배드려요! 🙏
-                    </p>
-                    <div style={{
-                      background: 'rgba(91, 39, 47, 0.06)',
-                      borderRadius: '12px',
-                      padding: '0.8rem 1.5rem',
-                      fontSize: '0.85rem',
-                      color: '#5b272f',
-                      fontWeight: 600,
-                    }}>
-                      📅 다음 예배: {getNextWorship()}
-                    </div>
+                    하나님의 평안이 함께 하시길 기도합니다
+                  </h3>
+                  <p style={{ 
+                    color: '#8b7355', 
+                    fontSize: '0.95rem', 
+                    lineHeight: 1.7, 
+                    margin: '0 0 1.5rem',
+                    maxWidth: '320px',
+                  }}>
+                    현재 예배 시간이 아닙니다.<br />
+                    다음 예배에서 함께 예배드려요! 🙏
+                  </p>
+                  <div style={{
+                    background: 'rgba(91, 39, 47, 0.06)',
+                    borderRadius: '12px',
+                    padding: '0.8rem 1.5rem',
+                    fontSize: '0.85rem',
+                    color: '#5b272f',
+                    fontWeight: 600,
+                  }}>
+                    📅 다음 예배: {getNextWorship()}
                   </div>
-                  <div className={styles.sermonMainInfo}>
-                    <h3>📺 예배 생중계 안내</h3>
-                    <p>주일 오전 9시 · 11시 / 수요 저녁 7:30 / 금요 저녁 8시<br />예배 시간에 이곳에서 실시간으로 참여하실 수 있습니다.<br />
-                    <a href="https://www.youtube.com/@petros-church" target="_blank" rel="noopener noreferrer" style={{ color: '#c19c72', textDecoration: 'underline' }}>
-                      유튜브 채널에서 지난 설교 보기 →
-                    </a></p>
-                  </div>
-                </>
-              );
-            })()}
+                </div>
+                <div className={styles.sermonMainInfo}>
+                  <h3>📺 예배 생중계 안내</h3>
+                  <p>주일 오전 9시 · 11시 / 수요 저녁 7:30 / 금요 저녁 8시<br />예배 시간에 이곳에서 실시간으로 참여하실 수 있습니다.<br />
+                  <a href="https://www.youtube.com/@petros-church" target="_blank" rel="noopener noreferrer" style={{ color: '#c19c72', textDecoration: 'underline' }}>
+                    유튜브 채널에서 지난 설교 보기 →
+                  </a></p>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Recent Sermons Grid */}
