@@ -2,7 +2,7 @@ const sharp = require('sharp');
 const path = require('path');
 
 async function generateIcons() {
-  const input = path.join(__dirname, 'public', 'church-logo.jpg');
+  const input = path.join(__dirname, 'public', 'church-logo.png');
   
   // 192x192 icon
   await sharp(input)
@@ -22,7 +22,7 @@ async function generateIcons() {
     .png()
     .toFile(path.join(__dirname, 'public', 'apple-touch-icon.png'));
 
-  console.log('✅ Icons generated successfully!');
+  console.log('✅ Icons regenerated from new logo!');
 }
 
 generateIcons().catch(console.error);

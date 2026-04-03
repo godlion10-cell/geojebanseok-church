@@ -55,7 +55,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
           onDoubleClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
           style={{ cursor: 'pointer' }}
         >
-          <img src="/church-logo.jpg" alt="반석교회 로고" style={{ height: '40px', objectFit: 'contain' }} />
+          <img src="/church-logo.png" alt="반석교회 로고" style={{ height: '40px', objectFit: 'contain' }} />
         </div>
         <button
           className={styles.mobileMenuBtn}
@@ -627,7 +627,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div className={styles.footerLogo}>
-            <img src="/church-logo.jpg" alt="반석교회 로고" style={{ height: '48px', objectFit: 'contain', filter: 'invert(1) brightness(2)' }} />
+            <img src="/church-logo-white.png" alt="반석교회 로고" style={{ height: '48px', objectFit: 'contain' }} />
             <span>대한예수교장로회 반석교회</span>
           </div>
           <div className={styles.footerInfo}>
