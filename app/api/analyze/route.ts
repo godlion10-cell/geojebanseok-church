@@ -160,8 +160,24 @@ schedules 배열은 category가 "SCHEDULE"일 때만 채우세요.
         });
       }
       
+      // 할당량 초과 에러 (429 또는 RESOURCE_EXHAUSTED)
+      if (geminiRes.status === 429 || errText.includes('RESOURCE_EXHAUSTED')) {
+        return NextResponse.json(
+          { error: '⏳ AI 사용량이 일시적으로 한도에 도달했습니다. 1~2분 후 다시 시도해주세요.' },
+          { status: 429 }
+        );
+      }
+      
+      // API 키 에러
+      if (geminiRes.status === 403 || errText.includes('API_KEY_INVALID')) {
+        return NextResponse.json(
+          { error: '🔑 AI API 키가 유효하지 않습니다. 관리자에게 문의해주세요.' },
+          { status: 403 }
+        );
+      }
+      
       return NextResponse.json(
-        { error: `AI 분석 실패 (${geminiRes.status}): API 키를 확인해주세요.` },
+        { error: `AI 분석 실패 (${geminiRes.status}): 잠시 후 다시 시도해주세요.` },
         { status: 500 }
       );
     }
