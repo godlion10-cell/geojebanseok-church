@@ -66,7 +66,6 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
   const [scrolled, setScrolled] = useState(false);
   const [selectedWorship, setSelectedWorship] = useState('주일대예배 (1부)');
   const [isLive, setIsLive] = useState(false);
-  const [liveVideoId, setLiveVideoId] = useState<string | null>(null);
 
   // 스크롤 감지
   useEffect(() => {
@@ -77,29 +76,13 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 🔴 예배 시간 자동 체크 + 라이브 비디오 ID 가져오기 (60초마다)
+  // 🔴 예배 시간 자동 체크 (30초마다)
   useEffect(() => {
-    const checkLive = async () => {
-      const timeIsLive = checkIsLive();
-      setIsLive(timeIsLive);
-
-      if (timeIsLive) {
-        try {
-          const res = await fetch('/api/youtube-live');
-          const data = await res.json();
-          if (data.live && data.videoId) {
-            setLiveVideoId(data.videoId);
-          }
-        } catch (e) {
-          console.log('YouTube live check failed, using fallback UI');
-        }
-      } else {
-        setLiveVideoId(null);
-      }
+    const checkLive = () => {
+      setIsLive(checkIsLive());
     };
-
-    checkLive(); // 즉시 1회
-    const timer = setInterval(checkLive, 60000); // 1분마다
+    checkLive();
+    const timer = setInterval(checkLive, 30000);
     return () => clearInterval(timer);
   }, []);
 
@@ -219,45 +202,41 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
           <div className={styles.sermonMain}>
             {isLive ? (
               <>
-                {liveVideoId ? (
-                  /* ✅ 실제 유튜브 라이브 임베드 */
-                  <div className={styles.sermonVideoWrap}>
-                    <iframe
-                      src={`https://www.youtube.com/embed/${liveVideoId}?autoplay=1&rel=0`}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      title="반석교회 실시간 예배 생중계"
-                    ></iframe>
-                  </div>
-                ) : (
-                  /* 비디오 ID 로딩 중 또는 실패 시 폴백 UI */
-                  <div className={styles.sermonVideoWrap} style={{
+                {/* ✅ 실시간 예배 UI - 유튜브 임베드 + 폴백 */}
+                <div className={styles.sermonVideoWrap} style={{
+                  position: 'relative',
+                  background: 'linear-gradient(135deg, #1a0a0e 0%, #2d1520 30%, #3d1a28 60%, #1a0a0e 100%)',
+                  overflow: 'hidden',
+                }}>
+                  {/* 배경 펄스 효과 */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'radial-gradient(circle at 50% 50%, rgba(255,50,50,0.08) 0%, transparent 70%)',
+                    animation: 'pulse 3s ease-in-out infinite',
+                    zIndex: 1,
+                  }}></div>
+                  
+                  {/* 메인 컨텐츠 */}
+                  <div style={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'linear-gradient(135deg, #1a0a0e 0%, #2d1520 30%, #3d1a28 60%, #1a0a0e 100%)',
-                    textAlign: 'center',
-                    padding: '2rem',
+                    height: '100%',
+                    width: '100%',
                     position: 'relative',
-                    overflow: 'hidden',
+                    zIndex: 2,
+                    padding: '2rem',
+                    textAlign: 'center',
                   }}>
-                    <div style={{
-                      position: 'absolute',
-                      top: 0, left: 0, right: 0, bottom: 0,
-                      background: 'radial-gradient(circle at 50% 50%, rgba(255,50,50,0.08) 0%, transparent 70%)',
-                      animation: 'pulse 3s ease-in-out infinite',
-                    }}></div>
+                    {/* LIVE 배지 */}
                     <div style={{
                       display: 'flex', alignItems: 'center', gap: '0.5rem',
                       marginBottom: '1.5rem',
                       background: 'rgba(255,0,0,0.15)',
                       padding: '0.5rem 1.2rem', borderRadius: '20px',
                       border: '1px solid rgba(255,50,50,0.3)',
-                      position: 'relative', zIndex: 1,
                     }}>
                       <span style={{
                         width: '10px', height: '10px', borderRadius: '50%',
@@ -266,31 +245,34 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
                       }}></span>
                       <span style={{ color: '#ff6666', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px' }}>LIVE NOW</span>
                     </div>
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem', position: 'relative', zIndex: 1 }}>✝️</div>
-                    <h3 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 700, margin: '0 0 0.8rem', fontFamily: 'var(--font-heading)', position: 'relative', zIndex: 1 }}>
+                    
+                    <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>✝️</div>
+                    <h3 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 700, margin: '0 0 0.8rem', fontFamily: 'var(--font-heading)' }}>
                       지금 예배가 진행되고 있습니다
                     </h3>
-                    <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', lineHeight: 1.7, margin: '0 0 2rem', position: 'relative', zIndex: 1 }}>
+                    <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', lineHeight: 1.7, margin: '0 0 2rem' }}>
                       반석교회와 함께 은혜를 나눠요 🙏
                     </p>
                     <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer"
                       style={{
                         display: 'inline-flex', alignItems: 'center', gap: '0.6rem',
                         background: 'linear-gradient(135deg, #ff0000, #cc0000)',
-                        color: '#fff', padding: '1rem 2rem', borderRadius: '50px',
-                        fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none',
-                        boxShadow: '0 4px 20px rgba(255,0,0,0.3)',
-                        position: 'relative', zIndex: 1,
+                        color: '#fff', padding: '1rem 2.5rem', borderRadius: '50px',
+                        fontSize: '1.15rem', fontWeight: 700, textDecoration: 'none',
+                        boxShadow: '0 4px 25px rgba(255,0,0,0.35)',
+                        transition: 'transform 0.2s, box-shadow 0.2s',
                       }}
+                      onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 6px 30px rgba(255,0,0,0.5)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 25px rgba(255,0,0,0.35)'; }}
                     >
                       ▶ 실시간 예배 참여하기
                     </a>
                   </div>
-                )}
+                </div>
                 <div className={styles.sermonMainInfo}>
                   <h3>🔴 실시간 예배 중</h3>
                   <p>지금 반석교회에서 예배가 진행되고 있습니다.<br />
-                  {liveVideoId ? '위 화면에서 실시간 예배에 참여하세요!' : '아래 버튼을 눌러 유튜브에서 참여하세요!'}<br />
+                  버튼을 눌러 유튜브에서 실시간 예배에 참여하세요!<br />
                   <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer" style={{ color: '#c19c72', textDecoration: 'underline', fontSize: '0.9rem' }}>
                     유튜브에서 직접 보기 →
                   </a></p>
