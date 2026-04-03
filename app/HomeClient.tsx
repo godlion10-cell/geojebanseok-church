@@ -165,7 +165,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
             </div>
             <div className={styles.sermonMainInfo}>
               <h3>🔴 실시간 예배 및 최신 설교</h3>
-              <p>주일 오전 11:00 / 수요예배 저녁 7:30 / 금요기도회 저녁 8:00<br />모든 예배가 실시간으로 방영됩니다.<br />방송 중이 아닐 때는 가장 최근의 설교 영상이 상영됩니다.</p>
+              <p>주일 오전 11시 / 수요예배 저녁 7:30 / 금요기도회 저녁 8시<br />모든 예배가 실시간으로 방영됩니다.<br />방송 중이 아닐 때는 가장 최근의 설교 영상이 상영됩니다.</p>
             </div>
           </div>
 
@@ -245,7 +245,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
       {/* Schedule Section */}
       <section className={styles.section} id="schedule">
         <h2 className={styles.sectionTitle}>예배 안내 및 순서</h2>
-        <p className={styles.sectionSubtitle}>은혜의 자리로 여러분을 초대합니다. 예배 이름을 클릭하면 해당 예배 순서를 보실 수 있습니다.</p>
+        <p className={styles.sectionSubtitle}>은혜의 자리로 여러분을 초대합니다.<br />예배 이름을 클릭하면 해당 예배 순서를 보실 수 있습니다.</p>
         
         <div className={styles.scheduleWrap}>
           {/* Left: Schedule Table */}
@@ -259,8 +259,8 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
                   { id: 'fs4', title: '중고등부예배', time: '오전 10시', place: '3층 교육관', officer: '김민정 전도사' },
                   { id: 'fs5', title: '주일학교예배', time: '오전 11시', place: '3층 교육관', officer: '김민정 전도사' },
                   { id: 'fs6', title: '수요저녁예배', time: '저녁 7:30', place: '2층 본당', officer: '이주민 목사' },
-                  { id: 'fs7', title: '금요기도회', time: '저녁 8:00', place: '2층 본당', officer: '이주민 목사' },
-                  { id: 'fs8', title: '새벽예배', time: '새벽 5시 30분', place: '2층 본당', officer: '이주민 목사' },
+                  { id: 'fs7', title: '금요기도회', time: '저녁 8시', place: '2층 본당', officer: '이주민 목사' },
+                  { id: 'fs8', title: '새벽예배', time: '새벽 5:30', place: '2층 본당', officer: '이주민 목사' },
                 ]).map((schedule: any) => (
                   <tr
                     key={schedule.id}
