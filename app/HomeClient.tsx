@@ -49,8 +49,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
       {/* Header */}
       <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
         <div className={styles.logo}>
-          <span style={{ fontSize: '1.3rem' }}>✝</span>
-          <span>반석교회</span>
+          <img src="/church-logo.jpg" alt="반석교회 로고" style={{ height: '40px', objectFit: 'contain' }} />
         </div>
         <button
           className={styles.mobileMenuBtn}
@@ -357,7 +356,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div className={styles.footerLogo}>
-            <span>✝</span>
+            <img src="/church-logo.jpg" alt="반석교회 로고" style={{ height: '48px', objectFit: 'contain', filter: 'invert(1) brightness(2)' }} />
             <span>대한예수교장로회 반석교회</span>
           </div>
           <div className={styles.footerInfo}>
