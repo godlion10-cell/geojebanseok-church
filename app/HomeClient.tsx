@@ -31,6 +31,7 @@ interface HomeClientProps {
 export default function HomeClient({ newsItems, sermons, schedules }: HomeClientProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [selectedWorship, setSelectedWorship] = useState('주일대예배 (1부)');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -244,7 +245,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
       {/* Schedule Section */}
       <section className={styles.section} id="schedule">
         <h2 className={styles.sectionTitle}>예배 안내 및 순서</h2>
-        <p className={styles.sectionSubtitle}>은혜의 자리로 여러분을 초대합니다.</p>
+        <p className={styles.sectionSubtitle}>은혜의 자리로 여러분을 초대합니다. 예배 이름을 클릭하면 해당 예배 순서를 보실 수 있습니다.</p>
         
         <div className={styles.scheduleWrap}>
           {/* Left: Schedule Table */}
@@ -261,8 +262,22 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
                   { id: 'fs7', title: '금요기도회', time: '저녁 20:00', place: '2층 본당', officer: '이주민 목사' },
                   { id: 'fs8', title: '새벽예배', time: '오전 05:30', place: '2층 본당', officer: '이주민 목사' },
                 ]).map((schedule: any) => (
-                  <tr key={schedule.id}>
-                    <th>{schedule.title}</th>
+                  <tr
+                    key={schedule.id}
+                    onClick={() => setSelectedWorship(schedule.title)}
+                    style={{
+                      cursor: 'pointer',
+                      background: selectedWorship === schedule.title ? 'rgba(91, 39, 47, 0.08)' : undefined,
+                      transition: 'background 0.2s',
+                    }}
+                  >
+                    <th style={{
+                      color: selectedWorship === schedule.title ? '#5b272f' : undefined,
+                      position: 'relative',
+                    }}>
+                      {selectedWorship === schedule.title && <span style={{ position: 'absolute', left: '-0.2rem', top: '50%', transform: 'translateY(-50%)', color: '#c19c72' }}>▶</span>}
+                      {schedule.title}
+                    </th>
                     <td><span className={styles.time}>{schedule.time}</span></td>
                     <td>{schedule.place}</td>
                     <td style={{ whiteSpace: 'nowrap' }}>{schedule.officer}</td>
@@ -274,42 +289,194 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
 
           {/* Right: Order of Service Box */}
           <div className={styles.orderServiceBox}>
-            <div className={styles.orderHeader}>주일 오전 예배 순서</div>
+            <div className={styles.orderHeader}>{selectedWorship || '주일대예배 (1부)'} 순서</div>
             <div className={styles.orderSub}>예배 10분 전에는 착석해 주시기 바랍니다.</div>
             
-            <div className={styles.orderGroup}>
-              <div className={styles.orderGroupTitle}>◀ 개회 (하나님께 나아감)</div>
-              <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>묵도</span> <span className={styles.orderContent}></span> <span className={styles.orderResp}>다같이</span></div>
-              <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>개회찬송</span> <span className={styles.orderContent}>예수 우리 왕이여 (38장)</span> <span className={styles.orderResp}>다같이</span></div>
-              <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>신앙고백</span> <span className={styles.orderContent}>사도신경</span> <span className={styles.orderResp}>다같이</span></div>
-              <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>교독문</span> <span className={styles.orderContent}></span> <span className={styles.orderResp}>다같이</span></div>
-              <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>찬송</span> <span className={styles.orderContent}>만왕의 왕 주께서 (151장)</span> <span className={styles.orderResp}>다같이</span></div>
-              <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>통성기도</span> <span className={styles.orderContent}></span> <span className={styles.orderResp}>다같이</span></div>
-            </div>
+            {(() => {
+              const orders: Record<string, { groups: { title: string; rows: { mark: string; label: string; content: string; resp: string }[] }[]; footer?: string }> = {
+                '주일대예배 (1부)': {
+                  groups: [
+                    { title: '◀ 개회 (하나님께 나아감)', rows: [
+                      { mark: '*', label: '묵도', content: '', resp: '다같이' },
+                      { mark: '*', label: '개회찬송', content: '예수 우리 왕이여 (38장)', resp: '다같이' },
+                      { mark: '*', label: '신앙고백', content: '사도신경', resp: '다같이' },
+                      { mark: '*', label: '교독문', content: '', resp: '다같이' },
+                      { mark: '', label: '찬송', content: '만왕의 왕 주께서 (151장)', resp: '다같이' },
+                      { mark: '', label: '통성기도', content: '', resp: '다같이' },
+                    ]},
+                    { title: '◀ 말씀의 선포', rows: [
+                      { mark: '', label: '성경봉독', content: '(누가복음 22:39~44)', resp: '다같이' },
+                      { mark: '', label: '말씀', content: '무릎 꿇으신 기도자', resp: '이주민 목사' },
+                      { mark: '', label: '합심기도', content: '말씀을 기억하며', resp: '다같이' },
+                    ]},
+                    { title: '◀ 결단과 헌신', rows: [
+                      { mark: '', label: '예물봉헌', content: '내 구주 예수를 더욱 사랑 (314장)', resp: '다같이' },
+                      { mark: '', label: '교회소식', content: '', resp: '인도자' },
+                    ]},
+                    { title: '◀ 성찬식', rows: [
+                      { mark: '', label: '성찬식', content: '(고린도전서 11:23-26)', resp: '이주민 목사' },
+                      { mark: '*', label: '찬송', content: '십자가를 질 수 있나 (461장)', resp: '다같이' },
+                      { mark: '*', label: '축도', content: '', resp: '이주민 목사' },
+                    ]},
+                  ],
+                  footer: '예배 후 식탁의 교제가 준비되어 있습니다.',
+                },
+                '주일대예배 (2부)': {
+                  groups: [
+                    { title: '◀ 개회 (하나님께 나아감)', rows: [
+                      { mark: '*', label: '묵도', content: '', resp: '다같이' },
+                      { mark: '*', label: '개회찬송', content: '예수 우리 왕이여 (38장)', resp: '다같이' },
+                      { mark: '*', label: '신앙고백', content: '사도신경', resp: '다같이' },
+                      { mark: '*', label: '교독문', content: '', resp: '다같이' },
+                      { mark: '', label: '찬양', content: '찬양팀 인도', resp: '다같이' },
+                      { mark: '', label: '통성기도', content: '', resp: '다같이' },
+                    ]},
+                    { title: '◀ 말씀의 선포', rows: [
+                      { mark: '', label: '성경봉독', content: '(누가복음 22:39~44)', resp: '다같이' },
+                      { mark: '', label: '말씀', content: '무릎 꿇으신 기도자', resp: '이주민 목사' },
+                      { mark: '', label: '합심기도', content: '말씀을 기억하며', resp: '다같이' },
+                    ]},
+                    { title: '◀ 결단과 헌신', rows: [
+                      { mark: '', label: '예물봉헌', content: '내 구주 예수를 더욱 사랑 (314장)', resp: '다같이' },
+                      { mark: '', label: '교회소식', content: '', resp: '인도자' },
+                      { mark: '*', label: '찬송', content: '십자가를 질 수 있나 (461장)', resp: '다같이' },
+                      { mark: '*', label: '축도', content: '', resp: '이주민 목사' },
+                    ]},
+                  ],
+                  footer: '예배 후 식탁의 교제가 준비되어 있습니다.',
+                },
+                '주일오후예배': {
+                  groups: [
+                    { title: '◀ 예배의 부름', rows: [
+                      { mark: '*', label: '묵도', content: '', resp: '다같이' },
+                      { mark: '*', label: '찬송', content: '', resp: '다같이' },
+                      { mark: '*', label: '기도', content: '', resp: '인도자' },
+                    ]},
+                    { title: '◀ 말씀과 기도', rows: [
+                      { mark: '', label: '성경봉독', content: '', resp: '다같이' },
+                      { mark: '', label: '말씀', content: '오후 말씀', resp: '이주민 목사' },
+                      { mark: '', label: '통성기도', content: '', resp: '다같이' },
+                    ]},
+                    { title: '◀ 보냄', rows: [
+                      { mark: '*', label: '찬송', content: '', resp: '다같이' },
+                      { mark: '*', label: '축도', content: '', resp: '이주민 목사' },
+                    ]},
+                  ],
+                },
+                '중고등부예배': {
+                  groups: [
+                    { title: '◀ 찬양과 경배', rows: [
+                      { mark: '', label: '찬양', content: '찬양 인도', resp: '다같이' },
+                      { mark: '', label: '기도', content: '', resp: '인도자' },
+                    ]},
+                    { title: '◀ 말씀', rows: [
+                      { mark: '', label: '성경봉독', content: '', resp: '다같이' },
+                      { mark: '', label: '말씀', content: '예수님의 십자가 (막 15장)', resp: '김민정 전도사' },
+                      { mark: '', label: '합심기도', content: '', resp: '다같이' },
+                    ]},
+                    { title: '◀ 교제', rows: [
+                      { mark: '', label: '교회소식', content: '', resp: '인도자' },
+                      { mark: '', label: '찬양', content: '', resp: '다같이' },
+                      { mark: '*', label: '축복기도', content: '', resp: '김민정 전도사' },
+                    ]},
+                  ],
+                },
+                '주일학교예배': {
+                  groups: [
+                    { title: '◀ 찬양', rows: [
+                      { mark: '', label: '율동찬양', content: '', resp: '다같이' },
+                      { mark: '', label: '기도', content: '', resp: '인도자' },
+                    ]},
+                    { title: '◀ 말씀', rows: [
+                      { mark: '', label: '말씀', content: '구레네 시몬 (막 15:21)', resp: '김민정 전도사' },
+                      { mark: '', label: '암송', content: '이번 주 말씀 암송', resp: '다같이' },
+                    ]},
+                    { title: '◀ 활동', rows: [
+                      { mark: '', label: '공과활동', content: '사순절 가정학습지', resp: '다같이' },
+                      { mark: '', label: '교회소식', content: '', resp: '인도자' },
+                      { mark: '*', label: '축복기도', content: '', resp: '김민정 전도사' },
+                    ]},
+                  ],
+                },
+                '수요저녁예배': {
+                  groups: [
+                    { title: '◀ 개회', rows: [
+                      { mark: '*', label: '묵도', content: '', resp: '다같이' },
+                      { mark: '*', label: '찬송', content: '', resp: '다같이' },
+                      { mark: '', label: '기도', content: '', resp: '인도자' },
+                    ]},
+                    { title: '◀ 말씀', rows: [
+                      { mark: '', label: '성경봉독', content: '창세기 45:4-10', resp: '다같이' },
+                      { mark: '', label: '말씀', content: '요셉 시리즈', resp: '이주민 목사' },
+                      { mark: '', label: '통성기도', content: '', resp: '다같이' },
+                    ]},
+                    { title: '◀ 마침', rows: [
+                      { mark: '', label: '교회소식', content: '', resp: '인도자' },
+                      { mark: '*', label: '찬송', content: '', resp: '다같이' },
+                      { mark: '*', label: '축도', content: '', resp: '이주민 목사' },
+                    ]},
+                  ],
+                },
+                '금요기도회': {
+                  groups: [
+                    { title: '◀ 찬양과 기도', rows: [
+                      { mark: '', label: '찬양', content: '', resp: '다같이' },
+                      { mark: '', label: '대표기도', content: '', resp: '인도자' },
+                    ]},
+                    { title: '◀ 말씀과 기도', rows: [
+                      { mark: '', label: '말씀', content: '[기도] 책', resp: '이주민 목사' },
+                      { mark: '', label: '통성기도', content: '중보기도', resp: '다같이' },
+                      { mark: '', label: '릴레이기도', content: '', resp: '참석 성도' },
+                    ]},
+                    { title: '◀ 마침', rows: [
+                      { mark: '*', label: '찬송', content: '', resp: '다같이' },
+                      { mark: '*', label: '축도', content: '', resp: '이주민 목사' },
+                    ]},
+                  ],
+                },
+                '새벽예배': {
+                  groups: [
+                    { title: '◀ 예배', rows: [
+                      { mark: '*', label: '묵도', content: '', resp: '다같이' },
+                      { mark: '*', label: '찬송', content: '', resp: '다같이' },
+                      { mark: '', label: '기도', content: '', resp: '인도자' },
+                    ]},
+                    { title: '◀ 말씀', rows: [
+                      { mark: '', label: '말씀', content: 'QT책 진도를 따라', resp: '이주민 목사' },
+                      { mark: '', label: '통성기도', content: '', resp: '다같이' },
+                    ]},
+                    { title: '◀ 마침', rows: [
+                      { mark: '*', label: '찬송', content: '', resp: '다같이' },
+                      { mark: '*', label: '축도', content: '', resp: '이주민 목사' },
+                    ]},
+                  ],
+                },
+              };
 
-            <div className={styles.orderGroup}>
-              <div className={styles.orderGroupTitle}>◀ 말씀의 선포</div>
-              <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>성경봉독</span> <span className={styles.orderContent}>(누가복음 22:39~44)</span> <span className={styles.orderResp}>다같이</span></div>
-              <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>말씀</span> <span className={styles.orderContent} style={{fontWeight: 'bold', color: '#5b272f'}}>무릎 꿇으신 기도자</span> <span className={styles.orderResp}>이주민 목사</span></div>
-              <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>합심기도</span> <span className={styles.orderContent}>말씀을 기억하며</span> <span className={styles.orderResp}>다같이</span></div>
-            </div>
-
-            <div className={styles.orderGroup}>
-              <div className={styles.orderGroupTitle}>◀ 결단과 헌신</div>
-              <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>예물봉헌</span> <span className={styles.orderContent}>내 구주 예수를 더욱 사랑 (314장)</span> <span className={styles.orderResp}>다같이</span></div>
-              <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>교회소식</span> <span className={styles.orderContent}></span> <span className={styles.orderResp}>인도자</span></div>
-            </div>
-
-            <div className={styles.orderGroup} style={{ borderBottom: 'none' }}>
-              <div className={styles.orderGroupTitle}>◀ 성찬식</div>
-              <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>성찬식</span> <span className={styles.orderContent}>(고린도전서 11:23-26)</span> <span className={styles.orderResp}>이주민 목사</span></div>
-              <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>찬송</span> <span className={styles.orderContent}>십자가를 질 수 있나 (461장)</span> <span className={styles.orderResp}>다같이</span></div>
-              <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>축도</span> <span className={styles.orderContent}></span> <span className={styles.orderResp}>이주민 목사</span></div>
-            </div>
-            
-            <div className={styles.orderSub} style={{ marginTop: '0', background: '#eadddf', fontWeight: 'bold' }}>
-              예배 후 식탁의 교제가 준비되어 있습니다.
-            </div>
+              const current = orders[selectedWorship] || orders['주일대예배 (1부)'];
+              return (
+                <>
+                  {current.groups.map((group, gi) => (
+                    <div key={gi} className={styles.orderGroup} style={gi === current.groups.length - 1 ? { borderBottom: 'none' } : undefined}>
+                      <div className={styles.orderGroupTitle}>{group.title}</div>
+                      {group.rows.map((row, ri) => (
+                        <div key={ri} className={styles.orderRow}>
+                          <span className={styles.orderMark}>{row.mark}</span>
+                          {' '}<span className={styles.orderLabel}>{row.label}</span>
+                          {' '}<span className={styles.orderContent} style={row.label === '말씀' ? { fontWeight: 'bold', color: '#5b272f' } : undefined}>{row.content}</span>
+                          {' '}<span className={styles.orderResp}>{row.resp}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                  {current.footer && (
+                    <div className={styles.orderSub} style={{ marginTop: '0', background: '#eadddf', fontWeight: 'bold' }}>
+                      {current.footer}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </section>
