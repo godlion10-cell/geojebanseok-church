@@ -99,7 +99,10 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
             <span style={{ display: 'block', marginTop: '0.5rem' }}>— 마태복음 7:24</span>
           </p>
           <div className={styles.heroButtons}>
-            <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>실시간 예배 참여하기</a>
+            <a href="#sermon" className={styles.btnPrimary} onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('sermon')?.scrollIntoView({ behavior: 'smooth' });
+            }}>실시간 예배 참여하기</a>
             <a href="#news" className={styles.btnOutline}>교회 소식 보기</a>
           </div>
         </div>
