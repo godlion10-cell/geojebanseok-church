@@ -1,57 +1,13 @@
-// AI 분석 API Route
+// AI 분석 API Route - Gemini 우선, 실패 시 OpenAI 자동 전환
 
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
-  try {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'GEMINI_API_KEY가 서버에 설정되지 않았습니다. Vercel 환경변수를 확인해주세요.' },
-        { status: 500 }
-      );
-    }
+// ===== 공통 프롬프트 생성 =====
+function buildPrompt(file: File, isVideo: boolean, isPdf: boolean, isDocument: boolean, instruction: string): string {
+  let prompt: string;
 
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-    if (!file) {
-      return NextResponse.json({ error: '파일이 없습니다.' }, { status: 400 });
-    }
-
-    const bytes = await file.arrayBuffer();
-    const base64 = Buffer.from(bytes).toString('base64');
-    let mimeType = file.type || 'application/octet-stream';
-    const isVideo = mimeType.startsWith('video/');
-    const fileName = file.name.toLowerCase();
-
-    // HWP, 문서 파일 처리: Gemini는 이미지/PDF만 직접 지원
-    // HWP 등 문서는 base64로 전송하되 mime을 application/octet-stream으로
-    const isDocument = fileName.endsWith('.hwp') || fileName.endsWith('.hwpx') || 
-                       fileName.endsWith('.doc') || fileName.endsWith('.docx') ||
-                       fileName.endsWith('.txt') || fileName.endsWith('.rtf');
-    const isPdf = fileName.endsWith('.pdf') || mimeType === 'application/pdf';
-    const isImage = mimeType.startsWith('image/');
-
-    // 지원 가능한 파일 유형 확인
-    if (!isImage && !isVideo && !isPdf && !isDocument) {
-      // 확장자로 이미지인지 한번 더 확인
-      if (fileName.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/)) {
-        mimeType = 'image/jpeg';
-      }
-    }
-
-    // PDF면 mime 보정
-    if (isPdf) {
-      mimeType = 'application/pdf';
-    }
-
-    const instruction = formData.get('instruction') as string || '';
-
-    let prompt: string;
-    
-    if (isDocument && !isPdf) {
-      // HWP 등 문서 파일: 바이너리를 직접 분석할 수 없으므로 파일명 기반 안내
-      prompt = `당신은 한국 교회 웹사이트 관리 AI 어시스턴트입니다.
+  if (isDocument && !isPdf) {
+    prompt = `당신은 한국 교회 웹사이트 관리 AI 어시스턴트입니다.
 사용자가 "${file.name}" 파일을 업로드했습니다.
 이 파일은 HWP(한글) 또는 문서 파일입니다.
 
@@ -73,8 +29,8 @@ export async function POST(request: NextRequest) {
   "schedules": [],
   "note": "HWP 파일은 이미지로 변환 후 업로드하시면 더 정확한 분석이 가능합니다."
 }`;
-    } else {
-      prompt = `당신은 한국 교회 웹사이트 관리 AI 어시스턴트입니다.
+  } else {
+    prompt = `당신은 한국 교회 웹사이트 관리 AI 어시스턴트입니다.
 첨부된 ${isVideo ? '영상' : isPdf ? 'PDF 문서' : '이미지'}을 분석하여 교회 홈페이지 콘텐츠로 등록할 수 있도록 아래 JSON 형식으로 응답하세요.
 
 분석 규칙:
@@ -97,95 +53,219 @@ export async function POST(request: NextRequest) {
 
 schedules 배열은 category가 "SCHEDULE"일 때만 채우세요.
 이미지에서 텍스트가 보이면 최대한 정확하게 추출하세요.`;
-    }
+  }
 
-    if (instruction) {
-      prompt += `\n\n[관리자 추가 지시사항]\n${instruction}\n위 지시사항을 반드시 반영하여 분석 결과를 생성하세요.`;
-    }
+  if (instruction) {
+    prompt += `\n\n[관리자 추가 지시사항]\n${instruction}\n위 지시사항을 반드시 반영하여 분석 결과를 생성하세요.`;
+  }
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  return prompt;
+}
 
-    // 요청 본문 구성
-    const parts: any[] = [{ text: prompt }];
-    
-    // 이미지/PDF/비디오만 inline_data로 첨부 (HWP는 제외)
-    if (isImage || isPdf || isVideo) {
-      parts.push({
-        inline_data: {
-          mime_type: mimeType,
-          data: base64,
-        }
-      });
-    } else if (isDocument) {
-      // 문서 파일도 시도 - Gemini가 읽을 수 있을 수도 있음
-      parts.push({
-        inline_data: {
-          mime_type: 'application/octet-stream',
-          data: base64,
-        }
-      });
-    }
+// ===== Gemini API 호출 =====
+async function callGemini(apiKey: string, prompt: string, base64: string, mimeType: string, isImage: boolean, isPdf: boolean, isVideo: boolean, isDocument: boolean): Promise<{ success: boolean; text?: string; rateLimited?: boolean; error?: string }> {
+  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-    const geminiBody = {
+  const parts: any[] = [{ text: prompt }];
+  if (isImage || isPdf || isVideo) {
+    parts.push({ inline_data: { mime_type: mimeType, data: base64 } });
+  } else if (isDocument) {
+    parts.push({ inline_data: { mime_type: 'application/octet-stream', data: base64 } });
+  }
+
+  const res = await fetch(geminiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
       contents: [{ parts }],
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 4096,
-      }
-    };
+      generationConfig: { temperature: 0.1, maxOutputTokens: 4096 },
+    }),
+  });
 
-    const geminiRes = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(geminiBody),
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error('Gemini API error:', errText);
+    if (res.status === 429 || errText.includes('RESOURCE_EXHAUSTED')) {
+      return { success: false, rateLimited: true, error: 'Gemini 할당량 초과' };
+    }
+    return { success: false, error: `Gemini 에러 (${res.status})` };
+  }
+
+  const data = await res.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  return { success: true, text };
+}
+
+// ===== OpenAI API 호출 =====
+async function callOpenAI(apiKey: string, prompt: string, base64: string, mimeType: string, isImage: boolean): Promise<{ success: boolean; text?: string; error?: string }> {
+  const messages: any[] = [];
+
+  if (isImage) {
+    messages.push({
+      role: 'user',
+      content: [
+        { type: 'text', text: prompt },
+        { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } },
+      ],
     });
+  } else {
+    messages.push({
+      role: 'user',
+      content: prompt,
+    });
+  }
 
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      console.error('Gemini API error:', errText);
-      
-      // HWP 파일 관련 에러면 안내 메시지
-      if (isDocument && !isPdf) {
-        return NextResponse.json({
-          success: true,
-          analysis: {
-            category: 'NEWS',
-            title: file.name.replace(/\.[^.]+$/, ''),
-            content: 'HWP(한글) 파일은 직접 분석이 어렵습니다.\n\n💡 팁: HWP 파일을 이미지(스크린샷)나 PDF로 변환한 후 업로드하시면 AI가 정확하게 분석할 수 있습니다.',
-            subcategory: '문서 파일',
-            note: 'HWP 파일은 이미지/PDF로 변환 후 재업로드를 권장합니다.',
-          },
-          uploadedFile: '',
-          fileName: file.name,
-        });
-      }
-      
-      // 할당량 초과 에러 (429 또는 RESOURCE_EXHAUSTED)
-      if (geminiRes.status === 429 || errText.includes('RESOURCE_EXHAUSTED')) {
-        return NextResponse.json(
-          { error: '⏳ AI 사용량이 일시적으로 한도에 도달했습니다. 1~2분 후 다시 시도해주세요.' },
-          { status: 429 }
-        );
-      }
-      
-      // API 키 에러
-      if (geminiRes.status === 403 || errText.includes('API_KEY_INVALID')) {
-        return NextResponse.json(
-          { error: '🔑 AI API 키가 유효하지 않습니다. 관리자에게 문의해주세요.' },
-          { status: 403 }
-        );
-      }
-      
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages,
+      temperature: 0.1,
+      max_tokens: 4096,
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error('OpenAI API error:', errText);
+    return { success: false, error: `OpenAI 에러 (${res.status})` };
+  }
+
+  const data = await res.json();
+  const text = data?.choices?.[0]?.message?.content || '';
+  return { success: true, text };
+}
+
+// ===== 메인 API Route =====
+export async function POST(request: NextRequest) {
+  try {
+    const geminiKey = process.env.GEMINI_API_KEY;
+    const openaiKey = process.env.OPENAI_API_KEY;
+
+    if (!geminiKey && !openaiKey) {
       return NextResponse.json(
-        { error: `AI 분석 실패 (${geminiRes.status}): 잠시 후 다시 시도해주세요.` },
+        { error: 'AI API 키가 설정되지 않았습니다. GEMINI_API_KEY 또는 OPENAI_API_KEY를 환경변수에 추가해주세요.' },
         { status: 500 }
       );
     }
 
-    const geminiData = await geminiRes.json();
-    const rawText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+    if (!file) {
+      return NextResponse.json({ error: '파일이 없습니다.' }, { status: 400 });
+    }
 
-    // JSON 추출 (마크다운 코드블록 안에 있을 수 있음)
+    const bytes = await file.arrayBuffer();
+    const base64 = Buffer.from(bytes).toString('base64');
+    let mimeType = file.type || 'application/octet-stream';
+    const isVideo = mimeType.startsWith('video/');
+    const fileName = file.name.toLowerCase();
+
+    const isDocument = fileName.endsWith('.hwp') || fileName.endsWith('.hwpx') ||
+                       fileName.endsWith('.doc') || fileName.endsWith('.docx') ||
+                       fileName.endsWith('.txt') || fileName.endsWith('.rtf');
+    const isPdf = fileName.endsWith('.pdf') || mimeType === 'application/pdf';
+    const isImage = mimeType.startsWith('image/');
+
+    if (!isImage && !isVideo && !isPdf && !isDocument) {
+      if (fileName.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/)) {
+        mimeType = 'image/jpeg';
+      }
+    }
+    if (isPdf) mimeType = 'application/pdf';
+
+    const instruction = formData.get('instruction') as string || '';
+    const prompt = buildPrompt(file, isVideo, isPdf, isDocument, instruction);
+
+    let rawText = '';
+    let usedModel = '';
+
+    // 1️⃣ Gemini 먼저 시도
+    if (geminiKey) {
+      console.log('🤖 Gemini로 분석 시도...');
+      const geminiResult = await callGemini(geminiKey, prompt, base64, mimeType, isImage, isPdf, isVideo, isDocument);
+
+      if (geminiResult.success && geminiResult.text) {
+        rawText = geminiResult.text;
+        usedModel = 'Gemini';
+        console.log('✅ Gemini 분석 성공');
+      } else if (geminiResult.rateLimited && openaiKey) {
+        // 할당량 초과 → OpenAI로 전환
+        console.log('⚠️ Gemini 할당량 초과 → OpenAI로 자동 전환');
+        const openaiResult = await callOpenAI(openaiKey, prompt, base64, mimeType, isImage);
+        if (openaiResult.success && openaiResult.text) {
+          rawText = openaiResult.text;
+          usedModel = 'OpenAI (자동 전환)';
+          console.log('✅ OpenAI 분석 성공');
+        } else {
+          return NextResponse.json(
+            { error: `AI 분석 실패: ${openaiResult.error}` },
+            { status: 500 }
+          );
+        }
+      } else if (geminiResult.rateLimited) {
+        return NextResponse.json(
+          { error: '⏳ Gemini 할당량 초과. OPENAI_API_KEY를 설정하시면 자동 전환됩니다. 또는 1~2분 후 재시도해주세요.' },
+          { status: 429 }
+        );
+      } else {
+        // HWP 파일 관련 Gemini 에러
+        if (isDocument && !isPdf) {
+          return NextResponse.json({
+            success: true,
+            analysis: {
+              category: 'NEWS',
+              title: file.name.replace(/\.[^.]+$/, ''),
+              content: 'HWP(한글) 파일은 직접 분석이 어렵습니다.\n\n💡 팁: HWP 파일을 이미지(스크린샷)나 PDF로 변환한 후 업로드하시면 AI가 정확하게 분석할 수 있습니다.',
+              subcategory: '문서 파일',
+            },
+            uploadedFile: '',
+            fileName: file.name,
+          });
+        }
+
+        // OpenAI fallback
+        if (openaiKey) {
+          console.log('⚠️ Gemini 실패 → OpenAI로 자동 전환');
+          const openaiResult = await callOpenAI(openaiKey, prompt, base64, mimeType, isImage);
+          if (openaiResult.success && openaiResult.text) {
+            rawText = openaiResult.text;
+            usedModel = 'OpenAI (자동 전환)';
+          } else {
+            return NextResponse.json(
+              { error: `AI 분석 실패: ${openaiResult.error}` },
+              { status: 500 }
+            );
+          }
+        } else {
+          return NextResponse.json(
+            { error: `Gemini 분석 실패: ${geminiResult.error}. OPENAI_API_KEY를 설정하시면 자동 전환됩니다.` },
+            { status: 500 }
+          );
+        }
+      }
+    }
+    // 2️⃣ Gemini 키 없으면 OpenAI만 사용
+    else if (openaiKey) {
+      console.log('🤖 OpenAI로 분석 시도...');
+      const openaiResult = await callOpenAI(openaiKey, prompt, base64, mimeType, isImage);
+      if (openaiResult.success && openaiResult.text) {
+        rawText = openaiResult.text;
+        usedModel = 'OpenAI';
+        console.log('✅ OpenAI 분석 성공');
+      } else {
+        return NextResponse.json(
+          { error: `OpenAI 분석 실패: ${openaiResult.error}` },
+          { status: 500 }
+        );
+      }
+    }
+
+    // JSON 추출
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       return NextResponse.json(
@@ -196,7 +276,7 @@ schedules 배열은 category가 "SCHEDULE"일 때만 채우세요.
 
     const parsed = JSON.parse(jsonMatch[0]);
 
-    // 파일도 서버에 저장
+    // 파일 저장
     const { writeFile, mkdir } = await import('fs/promises');
     const { join } = await import('path');
     const uploadDir = join(process.cwd(), 'public', 'uploads');
@@ -210,6 +290,7 @@ schedules 배열은 category가 "SCHEDULE"일 때만 채우세요.
       analysis: parsed,
       uploadedFile: `/uploads/${filename}`,
       fileName: file.name,
+      model: usedModel,
     });
 
   } catch (error: any) {
