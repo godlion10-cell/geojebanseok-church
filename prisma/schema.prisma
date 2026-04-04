@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -44,10 +45,22 @@ model Offering {
 
 model ContentItem {
   id        String   @id @default(uuid())
-  type      String   // e.g., "BULLETIN", "YOUTUBE_LINK", "NOTICE"
+  type      String   // e.g., "NEWS", "SERMON", "BULLETIN", "NOTICE"
+  category  String?  // e.g., "주일오전", "수요예배" (설교용) 또는 "안내", "소식" (뉴스용)
   title     String
-  url       String?  // PDF/Image link for bulletin, YouTube URL
-  content   String?  // Text content for notices
+  url       String?  // PDF/Image link for bulletin, YouTube URL, or Image path
+  content   String?  // Text content for notices or news
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorshipSchedule {
+  id        String   @id @default(uuid())
+  title     String   // e.g., "주일대예배 (1부)"
+  time      String   // e.g., "오전 09:00"
+  place     String   // e.g., "2층 본당"
+  officer   String   // e.g., "이주민 목사"
+  order     Int      @default(0) // 정렬 순서
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
