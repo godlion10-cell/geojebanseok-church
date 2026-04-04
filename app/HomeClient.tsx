@@ -1,6 +1,4 @@
 'use client';
-// Final Synchronization: 2026-04-05 01:54 (Re-uploading Friday 15:00~21:00 Final Version)
-
 
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';

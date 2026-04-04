@@ -13,6 +13,8 @@
   flex-direction: column;
   box-shadow: 4px 0 15px rgba(0,0,0,0.1);
   z-index: 10;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
 }
 
 .brand {
@@ -35,6 +37,7 @@
   font-weight: 500;
   transition: all 0.2s ease;
   border-left: 4px solid transparent;
+  text-decoration: none;
 }
 
 .link:hover, .activeLink {
@@ -48,6 +51,58 @@
   padding: 3rem 4rem;
   overflow-y: auto;
   background-color: #f4f6f8;
+  min-width: 0; /* flex box overflow fix */
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 200px;
+  }
+  .mainContent {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .adminLayout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    padding: 1rem 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  
+  .brand {
+    width: 100%;
+    text-align: center;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: none;
+  }
+  
+  .navLinks {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .link {
+    padding: 0.5rem 1rem;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    font-size: 0.9rem;
+  }
+  
+  .link:hover, .activeLink {
+    border-left-color: transparent;
+    border-bottom-color: var(--color-logo-gold);
+  }
 }
 
 .pageHeader {
@@ -57,7 +112,7 @@
 }
 
 .pageTitle {
-  font-size: 2.2rem;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
   color: var(--color-primary);
   font-weight: 700;
 }

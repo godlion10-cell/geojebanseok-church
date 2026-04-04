@@ -72,26 +72,23 @@ export default function MemberManager({ initialMembers }: { initialMembers: Memb
     setIsSubmitting(true);
 
     try {
-      if (editId) {
-        const res = await updateMember(editId, formData);
-        if (res.success && res.data) {
-          setMembers(members.map((m) => (m.id === editId ? res.data : m)));
-          handleCloseModal();
+      const res = editId 
+        ? await updateMember(editId, formData) 
+        : await addMember(formData);
+
+      if (res.success && res.data) {
+        if (editId) {
+          setMembers(members.map((m) => (m.id === editId ? res.data! : m)));
         } else {
-          alert(res.error || '수정 중 오류가 발생했습니다.');
-        }
-      } else {
-        const res = await addMember(formData);
-        if (res.success && res.data) {
           setMembers([res.data, ...members]);
-          handleCloseModal();
-        } else {
-          alert(res.error || '추가 중 오류가 발생했습니다.');
         }
+        handleCloseModal();
+      } else {
+        alert(res.error || '저장 중 오류가 발생했습니다.');
       }
-    } catch (error) {
-      console.error(error);
-      alert('요청 처리 중 문제가 발생했습니다.');
+    } catch (error: any) {
+      console.error('Save error:', error);
+      alert(`요청 처리 중 문제가 발생했습니다: ${error.message || '네트워크 상태를 확인해 주세요.'}`);
     } finally {
       setIsSubmitting(false);
     }

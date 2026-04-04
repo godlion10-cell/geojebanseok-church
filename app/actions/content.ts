@@ -22,11 +22,11 @@ export async function getContentItems(type?: string) {
 // 콘텐츠 추가 (이미지 업로드 포함)
 export async function addContentItem(formData: FormData) {
   try {
-    const type = (formData.get('type') as string) || '';
-    const category = (formData.get('category') as string) || '';
-    const title = (formData.get('title') as string) || '';
-    const url = (formData.get('url') as string) || ''; // YouTube URL 등
-    const content = (formData.get('content') as string) || '';
+    const type = formData.get('type') as string;
+    const category = formData.get('category') as string;
+    const title = formData.get('title') as string;
+    const url = formData.get('url') as string; // YouTube URL 등
+    const content = formData.get('content') as string;
     const file = formData.get('image') as File | null;
 
     let imagePath = url;
@@ -36,6 +36,7 @@ export async function addContentItem(formData: FormData) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const filename = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+      const { mkdir } = await import('fs/promises');
       const tmpDir = join('/tmp', 'uploads');
       await mkdir(tmpDir, { recursive: true });
       const path = join(tmpDir, filename);
@@ -44,16 +45,14 @@ export async function addContentItem(formData: FormData) {
       imagePath = `/uploads/${filename}`;
     }
 
-    const data: any = {
-      type,
-      category,
-      title,
-      url: imagePath,
-      content,
-    };
-
     const newItem = await (prisma.contentItem as any).create({
-      data: data,
+      data: {
+        type,
+        category,
+        title,
+        url: imagePath,
+        content,
+      },
     });
 
     revalidatePath('/');
@@ -68,11 +67,11 @@ export async function addContentItem(formData: FormData) {
 // 콘텐츠 수정
 export async function updateContentItem(id: string, formData: FormData) {
   try {
-    const type = (formData.get('type') as string) || '';
-    const category = (formData.get('category') as string) || '';
-    const title = (formData.get('title') as string) || '';
-    const url = (formData.get('url') as string) || '';
-    const content = (formData.get('content') as string) || '';
+    const type = formData.get('type') as string;
+    const category = formData.get('category') as string;
+    const title = formData.get('title') as string;
+    const url = formData.get('url') as string;
+    const content = formData.get('content') as string;
     const file = formData.get('image') as File | null;
 
     let imagePath = url;
@@ -81,6 +80,7 @@ export async function updateContentItem(id: string, formData: FormData) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const filename = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+      const { mkdir } = await import('fs/promises');
       const tmpDir = join('/tmp', 'uploads');
       await mkdir(tmpDir, { recursive: true });
       const path = join(tmpDir, filename);
@@ -89,17 +89,15 @@ export async function updateContentItem(id: string, formData: FormData) {
       imagePath = `/uploads/${filename}`;
     }
 
-    const data: any = {
-      type,
-      category,
-      title,
-      url: imagePath,
-      content,
-    };
-
     const updatedItem = await (prisma.contentItem as any).update({
       where: { id },
-      data: data,
+      data: {
+        type,
+        category,
+        title,
+        url: imagePath,
+        content,
+      },
     });
 
     revalidatePath('/');
@@ -131,15 +129,14 @@ export async function initializeBaseData(type: 'news' | 'sermon', items: any[]) 
   try {
     // 순차적으로 생성 (Turso/SQLite에서는 bulk insert보다 순차 생성이 안전할 수 있음)
     for (const item of items) {
-      const data: any = {
-        type: type.toUpperCase(),
-        category: item.category || '',
-        title: item.title,
-        url: item.url || '',
-        content: item.content || '',
-      };
       await (prisma.contentItem as any).create({
-        data: data,
+        data: {
+          type: type.toUpperCase(),
+          category: item.category || '',
+          title: item.title,
+          url: item.url || '',
+          content: item.content || '',
+        },
       });
     }
 
