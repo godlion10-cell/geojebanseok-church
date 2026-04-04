@@ -22,11 +22,11 @@ export async function getContentItems(type?: string) {
 // 콘텐츠 추가 (이미지 업로드 포함)
 export async function addContentItem(formData: FormData) {
   try {
-    const type = formData.get('type') as string;
-    const category = formData.get('category') as string;
-    const title = formData.get('title') as string;
-    const url = formData.get('url') as string; // YouTube URL 등
-    const content = formData.get('content') as string;
+    const type = (formData.get('type') as string) || '';
+    const category = (formData.get('category') as string) || '';
+    const title = (formData.get('title') as string) || '';
+    const url = (formData.get('url') as string) || ''; // YouTube URL 등
+    const content = (formData.get('content') as string) || '';
     const file = formData.get('image') as File | null;
 
     let imagePath = url;
@@ -67,11 +67,11 @@ export async function addContentItem(formData: FormData) {
 // 콘텐츠 수정
 export async function updateContentItem(id: string, formData: FormData) {
   try {
-    const type = formData.get('type') as string;
-    const category = formData.get('category') as string;
-    const title = formData.get('title') as string;
-    const url = formData.get('url') as string;
-    const content = formData.get('content') as string;
+    const type = (formData.get('type') as string) || '';
+    const category = (formData.get('category') as string) || '';
+    const title = (formData.get('title') as string) || '';
+    const url = (formData.get('url') as string) || '';
+    const content = (formData.get('content') as string) || '';
     const file = formData.get('image') as File | null;
 
     let imagePath = url;
