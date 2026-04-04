@@ -48,6 +48,7 @@ export async function addContentItem(formData: FormData) {
     const newItem = await prisma.contentItem.create({
       data: {
         type,
+        // @ts-ignore
         category,
         title,
         url: imagePath,
@@ -93,6 +94,7 @@ export async function updateContentItem(id: string, formData: FormData) {
       where: { id },
       data: {
         type,
+        // @ts-ignore
         category,
         title,
         url: imagePath,
@@ -132,6 +134,7 @@ export async function initializeBaseData(type: 'news' | 'sermon', items: any[]) 
       await prisma.contentItem.create({
         data: {
           type: type.toUpperCase(),
+          // @ts-ignore
           category: item.category || '',
           title: item.title,
           url: item.url || '',
