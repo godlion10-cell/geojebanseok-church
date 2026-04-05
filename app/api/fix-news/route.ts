@@ -5,6 +5,17 @@ import { revalidatePath } from 'next/cache';
 // 뉴스 데이터 텍스트 수정용 일회성 API
 export async function GET() {
   try {
+    // 데이터베이스 연결 체크
+    try {
+      await prisma.$connect();
+    } catch (e) {
+      console.warn('⚠️ 데이터베이스 연결 실패 (빌드 중에는 무시될 수 있음):', e);
+      return NextResponse.json({ 
+        error: '데이터베이스 연결 실패. Vercel 환경변수 설정을 확인해주세요.',
+        details: process.env.NODE_ENV === 'development' ? e : undefined
+      }, { status: 512 }); // 특정 상태 코드로 빌드 로그에서 식별 가능하게 함
+    }
+
     const newsItems = await prisma.contentItem.findMany({
       where: { type: 'NEWS' },
     });
