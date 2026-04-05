@@ -5,6 +5,16 @@ import { revalidatePath } from 'next/cache';
 // 시간표 데이터 수정용 일회성 API
 export async function GET() {
   try {
+    // 데이터베이스 연결 체크
+    try {
+      await prisma.$connect();
+    } catch (e) {
+      console.warn('⚠️ 데이터베이스 연결 실패 (빌드 중에는 무시될 수 있음):', e);
+      return NextResponse.json({ 
+        error: '데이터베이스 연결 실패. Vercel 환경변수 설정을 확인해주세요.',
+      }, { status: 512 });
+    }
+
     const schedules = await prisma.worshipSchedule.findMany({
       orderBy: { order: 'asc' },
     });
@@ -43,7 +53,7 @@ export async function GET() {
       success: true,
       message: `${updates.length}개 시간표 업데이트 완료`,
       updates,
-      all: schedules.map(s => ({ title: s.title, time: s.time })),
+      all: schedules.map((s: any) => ({ title: s.title, time: s.time })),
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
