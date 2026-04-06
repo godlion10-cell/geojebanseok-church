@@ -2,8 +2,8 @@
   <!-- Crisp White Background -->
   <rect width="512" height="512" fill="white"/>
 
-  <!-- Logo Symbol: Scaled down to 1.5 and moved up slightly -->
-  <g transform="translate(256, 150) scale(1.5) translate(-40, -70)">
+  <!-- Logo Symbol: Maintaining the bold scale (1.7) but centered in the upper half -->
+  <g transform="translate(256, 160) scale(1.7) translate(-40, -70)">
     <g>
       <path d="M28 8 Q28 8 28 8 L56 8 Q56 8 56 34 L56 56 Q42 56 28 42 Z" fill="#928747"/>
       <path d="M8 56 Q8 20 28 8 L28 42 Q28 56 28 70 L28 140 Q8 140 8 120 Z" fill="#2B5762" opacity="0.6"/>
@@ -12,7 +12,7 @@
     </g>
   </g>
 
-  <!-- Text: Stacked with smaller font size and less letter spacing to fit circle -->
-  <text x="256" y="340" text-anchor="middle" font-family="'Noto Sans KR', sans-serif" font-weight="900" font-size="82" fill="#2B5762" letter-spacing="6">반석</text>
-  <text x="256" y="440" text-anchor="middle" font-family="'Noto Sans KR', sans-serif" font-weight="900" font-size="82" fill="#2B5762" letter-spacing="6">교회</text>
+  <!-- Text: Using the BIG bold font (88) but with adjusted letter spacing (4) to keep letters '석' and '회' away from circle edges -->
+  <text x="256" y="355" text-anchor="middle" font-family="'Noto Sans KR', sans-serif" font-weight="900" font-size="88" fill="#2B5762" letter-spacing="4">반석</text>
+  <text x="256" y="455" text-anchor="middle" font-family="'Noto Sans KR', sans-serif" font-weight="900" font-size="88" fill="#2B5762" letter-spacing="4">교회</text>
 </svg>
