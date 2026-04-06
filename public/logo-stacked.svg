@@ -1,22 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <!-- Crisp White Background for circular mask -->
+  <!-- Crisp White Background -->
   <rect width="512" height="512" fill="white"/>
 
-  <g transform="translate(256, 170) scale(1.8) translate(-40, -70)">
-    <!-- Symbol: Abstract Cross/Rock -->
+  <!-- Logo Symbol: Scaled down to 1.5 and moved up slightly -->
+  <g transform="translate(256, 150) scale(1.5) translate(-40, -70)">
     <g>
-      <!-- Gold accent -->
       <path d="M28 8 Q28 8 28 8 L56 8 Q56 8 56 34 L56 56 Q42 56 28 42 Z" fill="#928747"/>
-      <!-- Left curved pillar -->
       <path d="M8 56 Q8 20 28 8 L28 42 Q28 56 28 70 L28 140 Q8 140 8 120 Z" fill="#2B5762" opacity="0.6"/>
-      <!-- Right tall pillar -->
       <path d="M38 8 L56 8 L56 140 L38 140 Z" fill="#2B5762"/>
-      <!-- Cross horizontal bar -->
       <path d="M22 52 L72 52 L72 72 L22 72 Z" fill="#2B5762"/>
     </g>
   </g>
 
-  <!-- Text: Stacked Vertical -->
-  <text x="256" y="360" text-anchor="middle" font-family="'Noto Sans KR', sans-serif" font-weight="900" font-size="94" fill="#2B5762" letter-spacing="10">반석</text>
-  <text x="256" y="460" text-anchor="middle" font-family="'Noto Sans KR', sans-serif" font-weight="900" font-size="94" fill="#2B5762" letter-spacing="10">교회</text>
+  <!-- Text: Stacked with smaller font size and less letter spacing to fit circle -->
+  <text x="256" y="340" text-anchor="middle" font-family="'Noto Sans KR', sans-serif" font-weight="900" font-size="82" fill="#2B5762" letter-spacing="6">반석</text>
+  <text x="256" y="440" text-anchor="middle" font-family="'Noto Sans KR', sans-serif" font-weight="900" font-size="82" fill="#2B5762" letter-spacing="6">교회</text>
 </svg>
