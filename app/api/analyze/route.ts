@@ -181,12 +181,14 @@ export async function POST(request: NextRequest) {
     const instruction = formData.get('instruction') as string || '';
     const prompt = buildPrompt(file, isVideo, isPdf, isDocument, instruction);
 
+    console.log(`[분석 시작] 파일명: ${file.name}, 타입: ${mimeType}, 크기: ${(file.size / 1024).toFixed(1)}KB`);
+
     let rawText = '';
     let usedModel = '';
 
     // 1️⃣ Gemini 먼저 시도
     if (geminiKey) {
-      console.log('🤖 Gemini로 분석 시도...');
+      console.log('🤖 Gemini API 호출 중...');
       const geminiResult = await callGemini(geminiKey, prompt, base64, mimeType, isImage, isPdf, isVideo, isDocument);
 
       if (geminiResult.success && geminiResult.text) {

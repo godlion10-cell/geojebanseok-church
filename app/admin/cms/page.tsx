@@ -74,6 +74,7 @@ export default function CMSPage() {
   const [aiFile, setAiFile] = useState<File | null>(null);
   const [aiPreview, setAiPreview] = useState<string>('');
   const [aiAnalyzing, setAiAnalyzing] = useState(false);
+  const [aiStatus, setAiStatus] = useState<'idle' | 'compressing' | 'uploading' | 'analyzing' | 'parsing' | 'saving'>('idle');
   const [aiResult, setAiResult] = useState<any>(null);
   const [aiError, setAiError] = useState('');
   const [aiSaving, setAiSaving] = useState(false);
@@ -264,25 +265,90 @@ export default function CMSPage() {
     setAiResult(null);
 
     try {
+      let fileToUpload = aiFile;
+
+      // 1. 이미지일 경우 압축 시도 (Vercel 용량 제한 및 속도 개선)
+      if (aiFile.type.startsWith('image/')) {
+        setAiStatus('compressing');
+        console.log('🖼️ 이미지 압축 시작...');
+        const compressed = await compressImage(aiFile);
+        if (compressed) {
+          fileToUpload = compressed;
+          console.log('✅ 이미지 압축 완료:', (compressed.size / 1024 / 1024).toFixed(2), 'MB');
+        }
+      }
+
+      setAiStatus('uploading');
       const fd = new FormData();
-      fd.append('file', aiFile);
+      fd.append('file', fileToUpload);
       if (aiInstruction.trim()) {
         fd.append('instruction', aiInstruction.trim());
       }
 
+      console.log('🤖 AI 분석 서버로 요청 전송...');
+      setAiStatus('analyzing');
       const res = await fetch('/api/analyze', { method: 'POST', body: fd });
+      
+      setAiStatus('parsing');
       const data = await res.json();
 
       if (!res.ok || !data.success) {
         setAiError(data.error || 'AI 분석에 실패했습니다.');
       } else {
+        console.log('✅ AI 분석 결과 수신 성공');
         setAiResult({ ...data.analysis, uploadedFile: data.uploadedFile });
       }
     } catch (err: any) {
+      console.error('AI 분석 오류:', err);
       setAiError(err.message || '네트워크 오류');
     } finally {
       setAiAnalyzing(false);
+      setAiStatus('idle');
     }
+  };
+
+  // 이미지 압축 헬퍼 함수
+  const compressImage = async (file: File): Promise<File | null> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+            } else {
+              resolve(null);
+            }
+          }, 'image/jpeg', 0.7);
+        };
+      };
+    });
   };
 
   const handleAiSave = async () => {
@@ -492,22 +558,32 @@ export default function CMSPage() {
                           style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                         >
                           {aiAnalyzing ? (
-                            <><span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⚙️</span> AI 분석 중...</>
+                            <><span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⚙️</span> {
+                              aiStatus === 'compressing' ? '이미지 최적화 중...' :
+                              aiStatus === 'uploading' ? '이미지 업로드 중...' :
+                              aiStatus === 'analyzing' ? 'AI 가 분석 중...' :
+                              aiStatus === 'parsing' ? '분석 결과 정리 중...' : '잠시만 기다려주세요...'
+                            }</>
                           ) : (
                             <>🤖 AI 분석 시작</>
                           )}
                         </button>
-                        <button onClick={resetAi} className={css.logoutBtn}>✕ 취소</button>
+                        <button onClick={resetAi} className={css.logoutBtn} disabled={aiAnalyzing}>✕ 취소</button>
                       </div>
 
                       {aiAnalyzing && (
                         <div style={{ padding: '1.5rem', background: 'white', borderRadius: '16px', border: '1px solid #f0e8dc' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
                             <div style={{ width: '24px', height: '24px', border: '3px solid #c19c72', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                            <span style={{ fontWeight: 700, color: '#5b272f' }}>Google Gemini가 분석하고 있습니다...</span>
+                            <span style={{ fontWeight: 700, color: '#5b272f' }}>
+                              {aiStatus === 'compressing' && '📦 큰 이미지를 업로드 가능하도록 최적화하고 있습니다...'}
+                              {aiStatus === 'uploading' && '🚀 최적화된 파일을 전송하고 있습니다...'}
+                              {aiStatus === 'analyzing' && '🤖 Google Gemini 1.5가 내용을 분석하고 있습니다...'}
+                              {aiStatus === 'parsing' && '✍️ 분석된 내용을 저장하기 좋게 정리하고 있습니다...'}
+                            </span>
                           </div>
                           <p style={{ margin: 0, fontSize: '0.85rem', color: '#999' }}>
-                            이미지에서 텍스트를 추출하고, 카테고리를 판별하고 있습니다.
+                            {aiStatus === 'analyzing' ? '주보의 텍스트를 읽고 카테고리를 분류하는 데는 약 5~15초가 소요됩니다.' : '잠시만 기다려 주시면 분석 결과가 표시됩니다.'}
                           </p>
                         </div>
                       )}
