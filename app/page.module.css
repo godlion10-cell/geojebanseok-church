@@ -901,10 +901,27 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 0.3rem;
-  margin-bottom: 1.5rem;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
   font-size: 1rem;
-  padding: 0;
+  padding: 1.8rem 1rem;
+  background: #fcf9f5;
+  border: 1px solid rgba(193, 156, 114, 0.25);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  position: relative;
+}
+
+.orderRow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 3px;
+  background: var(--color-logo-gold);
+  border-radius: 0 0 4px 4px;
 }
 
 .orderRow:last-child {
@@ -916,10 +933,15 @@
 }
 
 .orderLabel {
-  font-weight: 700;
-  color: #c19c72;
-  font-size: 0.9rem;
-  letter-spacing: 0.1em;
+  font-weight: 800;
+  color: #8b7355;
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+  border-bottom: 1px dashed rgba(193, 156, 114, 0.4);
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.3rem;
+  display: inline-block;
+  min-width: 60px;
 }
 
 .orderContent {
@@ -1208,19 +1230,20 @@
   }
 
   .orderRow {
-    margin-bottom: 1.2rem;
+    margin-bottom: 1rem;
+    padding: 1.5rem 1rem;
   }
 
   .orderContent {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
 
   .orderLabel {
-    font-size: 0.85rem;
+    font-size: 1.15rem;
   }
 
   .orderResp {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
   }
   
   /* Additional overall font scaling for mobile elements */

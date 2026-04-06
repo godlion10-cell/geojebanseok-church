@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
 
     if (!geminiKey && !openaiKey) {
       return NextResponse.json(
-        { error: 'AI API 키가 설정되지 않았습니다. Vercel 환경 변수(또는 로컬 .env)에 GEMINI_API_KEY를 추가해주세요.' },
+        { error: 'AI API 키가 설정되지 않았습니다. Vercel 환경 변수(또는 로컬 .env)에 GEMINI_API_KEY 또는 OPENAI_API_KEY를 추가해주세요.' },
         { status: 500 }
       );
     }
