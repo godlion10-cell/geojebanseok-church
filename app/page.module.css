@@ -609,11 +609,17 @@
   flex-shrink: 0;
 }
 
+.sermonInfo {
+  min-width: 0;
+  flex: 1;
+}
+
 .sermonInfo h4 {
   font-size: 1rem;
   color: var(--color-primary);
   margin-bottom: 0.3rem;
   word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .sermonInfo p {
@@ -785,7 +791,8 @@
   background: white;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   height: fit-content;
   border: 1px solid rgba(193, 156, 114, 0.08);
 }
@@ -793,6 +800,7 @@
 .scheduleTable {
   width: 100%;
   border-collapse: collapse;
+  min-width: 500px;
 }
 
 .scheduleTable th,
@@ -800,6 +808,7 @@
   padding: 1.1rem 1.2rem;
   text-align: left;
   border-bottom: 1px solid rgba(193, 156, 114, 0.08);
+  white-space: nowrap;
 }
 
 .scheduleTable tr {
@@ -831,75 +840,101 @@
   min-width: 75px;
 }
 
-/* Order of Service */
+/* Order of Service - Center Aligned Beautiful Design */
 .orderServiceBox {
-  background: white;
+  background: #ffffff;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  border: 1px solid rgba(193, 156, 114, 0.08);
+  box-shadow: 0 10px 40px rgba(91, 39, 47, 0.08);
+  border: 1px solid rgba(193, 156, 114, 0.2);
   overflow: hidden;
 }
 
 .orderHeader {
-  background: linear-gradient(135deg, #5b272f, #7a3a44);
-  color: white;
-  padding: 1.4rem;
+  background: linear-gradient(135deg, #4a1f26, #7a3a44, #4a1f26);
+  color: #ffffff;
+  padding: 1.8rem;
   text-align: center;
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: 0.03em;
+  font-weight: 800;
+  font-size: 1.4rem;
+  letter-spacing: 0.05em;
+  font-family: 'Nanum Myeongjo', serif;
 }
 
 .orderSub {
-  background: var(--color-background);
-  color: var(--color-primary);
-  padding: 0.8rem;
+  background: #faf6f0;
+  color: #8b7355;
+  padding: 1rem;
   text-align: center;
-  font-size: 0.85rem;
-  border-bottom: 1px solid rgba(193, 156, 114, 0.1);
-  font-weight: 500;
+  font-size: 0.95rem;
+  border-bottom: 1px solid rgba(193, 156, 114, 0.15);
+  font-weight: 600;
 }
 
 .orderGroup {
-  padding: 1.3rem 1.5rem;
-  border-bottom: 1px dashed rgba(193, 156, 114, 0.15);
+  padding: 2rem 1.5rem;
+  border-bottom: 1px solid rgba(193, 156, 114, 0.1);
+  background: #ffffff;
 }
 
 .orderGroupTitle {
   font-family: 'Nanum Myeongjo', serif;
-  color: var(--color-logo-gold);
-  font-weight: 700;
-  margin-bottom: 0.8rem;
-  font-size: 1rem;
+  color: #c19c72;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+  text-align: center;
+  position: relative;
+}
+
+.orderGroupTitle::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: #c19c72;
+  margin: 0.6rem auto 0;
+  opacity: 0.5;
 }
 
 .orderRow {
-  display: grid;
-  grid-template-columns: 20px 80px 1fr 80px;
-  gap: 0.4rem;
-  margin-bottom: 0.4rem;
-  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 0.15rem 0;
+  text-align: center;
+  gap: 0.3rem;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  padding: 0;
+}
+
+.orderRow:last-child {
+  margin-bottom: 0;
 }
 
 .orderMark {
-  color: #ccc;
+  display: none;
 }
 
 .orderLabel {
-  font-weight: 600;
-  color: #444;
+  font-weight: 700;
+  color: #c19c72;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
 }
 
 .orderContent {
-  color: #777;
+  color: #4a1f26;
+  font-size: 1.15rem;
+  font-weight: 600;
 }
 
 .orderResp {
-  text-align: right;
-  color: #999;
-  font-size: 0.8rem;
+  color: #888;
+  font-size: 0.85rem;
+  background: #f8f4f0;
+  padding: 0.2rem 0.8rem;
+  border-radius: 20px;
+  margin-top: 0.2rem;
 }
 
 /* ======================================== */
@@ -1118,13 +1153,30 @@
     padding: 4.5rem 4%;
   }
 
+  /* Increase overall mobile font sizes */
   .sectionTitle {
-    font-size: 1.8rem;
+    font-size: 2.1rem;
   }
 
   .sectionSubtitle {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     margin-bottom: 3rem;
+  }
+  
+  .visionTitle {
+    font-size: 1.3rem;
+  }
+  
+  .visionDesc {
+    font-size: 1.05rem;
+  }
+  
+  .newsCard h3 {
+    font-size: 1.25rem;
+  }
+
+  .newsCard p, .newsCard li {
+    font-size: 1.05rem;
   }
 
   .sermonMain {
@@ -1142,28 +1194,58 @@
     grid-template-columns: 1fr;
   }
 
+  .orderHeader {
+    font-size: 1.3rem;
+    padding: 1.4rem;
+  }
+
+  .orderGroup {
+    padding: 1.5rem 1rem;
+  }
+
+  .orderGroupTitle {
+    font-size: 1.15rem;
+  }
+
   .orderRow {
-    grid-template-columns: 1fr;
-    gap: 0.15rem;
-    margin-bottom: 0.8rem;
-    padding: 0.3rem 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    margin-bottom: 1.2rem;
   }
 
-  .orderLabel::before {
-    content: "• ";
-    color: var(--color-logo-gold);
+  .orderContent {
+    font-size: 1.1rem;
   }
 
-  .orderMark {
-    display: none;
+  .orderLabel {
+    font-size: 0.85rem;
   }
 
   .orderResp {
-    text-align: left;
-    color: var(--color-primary);
-    font-weight: 600;
     font-size: 0.8rem;
+  }
+  
+  /* Additional overall font scaling for mobile elements */
+  .infoLabel {
+    font-size: 1.05rem;
+  }
+  
+  .infoItem {
+    font-size: 1.1rem;
+  }
+
+  .sermonMainInfo h3 {
+    font-size: 1.5rem;
+  }
+
+  .sermonMainInfo p {
+    font-size: 1.05rem;
+  }
+
+  .sloganText {
+    font-size: 2rem;
+  }
+  
+  .scheduleTable th, .scheduleTable td {
+    font-size: 1.05rem;
   }
 
   .newsGrid {
@@ -1182,7 +1264,7 @@
 
 @media (max-width: 480px) {
   .heroTitle {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
   }
 
   .heroQuote {
