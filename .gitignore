@@ -60,3 +60,4 @@ app/page/
 # exports & zips
 *.zip
 export.ps1
+.env*.local
