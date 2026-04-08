@@ -236,7 +236,6 @@ export async function POST(request: NextRequest) {
           { error: `Gemini 분석 실패: ${geminiResult.error}. Vercel 환경변수에서 GEMINI_API_KEY를 확인해주세요.` },
           { status: 500 }
         );
-        }
       }
     }
     // 2️⃣ Gemini 키 없으면 OpenAI만 사용
