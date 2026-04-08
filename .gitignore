@@ -60,4 +60,6 @@ app/page/
 # exports & zips
 *.zip
 export.ps1
-.env*.local
+
+# old project backup (contains hardcoded API keys in test files)
+/geojebanseok-church/
