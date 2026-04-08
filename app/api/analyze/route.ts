@@ -1,6 +1,16 @@
-// AI 분석 API Route - Gemini 우선, 실패 시 OpenAI 자동 전환
-
 import { NextRequest, NextResponse } from 'next/server';
+
+// 디버그용: GET 요청으로 환경변수 확인
+export async function GET() {
+  return NextResponse.json({
+    gemini: !!process.env.GEMINI_API_KEY,
+    geminiPrefix: process.env.GEMINI_API_KEY?.substring(0, 8) || 'NOT SET',
+    openai: !!process.env.OPENAI_API_KEY,
+    openaiPrefix: process.env.OPENAI_API_KEY?.substring(0, 8) || 'NOT SET',
+  });
+}
+
+// AI 분석 API Route - Gemini 우선, 실패 시 OpenAI 자동 전환
 
 // ===== 공통 프롬프트 생성 =====
 function buildPrompt(file: File, isVideo: boolean, isPdf: boolean, isDocument: boolean, instruction: string): string {
