@@ -14,7 +14,7 @@ export default async function OfferingsPage() {
   const initialOfferings = offeringsRes.success && offeringsRes.data ? offeringsRes.data : [];
   
   // 교인 목록은 id, name, role 만 추출하여 가볍게 전달
-  const membersList = (membersRes.success && membersRes.data ? membersRes.data : []).map(m => ({
+  const membersList = (membersRes.success && (membersRes.data as any) ? (membersRes.data as any) : []).map((m: any) => ({
     id: m.id,
     name: m.name,
     role: m.role,

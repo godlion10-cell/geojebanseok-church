@@ -45,10 +45,9 @@ export async function addContentItem(formData: FormData) {
       imagePath = `/uploads/${filename}`;
     }
 
-    const newItem = await prisma.contentItem.create({
+    const newItem = await (prisma.contentItem as any).create({
       data: {
         type,
-        // @ts-ignore
         category,
         title,
         url: imagePath,
@@ -90,11 +89,10 @@ export async function updateContentItem(id: string, formData: FormData) {
       imagePath = `/uploads/${filename}`;
     }
 
-    const updatedItem = await prisma.contentItem.update({
+    const updatedItem = await (prisma.contentItem as any).update({
       where: { id },
       data: {
         type,
-        // @ts-ignore
         category,
         title,
         url: imagePath,
@@ -131,10 +129,9 @@ export async function initializeBaseData(type: 'news' | 'sermon', items: any[]) 
   try {
     // 순차적으로 생성 (Turso/SQLite에서는 bulk insert보다 순차 생성이 안전할 수 있음)
     for (const item of items) {
-      await prisma.contentItem.create({
+      await (prisma.contentItem as any).create({
         data: {
           type: type.toUpperCase(),
-          // @ts-ignore
           category: item.category || '',
           title: item.title,
           url: item.url || '',
