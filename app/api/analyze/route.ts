@@ -230,24 +230,12 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        // OpenAI fallback
-        if (openaiKey) {
-          console.log('⚠️ Gemini 실패 → OpenAI로 자동 전환');
-          const openaiResult = await callOpenAI(openaiKey, prompt, base64, mimeType, isImage);
-          if (openaiResult.success && openaiResult.text) {
-            rawText = openaiResult.text;
-            usedModel = 'OpenAI (자동 전환)';
-          } else {
-            return NextResponse.json(
-              { error: `AI 분석 실패: ${openaiResult.error}` },
-              { status: 500 }
-            );
-          }
-        } else {
-          return NextResponse.json(
-            { error: `Gemini 분석 실패: ${geminiResult.error}. OPENAI_API_KEY를 설정하시면 자동 전환됩니다.` },
-            { status: 500 }
-          );
+        // Gemini 실패 시 상세 에러 반환 (OpenAI 폴백 없이)
+        console.error('❌ Gemini 분석 실패:', geminiResult.error);
+        return NextResponse.json(
+          { error: `Gemini 분석 실패: ${geminiResult.error}. Vercel 환경변수에서 GEMINI_API_KEY를 확인해주세요.` },
+          { status: 500 }
+        );
         }
       }
     }
