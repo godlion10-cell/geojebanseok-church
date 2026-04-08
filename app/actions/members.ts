@@ -25,33 +25,20 @@ export async function addMember(data: {
   role: string;
 }) {
   try {
-    // 날짜 형식이 유효하지 않은 경우를 위해 추가 검증
-    let dob: Date | null = null;
-    if (data.dateOfBirth && data.dateOfBirth.trim() !== '') {
-      const parsedDate = new Date(data.dateOfBirth);
-      if (!isNaN(parsedDate.getTime())) {
-        dob = parsedDate;
-      }
-    }
-
     const newMember = await prisma.member.create({
       data: {
         name: data.name,
         phone: data.phone || null,
         address: data.address || null,
-        dateOfBirth: dob,
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
         role: data.role,
       },
     });
     revalidatePath('/admin/members');
     return { success: true, data: newMember };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Failed to add member:', error);
-    // 구체적인 오류 내용을 알 수 있도록 에러 메시지 반환
-    return { 
-      success: false, 
-      error: `교인 추가 실패: ${error.message || '알 수 없는 오류가 발생했습니다.'}` 
-    };
+    return { success: false, error: '교인 추가에 실패했습니다.' };
   }
 }
 
@@ -70,7 +57,7 @@ export async function updateMember(id: string, data: {
         name: data.name,
         phone: data.phone || null,
         address: data.address || null,
-        dateOfBirth: (data.dateOfBirth && data.dateOfBirth.trim() !== '') ? new Date(data.dateOfBirth) : null,
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
         role: data.role,
       },
     });

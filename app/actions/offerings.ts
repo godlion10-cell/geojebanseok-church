@@ -29,11 +29,10 @@ export async function addOffering(data: {
   offeringType: string;
 }) {
   try {
-    const offeringDate = data.date ? new Date(data.date) : new Date();
     const newOffering = await prisma.offering.create({
       data: {
         memberId: data.memberId,
-        date: isNaN(offeringDate.getTime()) ? new Date() : offeringDate,
+        date: new Date(data.date),
         amount: data.amount,
         offeringType: data.offeringType,
       },
@@ -59,12 +58,11 @@ export async function updateOffering(id: string, data: {
   offeringType: string;
 }) {
   try {
-    const offeringDate = data.date ? new Date(data.date) : new Date();
     const updatedOffering = await prisma.offering.update({
       where: { id },
       data: {
         memberId: data.memberId,
-        date: isNaN(offeringDate.getTime()) ? new Date() : offeringDate,
+        date: new Date(data.date),
         amount: data.amount,
         offeringType: data.offeringType,
       },
