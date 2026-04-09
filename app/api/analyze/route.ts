@@ -74,7 +74,7 @@ schedules 배열은 category가 "SCHEDULE"일 때만 채우세요.
 
 // ===== Gemini API 호출 =====
 async function callGemini(apiKey: string, prompt: string, base64: string, mimeType: string, isImage: boolean, isPdf: boolean, isVideo: boolean, isDocument: boolean): Promise<{ success: boolean; text?: string; rateLimited?: boolean; error?: string }> {
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   const parts: any[] = [{ text: prompt }];
   if (isImage || isPdf || isVideo) {
@@ -240,12 +240,27 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        // Gemini 실패 시 상세 에러 반환 (OpenAI 폴백 없이)
-        console.error('❌ Gemini 분석 실패:', geminiResult.error);
-        return NextResponse.json(
-          { error: `Gemini 분석 실패: ${geminiResult.error}. Vercel 환경변수에서 GEMINI_API_KEY를 확인해주세요.` },
-          { status: 500 }
-        );
+        // Gemini 실패 → OpenAI로 자동 전환
+        if (openaiKey) {
+          console.log('⚠️ Gemini 실패 → OpenAI로 자동 전환');
+          const openaiResult = await callOpenAI(openaiKey, prompt, base64, mimeType, isImage);
+          if (openaiResult.success && openaiResult.text) {
+            rawText = openaiResult.text;
+            usedModel = 'OpenAI (자동 전환)';
+            console.log('✅ OpenAI 분석 성공 (Gemini 폴백)');
+          } else {
+            return NextResponse.json(
+              { error: `AI 분석 실패: ${openaiResult.error}` },
+              { status: 500 }
+            );
+          }
+        } else {
+          console.error('❌ Gemini 분석 실패:', geminiResult.error);
+          return NextResponse.json(
+            { error: `Gemini 분석 실패: ${geminiResult.error}. OPENAI_API_KEY를 설정하시면 자동 전환됩니다.` },
+            { status: 500 }
+          );
+        }
       }
     }
     // 2️⃣ Gemini 키 없으면 OpenAI만 사용

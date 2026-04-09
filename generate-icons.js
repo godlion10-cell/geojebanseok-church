@@ -2,36 +2,27 @@ const sharp = require('sharp');
 const path = require('path');
 
 async function generateIcons() {
-  const input = path.join(__dirname, 'public', 'logo-stacked.svg');
+  const input = path.join(__dirname, 'public', 'church-logo.png');
   
-  // Create 192x192
+  // 192x192 icon
   await sharp(input)
-    .resize(192, 192)
+    .resize(192, 192, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
     .png()
     .toFile(path.join(__dirname, 'public', 'icon-192x192.png'));
   
-  // Create 512x512
+  // 512x512 icon
   await sharp(input)
-    .resize(512, 512)
+    .resize(512, 512, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
     .png()
     .toFile(path.join(__dirname, 'public', 'icon-512x512.png'));
 
-  // Create Apple touch icon (180x180)
+  // Apple touch icon (180x180)
   await sharp(input)
-    .resize(180, 180)
+    .resize(180, 180, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
     .png()
     .toFile(path.join(__dirname, 'public', 'apple-touch-icon.png'));
 
-  // Generate proof (simulate circle)
-  const circleSvg = Buffer.from(
-    `<svg width="512" height="512"><circle cx="256" cy="256" r="256" fill="white"/></svg>`
-  );
-  await sharp(path.join(__dirname, 'public', 'icon-512x512.png'))
-    .composite([{ input: circleSvg, blend: 'dest-in' }])
-    .png()
-    .toFile(path.join(__dirname, 'proof_circle.png'));
-
-  console.log('✅ Icons regenerated with stacked design!');
+  console.log('✅ Icons regenerated from new logo!');
 }
 
 generateIcons().catch(console.error);
