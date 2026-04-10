@@ -839,6 +839,7 @@
 .scheduleTable th, .scheduleTable td {
   padding: 1.1rem 1.2rem;
   text-align: left;
+  vertical-align: middle;
   border-bottom: 1px solid rgba(193, 156, 114, 0.08);
 }
 
