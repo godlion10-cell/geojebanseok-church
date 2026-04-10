@@ -48,11 +48,47 @@ const NAV_ITEMS: { key: SectionKey; label: string }[] = [
   { key: 'location', label: '오시는길' },
 ];
 
+// ===== Fallback 데이터 (DB에 데이터 없을 때 사용) =====
+const FALLBACK_NEWS = [
+  { id: 'f1', title: '환영 및 등록 안내', content: '환영하고 축복합니다. 반석교회는 대한예수교 장로회 합동 측 소속입니다.\n• 유튜브: @petros-church\n• 온라인 헌금: 신협 131-017-687642\n• 다음세대 후원: 신협 131-018-242250' },
+  { id: 'f2', title: '홈페이지 및 교회 소식', content: '반석교회 홈페이지 초안이 만들어졌습니다. 주소는 "거제반석교회.com" 입니다.' },
+  { id: 'f3', title: '부활주일 감사', content: '할렐루야! 오늘은 부활주일입니다. 죄와 죽음을 이기신 예수 그리스도를 찬양합니다.' },
+  { id: 'f4', title: '부활절 이벤트 동참', content: '본당 뒤편, 부활의 예수님을 생각하며 내가 좋아하는 말씀 구절을 적어주세요. 함께 십자가를 채워요~' },
+  { id: 'f5', title: '오늘 세례식 안내', content: '성인 세례: 설하나 자매. 지혜를 얻고 새 생명을 얻은 성도를 함께 축복하고 환영해 주세요.' },
+  { id: 'f6', title: '부활절 연합예배', content: '오늘 오후는 연초지역 부활절 연합예배로 드립니다. (장소: 송정교회 / 시간: 오후 2시 30분)' },
+  { id: 'f7', title: '새생명 축제 작정', content: '다음 주일에는 새생명(전도대상자)을 작정하는 시간을 가집니다. 기도로 준비해 주세요.' },
+  { id: 'f8', title: '성전 보수 공사', content: '본당 방음 및 난방 벽 공사가 시작됩니다. 성전 보수를 위해 건축헌금으로 동참 부탁드립니다.' },
+  { id: 'f9', title: '새가족 소개', content: '성시현 자매(김온유, 김라온), 김원만 형제/허순 자매님을 진심으로 환영하고 축복합니다.' },
+  { id: 'f10', title: '전교인 성경퀴즈대회', content: '5월 5주차 진행 예정입니다. 범위는 주일말씀정리 유인물(이음돌 모임 시 배부)입니다.' },
+];
+
+const FALLBACK_SERMONS = [
+  { id: 's1', title: '부활, 죽음을 이기는 하나님의 소망', category: '주일오전 설교', content: '이주민 목사 (고전 15:1-10)' },
+  { id: 's2', title: '다시 시작된 하나님의 인도', category: '수요예배 말씀', content: '이주민 목사 (창 45:16-28)' },
+  { id: 's3', title: '생명의 삶 (매일 새벽)', category: '큐티(QT) 안내', content: '경건의 시간' },
+];
+
+const FALLBACK_SCHEDULES = [
+  { id: 'sc1', title: '주일대예배 (1부)', time: '오전 09:00', place: '2층 본당', officer: '이주민 목사' },
+  { id: 'sc2', title: '주일대예배 (2부)', time: '오전 11:00', place: '2층 본당', officer: '이주민 목사' },
+  { id: 'sc3', title: '주일오후예배', time: '오후 01:50', place: '2층 본당', officer: '이주민 목사' },
+  { id: 'sc4', title: '주일청소년', time: '오전 10:00', place: '3층 교육관', officer: '김민정' },
+  { id: 'sc5', title: '주일어린이', time: '오전 11:00', place: '3층 교육관', officer: '김민정' },
+  { id: 'sc6', title: '수요저녁예배', time: '저녁 07:30', place: '2층 본당', officer: '이주민 목사' },
+  { id: 'sc7', title: '금요기도회', time: '저녁 08:00', place: '2층 본당', officer: '이주민 목사' },
+  { id: 'sc8', title: '새벽예배', time: '오전 05:30', place: '2층 본당', officer: '이주민 목사' },
+];
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<SectionKey>('about');
   const [isLive, setIsLive] = useState(false);
   const liveVideoRef = useRef<HTMLDivElement>(null);
+
+  // DB에서 불러온 콘텐츠 상태
+  const [newsItems, setNewsItems] = useState<any[]>([]);
+  const [sermonItems, setSermonItems] = useState<any[]>([]);
+  const [scheduleItems, setScheduleItems] = useState<any[]>([]);
 
   // 예배 시간 자동 체크 (30초마다)
   useEffect(() => {
@@ -61,6 +97,25 @@ export default function Home() {
     const timer = setInterval(checkLive, 30000);
     return () => clearInterval(timer);
   }, []);
+
+  // DB에서 콘텐츠 로딩
+  useEffect(() => {
+    fetch('/api/content')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          if (data.news?.length > 0) setNewsItems(data.news);
+          if (data.sermons?.length > 0) setSermonItems(data.sermons);
+          if (data.schedules?.length > 0) setScheduleItems(data.schedules);
+        }
+      })
+      .catch(err => console.error('콘텐츠 로딩 실패:', err));
+  }, []);
+
+  // 실제 표시 데이터 (DB 데이터 or Fallback)
+  const displayNews = newsItems.length > 0 ? newsItems : FALLBACK_NEWS;
+  const displaySermons = sermonItems.length > 0 ? sermonItems : FALLBACK_SERMONS;
+  const displaySchedules = scheduleItems.length > 0 ? scheduleItems : FALLBACK_SCHEDULES;
 
   const handleFullscreen = () => {
     if (liveVideoRef.current) {
@@ -215,30 +270,16 @@ export default function Home() {
                 )}
               </div>
               <div className={styles.sermonGrid}>
-                <div className={styles.sermonCard}>
-                  <div className={styles.sermonThumb}><span>📖</span></div>
-                  <div className={styles.sermonInfo}>
-                    <h4>주일오전 설교</h4>
-                    <p>부활, 죽음을 이기는 하나님의 소망</p>
-                    <span className={styles.sermonMeta}>이주민 목사 (고전 15:1-10)</span>
+                {displaySermons.map((sermon: any) => (
+                  <div key={sermon.id} className={styles.sermonCard}>
+                    <div className={styles.sermonThumb}><span>{sermon.category === '큐티(QT) 안내' ? '🔗' : '📖'}</span></div>
+                    <div className={styles.sermonInfo}>
+                      <h4>{sermon.category || '설교말씀'}</h4>
+                      <p>{sermon.title}</p>
+                      <span className={styles.sermonMeta}>{sermon.content}</span>
+                    </div>
                   </div>
-                </div>
-                <div className={styles.sermonCard}>
-                  <div className={styles.sermonThumb}><span>📖</span></div>
-                  <div className={styles.sermonInfo}>
-                    <h4>수요예배 말씀</h4>
-                    <p>다시 시작된 하나님의 인도</p>
-                    <span className={styles.sermonMeta}>이주민 목사 (창 45:16-28)</span>
-                  </div>
-                </div>
-                <div className={styles.sermonCard}>
-                  <div className={styles.sermonThumb}><span>🔗</span></div>
-                  <div className={styles.sermonInfo}>
-                    <h4>큐티(QT) 안내</h4>
-                    <p>생명의 삶 (매일 새벽)</p>
-                    <span className={styles.sermonMeta}>경건의 시간</span>
-                  </div>
-                </div>
+                ))}
               </div>
               <div className={styles.channelLink}>
                 <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
@@ -263,47 +304,12 @@ export default function Home() {
                 </div>
               </div>
               <div className={styles.newsGrid}>
-                <div className={styles.newsCard}>
-                  <h3>1. 환영 및 등록 안내</h3>
-                  <p>환영하고 축복합니다. 반석교회는 대한예수교 장로회 합동 측 소속입니다.</p>
-                  <ul><li>유튜브: @petros-church</li><li>온라인 헌금: 신협 131-017-687642</li><li>다음세대 후원: 신협 131-018-242250</li></ul>
-                </div>
-                <div className={styles.newsCard}>
-                  <h3>2. 홈페이지 및 교회 소식</h3>
-                  <p>반석교회 홈페이지 초안이 만들어졌습니다. 주소는 &ldquo;거제반석교회.com&rdquo; 입니다.</p>
-                </div>
-                <div className={styles.newsCard}>
-                  <h3>3. 부활주일 감사</h3>
-                  <p>할렐루야! 오늘은 부활주일입니다. 죄와 죽음을 이기신 예수 그리스도를 찬양합니다.</p>
-                </div>
-                <div className={styles.newsCard}>
-                  <h3>4. 부활절 이벤트 동참</h3>
-                  <p>본당 뒤편, 부활의 예수님을 생각하며 내가 좋아하는 말씀 구절을 적어주세요. 함께 십자가를 채워요~</p>
-                </div>
-                <div className={styles.newsCard}>
-                  <h3>5. 오늘 세례식 안내</h3>
-                  <p>성인 세례: 설하나 자매. 지혜를 얻고 새 생명을 얻은 성도를 함께 축복하고 환영해 주세요.</p>
-                </div>
-                <div className={styles.newsCard}>
-                  <h3>6. 부활절 연합예배</h3>
-                  <p>오늘 오후는 연초지역 부활절 연합예배로 드립니다. (장소: 송정교회 / 시간: 오후 2시 30분)</p>
-                </div>
-                <div className={styles.newsCard}>
-                  <h3>7. 새생명 축제 작정</h3>
-                  <p>다음 주일에는 새생명(전도대상자)을 작정하는 시간을 가집니다. 기도로 준비해 주세요.</p>
-                </div>
-                <div className={styles.newsCard}>
-                  <h3>8. 성전 보수 공사</h3>
-                  <p>본당 방음 및 난방 벽 공사가 시작됩니다. 성전 보수를 위해 건축헌금으로 동참 부탁드립니다.</p>
-                </div>
-                <div className={styles.newsCard}>
-                  <h3>9. 새가족 소개</h3>
-                  <p>성시현 자매(김온유, 김라온), 김원만 형제/허순 자매님을 진심으로 환영하고 축복합니다.</p>
-                </div>
-                <div className={styles.newsCard}>
-                  <h3>10. 전교인 성경퀴즈대회</h3>
-                  <p>5월 5주차 진행 예정입니다. 범위는 주일말씀정리 유인물(이음돌 모임 시 배부)입니다.</p>
-                </div>
+                {displayNews.map((news: any, idx: number) => (
+                  <div key={news.id} className={styles.newsCard}>
+                    <h3>{idx + 1}. {news.title}</h3>
+                    <p style={{ whiteSpace: 'pre-line' }}>{news.content}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
@@ -319,14 +325,9 @@ export default function Home() {
                 <div className={styles.orderHeader}>예배 시간 안내</div>
                 <table className={styles.scheduleTable}>
                   <tbody>
-                    <tr><th>주일대예배 (1부)</th><td><span className={styles.time}>오전 09:00</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
-                    <tr><th>주일대예배 (2부)</th><td><span className={styles.time}>오전 11:00</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
-                    <tr><th>주일오후예배</th><td><span className={styles.time}>오후 01:50</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
-                    <tr><th>주일청소년</th><td><span className={styles.time}>오전 10:00</span></td><td>3층 교육관</td><td>김민정</td></tr>
-                    <tr><th>주일어린이</th><td><span className={styles.time}>오전 11:00</span></td><td>3층 교육관</td><td>김민정</td></tr>
-                    <tr><th>수요저녁예배</th><td><span className={styles.time}>저녁 07:30</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
-                    <tr><th>금요기도회</th><td><span className={styles.time}>저녁 08:00</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
-                    <tr><th>새벽예배</th><td><span className={styles.time}>오전 05:30</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
+                    {displaySchedules.map((s: any) => (
+                      <tr key={s.id}><th>{s.title}</th><td><span className={styles.time}>{s.time}</span></td><td>{s.place}</td><td>{s.officer}</td></tr>
+                    ))}
                   </tbody>
                 </table>
                 <div className={styles.scheduleFooterVerse}>

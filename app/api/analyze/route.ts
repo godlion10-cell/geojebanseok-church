@@ -177,6 +177,7 @@ export async function POST(request: NextRequest) {
 
     const isDocument = fileName.endsWith('.hwp') || fileName.endsWith('.hwpx') ||
                        fileName.endsWith('.doc') || fileName.endsWith('.docx') ||
+                       fileName.endsWith('.xls') || fileName.endsWith('.xlsx') ||
                        fileName.endsWith('.txt') || fileName.endsWith('.rtf');
     const isPdf = fileName.endsWith('.pdf') || mimeType === 'application/pdf';
     const isImage = mimeType.startsWith('image/');

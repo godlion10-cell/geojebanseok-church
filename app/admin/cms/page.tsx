@@ -244,14 +244,23 @@ export default function CMSPage() {
     setAiFile(file);
     setAiResult(null);
     setAiError('');
+    const fileName = file.name.toLowerCase();
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (e) => setAiPreview(e.target?.result as string);
       reader.readAsDataURL(file);
     } else if (file.type.startsWith('video/')) {
       setAiPreview('video');
+    } else if (fileName.endsWith('.pdf') || file.type === 'application/pdf') {
+      setAiPreview('pdf');
+    } else if (fileName.endsWith('.hwp') || fileName.endsWith('.hwpx')) {
+      setAiPreview('hwp');
+    } else if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx') || file.type.includes('spreadsheet')) {
+      setAiPreview('excel');
+    } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
+      setAiPreview('word');
     } else {
-      setAiPreview('');
+      setAiPreview('document');
     }
   };
 
@@ -464,7 +473,7 @@ export default function CMSPage() {
                   🤖 AI 스마트 업로드
                 </h3>
                 <p style={{ margin: 0, color: '#888', fontSize: '0.95rem', paddingLeft: '1.5rem' }}>
-                  사진, PDF파일, 동영상을 첨부하면 AI가 자동으로 분석하여 적절한 카테고리에 등록합니다.
+                  사진, PDF, HWP(한글), 엑셀, Word, 동영상을 첨부하면 AI가 자동으로 분석하여 적절한 카테고리에 등록합니다.
                 </p>
               </div>
 
@@ -488,15 +497,15 @@ export default function CMSPage() {
                 >
                   <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.6 }}>📤</div>
                   <p style={{ fontSize: '1.2rem', fontWeight: 700, color: '#5b272f', margin: '0 0 0.5rem' }}>
-                    사진, PDF파일, 동영상을 여기에 드래그하세요
+                    사진, PDF, HWP, 엑셀, 동영상을 여기에 드래그하세요
                   </p>
                   <p style={{ color: '#999', fontSize: '0.9rem', margin: 0 }}>
-                    또는 클릭하여 파일 선택 (주보 사진, 교회 활동 사진, 설교 영상 등)
+                    또는 클릭하여 파일 선택 (주보 사진, 한글문서, PDF, 엑셀, 교회 활동 사진, 설교 영상 등)
                   </p>
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*,video/*"
+                    accept="image/*,video/*,.pdf,.hwp,.hwpx,.doc,.docx,.xls,.xlsx,.txt,.rtf"
                     style={{ display: 'none' }}
                     onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }}
                   />
@@ -511,6 +520,31 @@ export default function CMSPage() {
                     <div style={{ flex: '0 0 280px' }}>
                       {aiPreview === 'video' ? (
                         <div style={{ width: '280px', height: '200px', borderRadius: '16px', background: '#2a1a1f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '3rem' }}>📹</div>
+                      ) : aiPreview === 'pdf' ? (
+                        <div style={{ width: '280px', height: '200px', borderRadius: '16px', background: 'linear-gradient(135deg, #e74c3c22, #c0392b22)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px solid #e74c3c33' }}>
+                          <span style={{ fontSize: '3.5rem' }}>📄</span>
+                          <span style={{ marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: '#c0392b' }}>PDF 문서</span>
+                        </div>
+                      ) : aiPreview === 'hwp' ? (
+                        <div style={{ width: '280px', height: '200px', borderRadius: '16px', background: 'linear-gradient(135deg, #3498db22, #2980b922)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px solid #3498db33' }}>
+                          <span style={{ fontSize: '3.5rem' }}>📝</span>
+                          <span style={{ marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: '#2980b9' }}>한글(HWP) 문서</span>
+                        </div>
+                      ) : aiPreview === 'excel' ? (
+                        <div style={{ width: '280px', height: '200px', borderRadius: '16px', background: 'linear-gradient(135deg, #27ae6022, #2ecc7122)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px solid #27ae6033' }}>
+                          <span style={{ fontSize: '3.5rem' }}>📊</span>
+                          <span style={{ marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: '#27ae60' }}>엑셀 문서</span>
+                        </div>
+                      ) : aiPreview === 'word' ? (
+                        <div style={{ width: '280px', height: '200px', borderRadius: '16px', background: 'linear-gradient(135deg, #2980b922, #3498db22)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px solid #2980b933' }}>
+                          <span style={{ fontSize: '3.5rem' }}>📋</span>
+                          <span style={{ marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: '#2980b9' }}>Word 문서</span>
+                        </div>
+                      ) : aiPreview === 'document' ? (
+                        <div style={{ width: '280px', height: '200px', borderRadius: '16px', background: 'linear-gradient(135deg, #95a5a622, #7f8c8d22)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px solid #95a5a633' }}>
+                          <span style={{ fontSize: '3.5rem' }}>📃</span>
+                          <span style={{ marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: '#7f8c8d' }}>텍스트 문서</span>
+                        </div>
                       ) : aiPreview ? (
                         <img src={aiPreview} alt="미리보기" style={{ width: '280px', height: '200px', objectFit: 'cover', borderRadius: '16px', border: '1px solid #e0d5c5' }} />
                       ) : null}
@@ -708,6 +742,8 @@ export default function CMSPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.8rem' }}>
                   {[
                     { icon: '📋', text: '주보 사진 → 교회 소식 텍스트 추출' },
+                    { icon: '📝', text: 'HWP/Word 문서 → 내용 자동 분석' },
+                    { icon: '📊', text: '엑셀/PDF → 시간표·데이터 추출' },
                     { icon: '🎬', text: '설교 영상 → 제목·설교자 자동 입력' },
                     { icon: '⏰', text: '시간표 사진 → 예배 시간 일괄 등록' },
                     { icon: '📸', text: '행사 사진 → 소식 제목·설명 생성' },
