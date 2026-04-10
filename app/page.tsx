@@ -329,6 +329,15 @@ export default function Home() {
                     <tr><th>새벽예배</th><td><span className={styles.time}>오전 05:30</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
                   </tbody>
                 </table>
+                <div className={styles.scheduleFooterVerse}>
+                  <div className={styles.verseIcon}>✝</div>
+                  <div className={styles.verseText}>
+                    &ldquo;그러므로 누구든지 나의 이 말을 듣고<br />
+                    행하는 자는 그 집을 반석 위에 지은<br />
+                    지혜로운 사람 같으리니&rdquo;
+                  </div>
+                  <div className={styles.verseRef}>— 마태복음 7:24</div>
+                </div>
               </div>
               <div className={styles.orderServiceBox}>
                 <div className={styles.orderHeader}>주일 오전 예배 순서</div>
