@@ -196,13 +196,13 @@ export default function Home() {
               <div className={styles.welcomeWrap}>
                 <div className={styles.welcomeCard}>
                   <div className={styles.welcomeIcon}>⛪</div>
-                  <h3>교회 정체성</h3>
-                  <p>반석교회는 <strong>그리스도의 살아있는 몸 된 공동체</strong>로서, &lsquo;반석&rsquo; 같은 신앙을 추구합니다. 대한예수교 장로회 합동측에 속한 건전한 교회입니다.</p>
+                  <h3>교회의 정체성: 그리스도의 살아있는 몸</h3>
+                  <p>반석교회는 단순한 조직을 넘어 <strong>그리스도의 살아있는 몸 된 공동체</strong>입니다. 마태복음 16장 18절의 약속을 따라 음부의 권세가 이기지 못하는 &lsquo;반석&rsquo; 같은 신앙을 추구하며, 오직 주님이 세우신 기초 위에서 세상을 이기는 생명력을 가진 공동체로 나아갑니다.</p>
                 </div>
                 <div className={styles.welcomeCard}>
                   <div className={styles.welcomeIcon}>🏔️</div>
-                  <h3>교회 비전</h3>
-                  <p><strong>&ldquo;하나님의 손에 붙잡혀, 세상을 이기는 교회&rdquo;</strong><br />다윗이 매끄러운 돌 다섯을 골라 블레셋 사람에게 나아간 것처럼, 오직 하나님만을 의지하며 나아갑니다.</p>
+                  <h3>교회의 비전</h3>
+                  <p>우리는 <strong>&ldquo;하나님의 주머니 속에 담긴 매끄러운 돌&rdquo;</strong>이 되기를 소망합니다. 다윗이 하나님의 손에 붙들려 골리앗을 이겼듯이, 우리 성도 각 사람이 하나님의 도구가 되어 세상 속에서 승리하는 것이 우리의 최종 비전입니다.</p>
                   <span className={styles.welcomeVerse}>— 사무엘상 17:40</span>
                 </div>
                 <div className={styles.welcomeCard} style={{ gridColumn: '1 / -1' }}>
@@ -210,7 +210,7 @@ export default function Home() {
                     <div className={styles.mottoLabel}>영구 표어</div>
                     <div className={styles.mottoText}>Stand on Grace !!</div>
                     <div className={styles.mottoSub}>은혜 위에 바로 서라</div>
-                    <p className={styles.mottoDesc}>&ldquo;하나님의 주권적 은혜 위에 서면, 성령의 샘이 터진다!&rdquo;</p>
+                    <p className={styles.mottoDesc}>우리의 핵심 가치는 하나님의 주권적인 은혜입니다. 복음의 본질은 하나님의 은혜이며, 우리가 이 은혜를 은혜되게 깨닫고 지킬 때, 교회는 생명의 공동체가 됩니다. 모든 성도가 매일의 삶 속에서 하나님의 주권을 인정하고 그분의 은혜를 의지하도록 반석교회는 목회되고 있습니다.</p>
                   </div>
                 </div>
               </div>
@@ -221,54 +221,54 @@ export default function Home() {
         {/* 비전과 사명 */}
         {activeSection === 'vision' && (
           <section className={styles.tabSection}>
-            <h2 className={styles.sectionTitle}>4대 지향점</h2>
+            <h2 className={styles.sectionTitle}>우리가 꿈꾸는 교회의 네 가지 모습</h2>
             <p className={styles.sectionSubtitle}>
-              반석교회는 &lsquo;반석&rsquo; 같은 신앙 위에 네 가지 기둥을 세워갑니다.
+              반석교회는 다음의 네 가지 지향점을 향해 나아갑니다.
             </p>
             <div className={styles.visionGrid}>
               <div className={styles.visionCard}>
                 <div className={styles.visionNum}>01</div>
                 <h3 className={styles.visionTitle}>💎 단단한 교회</h3>
-                <p className={styles.visionDesc}>인간의 생각을 자기부인 시키며,<br />하나님의 진리로만 순전해지는 교회</p>
+                <p className={styles.visionDesc}>하나님의 진리로만 순전해지며, 인간의 생각을 내려놓고 자기 부인을 실천하는 교회입니다.</p>
               </div>
               <div className={styles.visionCard}>
                 <div className={styles.visionNum}>02</div>
                 <h3 className={styles.visionTitle}>⚔️ 강건한 교회</h3>
-                <p className={styles.visionDesc}>율법적이고 종교적 신앙이 아니라,<br />예수의 생명으로 자신과 세상을 이기는 교회</p>
+                <p className={styles.visionDesc}>형식적인 신앙을 탈피하여 예수의 생명력으로 자신을 다스리고 세상을 이기는 교회입니다.</p>
               </div>
               <div className={styles.visionCard}>
                 <div className={styles.visionNum}>03</div>
                 <h3 className={styles.visionTitle}>🌱 세우는 교회</h3>
-                <p className={styles.visionDesc}>믿음에는 본이 되며, 세상에는 빛이 되며,<br />다음세대를 영적 리더로 세우는 교회</p>
+                <p className={styles.visionDesc}>성도를 바로 세우고, 다음 세대를 영적 리더로 키워내며 복음을 계승하는 교회입니다.</p>
               </div>
               <div className={styles.visionCard}>
                 <div className={styles.visionNum}>04</div>
                 <h3 className={styles.visionTitle}>🏛️ 굳건한 교회</h3>
-                <p className={styles.visionDesc}>모든 영역, 모든 나라가 흔들리지 않는<br />하나님 나라 되도록 사명에 헌신하는 교회</p>
+                <p className={styles.visionDesc}>교회 담장을 넘어 모든 영역에 하나님 나라가 임하도록 시대적 사명에 헌신하는 교회입니다.</p>
               </div>
             </div>
 
             {/* 사역의 핵심 컨셉 — 나무 비유 */}
             <div className={styles.ministryWrap}>
-              <h3 className={styles.ministryTitle}>사역의 핵심 컨셉</h3>
-              <p className={styles.ministrySubtitle}>반석 위에 뿌리를 내리고, 은혜의 기둥을 세우며, 생명의 열매를 맺는 나무</p>
+              <h3 className={styles.ministryTitle}>목회의 핵심 체계: 뿌리, 기둥, 열매</h3>
+              <p className={styles.ministrySubtitle}>복음의 진리에서 시작하여 신앙의 본질을 세우고, 사역의 가치를 맺는 유기적인 체계입니다.</p>
               <div className={styles.ministryGrid}>
                 <div className={styles.ministryCard} style={{ borderTopColor: '#8B7355' }}>
                   <div className={styles.ministryIcon}>🌿</div>
-                  <h4>뿌리 — 복음의 진리</h4>
-                  <p>반석 위에 내린 뿌리. 순전함의 기준은 &lsquo;오직 예수, 오직 성경&rsquo;이며, 신령한 젖을 사모하여 구원에 이르도록 자라납니다.</p>
+                  <h4>뿌리 — 복음의 진리 (반석)</h4>
+                  <p><strong>순전한 신앙.</strong> 신앙의 기초를 종교개혁자들의 신앙가치를 따라 오직 예수, 오직 성경을 절대 기준으로 삼고 바르게 서길 힘쓰는 교회입니다.</p>
                   <span className={styles.ministryVerse}>벧전 2:2</span>
                 </div>
                 <div className={styles.ministryCard} style={{ borderTopColor: '#C19C72' }}>
                   <div className={styles.ministryIcon}>🏗️</div>
                   <h4>기둥 — 신앙의 본질 (은혜)</h4>
-                  <p>&ldquo;나의 나 된 것은 오직 하나님의 은혜&rdquo;임을 깨닫고, 철저히 은혜에 지배받는 교회가 됩니다.</p>
+                  <p><strong>감격의 신앙.</strong> 모든 것을 하나님의 절대주권과 그의 은혜 아래에 두고, 오직 예수님만 교회의 머리로 삼고 순종하길 힘쓰는 교회입니다.</p>
                   <span className={styles.ministryVerse}>고전 15:10</span>
                 </div>
                 <div className={styles.ministryCard} style={{ borderTopColor: '#5B272F' }}>
                   <div className={styles.ministryIcon}>🍇</div>
                   <h4>열매 — 사역의 가치 (생명)</h4>
-                  <p>사역의 가치를 &lsquo;옳고 그름&rsquo;에 두지 않고, 새 언약의 일꾼으로서 영적으로 살아나고 &lsquo;살리는 것&rsquo;에 둡니다.</p>
+                  <p><strong>생명의 사역.</strong> 사역의 가치를 세상에 두지 않고, 오직 성령의 능력으로만 가능한 &lsquo;생명&rsquo;에 집중하는 교회입니다.</p>
                   <span className={styles.ministryVerse}>고후 3:6</span>
                 </div>
               </div>
