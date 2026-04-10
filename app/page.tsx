@@ -224,7 +224,7 @@ export default function Home() {
             {/* ===== 데스크톱: 인포그래픽 이미지 ===== */}
             <div className={styles.visionDesktop}>
               <img
-                src="/vision-infographic.jpg"
+                src="/vision-infographic.png"
                 alt="반석교회 목회 철학 - Stand on Grace!! 4대 지향점과 사역의 핵심 컨셉"
                 className={styles.visionInfographic}
               />
