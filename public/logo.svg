@@ -1,24 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 160" fill="none">
-  <!-- Background transparent -->
-
-  <!-- Left Symbol: Abstract Cross/Rock -->
-  <g>
-    <!-- Gold accent (top-left corner piece) -->
-    <path d="M28 8 Q28 8 28 8 L56 8 Q56 8 56 34 L56 56 Q42 56 28 42 Z" fill="#928747"/>
-    
-    <!-- Left curved pillar -->
-    <path d="M8 56 Q8 20 28 8 L28 42 Q28 56 28 70 L28 140 Q8 140 8 120 Z" fill="#2B5762" opacity="0.6"/>
-    
-    <!-- Right tall pillar (main cross vertical) -->
-    <path d="M38 8 L56 8 L56 140 L38 140 Z" fill="#2B5762"/>
-    
-    <!-- Cross horizontal bar -->
-    <path d="M22 52 L72 52 L72 72 L22 72 Z" fill="#2B5762"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" fill="none">
+  <!-- New Symbol from Image -->
+  <g transform="translate(10, 10) scale(0.6)">
+    <!-- Top Left Green Piece -->
+    <path d="M5 0 L45 5 L40 40 L0 35 Z" fill="#8A9A0F" />
+    <!-- Top Right Navy Piece -->
+    <path d="M55 5 L85 0 L90 45 L60 50 Z" fill="#003D4C" />
+    <!-- Bottom Left Navy Piece -->
+    <path d="M0 50 L40 55 L45 140 L5 135 Z" fill="#003D4C" />
+    <!-- Bottom Right Navy Piece -->
+    <path d="M55 65 L90 55 L85 140 L50 145 Z" fill="#003D4C" />
   </g>
 
-  <!-- Tagline: 은혜 위에 바로 서는 -->
-  <text x="170" y="30" font-family="'Noto Sans KR', 'Malgun Gothic', sans-serif" font-size="14" fill="#2B5762" letter-spacing="3">은혜 위에 바로 서는</text>
+  <!-- Tagline -->
+  <text x="85" y="35" font-family="'Noto Sans KR', sans-serif" font-size="14" fill="#8A9A0F" letter-spacing="2">은혜 위에 바로 서는</text>
 
-  <!-- Main Title: 반석교회 -->
-  <text x="110" y="115" font-family="'Noto Sans KR', 'Malgun Gothic', sans-serif" font-weight="900" font-size="72" fill="#2B5762" letter-spacing="2">반석교회</text>
+  <!-- Main Title -->
+  <text x="80" y="95" font-family="'Noto Sans KR', sans-serif" font-weight="900" font-size="54" fill="#003D4C">반석교회</text>
 </svg>
