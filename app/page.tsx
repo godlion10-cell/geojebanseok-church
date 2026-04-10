@@ -221,78 +221,76 @@ export default function Home() {
         {/* 비전과 사명 */}
         {activeSection === 'vision' && (
           <section className={styles.tabSection}>
-            {/* ===== 데스크톱: 인포그래픽 이미지 ===== */}
-            <div className={styles.visionDesktop}>
-              <img
-                src="/vision-infographic.png"
-                alt="반석교회 목회 철학 - Stand on Grace!! 4대 지향점과 사역의 핵심 컨셉"
-                className={styles.visionInfographic}
-              />
+            {/* ===== 섹션 1: 사역의 핵심 컨셉 ===== */}
+            <div className={styles.vpHeader}>
+              <h2 className={styles.vpTitle}>Stand on Grace !!</h2>
+              <p className={styles.vpSubtitle}>반석교회 목회 철학</p>
             </div>
 
-            {/* ===== 모바일: HTML/CSS 재구성 ===== */}
-            <div className={styles.visionMobile}>
-              {/* 상단 표어 */}
-              <div className={styles.vmHeader}>
-                <h2 className={styles.vmMottoEn}>Stand on Grace !!</h2>
-                <p className={styles.vmMottoKr}>반석교회 목회 철학</p>
+            <div className={styles.vpMinistryRow}>
+              {/* 왼쪽: 나무 이미지 */}
+              <div className={styles.vpTreeWrap}>
+                <img src="/vision/tree.png" alt="사역의 핵심 컨셉 - 뿌리, 기둥, 열매" className={styles.vpTreeImg} />
               </div>
-
-              {/* 4대 지향점 */}
-              <div className={styles.vmPillarsGrid}>
-                <div className={styles.vmPillarCard}>
-                  <div className={styles.vmPillarIcon}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                  </div>
-                  <h4>단단한 교회</h4>
-                  <p>인간의 생각을 자기부인 시키며,<br />하나님의 진리로만 순전해지는 교회</p>
-                </div>
-                <div className={styles.vmPillarCard}>
-                  <div className={styles.vmPillarIcon}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
-                  </div>
-                  <h4>강건한 교회</h4>
-                  <p>율법적이고<br />종교적 신앙이 아니라,<br />예수의 생명으로 자신과 세상을 이기는 교회</p>
-                </div>
-                <div className={styles.vmPillarCard}>
-                  <div className={styles.vmPillarIcon}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                  </div>
-                  <h4>세우는 교회</h4>
-                  <p>믿음에는 본이 되며,<br />세상에는 빛이 되며,<br />다음세대를 영적 리더로 세우는 교회</p>
-                </div>
-                <div className={styles.vmPillarCard}>
-                  <div className={styles.vmPillarIcon}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                  </div>
-                  <h4>굳건한 교회</h4>
-                  <p>모든 영역, 모든 나라가<br />흔들리지 않는 하나님 나라 되도록<br />사명에 헌신하는 교회</p>
-                </div>
-              </div>
-
-              {/* 사역 핵심 컨셉 — 나무 비유 */}
-              <div className={styles.vmTreeSection}>
-                <div className={styles.vmTreeCard} style={{ borderLeftColor: '#C19C72' }}>
-                  <div className={styles.vmTreeLabel}>열매</div>
+              {/* 오른쪽: 설명 카드 */}
+              <div className={styles.vpMinistryCards}>
+                <div className={styles.vpMCard}>
+                  <div className={styles.vpMLabel} style={{ background: '#C19C72' }}>열매</div>
                   <h4>사역의 가치 (생명)</h4>
-                  <p>세상의 가치가 아닌 성령의 능력으로만 가능한 생명에 집중합니다.</p>
+                  <p><strong>생명의 사역.</strong> 세상의 가치가 아닌<br />성령의 능력으로만 가능한<br />&lsquo;생명&rsquo;에 집중하는 교회입니다.</p>
+                  <span className={styles.vpMVerse}>고후 3:6</span>
                 </div>
-                <div className={styles.vmTreeCard} style={{ borderLeftColor: '#8B7355' }}>
-                  <div className={styles.vmTreeLabel}>기둥</div>
+                <div className={styles.vpMCard}>
+                  <div className={styles.vpMLabel} style={{ background: '#8B7355' }}>기둥</div>
                   <h4>신앙의 본질 (은혜)</h4>
-                  <p>하나님의 절대주권 아래 예수님을 머리로 삼고 순종하는 감격의 신앙입니다.</p>
+                  <p><strong>감격의 신앙.</strong> 하나님의 절대주권 아래<br />예수님을 머리로 삼고<br />순종하길 힘쓰는 교회입니다.</p>
+                  <span className={styles.vpMVerse}>고전 15:10</span>
                 </div>
-                <div className={styles.vmTreeCard} style={{ borderLeftColor: '#5B272F' }}>
-                  <div className={styles.vmTreeLabel}>뿌리</div>
+                <div className={styles.vpMCard}>
+                  <div className={styles.vpMLabel} style={{ background: '#5B272F' }}>뿌리</div>
                   <h4>복음의 진리 (반석)</h4>
-                  <p>오직 예수와 성경을 기준으로 삼는 순전한 신앙의 기초입니다.</p>
+                  <p><strong>순전한 신앙.</strong> 오직 예수, 오직 성경을<br />절대 기준으로 삼고<br />바르게 서길 힘쓰는 교회입니다.</p>
+                  <span className={styles.vpMVerse}>벧전 2:2</span>
                 </div>
               </div>
+            </div>
 
-              {/* 교회 비전 */}
-              <div className={styles.vmVisionBottom}>
+            {/* ===== 섹션 2: 4대 지향점 ===== */}
+            <div className={styles.vpPillarsSection}>
+              <h3 className={styles.vpPillarsTitle}>우리가 꿈꾸는 교회의 네 가지 모습</h3>
+              <div className={styles.vpPillarsGrid}>
+                <div className={styles.vpPillarItem}>
+                  <img src="/vision/icon-solid.png" alt="단단한 교회" className={styles.vpPillarIcon} />
+                  <h4>단단한 교회</h4>
+                  <p>인간의 생각을 자기부인 시키며,<br />하나님의 진리로만<br />순전해지는 교회</p>
+                </div>
+                <div className={styles.vpPillarItem}>
+                  <img src="/vision/icon-strong.png" alt="강건한 교회" className={styles.vpPillarIcon} />
+                  <h4>강건한 교회</h4>
+                  <p>율법적이고<br />종교적 신앙이 아니라,<br />예수의 생명으로<br />자신과 세상을 이기는 교회</p>
+                </div>
+                <div className={styles.vpPillarItem}>
+                  <img src="/vision/icon-build.png" alt="세우는 교회" className={styles.vpPillarIcon} />
+                  <h4>세우는 교회</h4>
+                  <p>믿음에는 본이 되며,<br />세상에는 빛이 되며,<br />다음세대를 영적 리더로<br />세우는 교회</p>
+                </div>
+                <div className={styles.vpPillarItem}>
+                  <img src="/vision/icon-steadfast.png" alt="굳건한 교회" className={styles.vpPillarIcon} />
+                  <h4>굳건한 교회</h4>
+                  <p>모든 영역, 모든 나라가<br />흔들리지 않는<br />하나님 나라 되도록<br />사명에 헌신하는 교회</p>
+                </div>
+              </div>
+            </div>
+
+            {/* ===== 섹션 3: 교회 비전 배너 ===== */}
+            <div className={styles.vpVisionBanner}>
+              <div className={styles.vpBannerImg}>
+                <img src="/vision/stones.png" alt="하나님의 손에 붙잡힌 매끄러운 돌" className={styles.vpStonesImg} />
+              </div>
+              <div className={styles.vpBannerText}>
                 <h3>하나님의 손에 붙잡힌 매끄러운 돌</h3>
-                <p>다윗의 물맷돌처럼 성도 각 사람이 하나님의 도구가 되어 세상을 이기는 비전입니다.</p>
+                <p>다윗의 물맷돌처럼 성도 각 사람이<br />하나님의 도구가 되어<br />세상을 이기는 비전입니다.</p>
+                <span className={styles.vpBannerVerse}>— 사무엘상 17:40</span>
               </div>
             </div>
           </section>
