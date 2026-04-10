@@ -808,17 +808,18 @@
 /*  SCHEDULE SECTION                       */
 /* ======================================== */
 .scheduleWrap {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  gap: 1.5rem !important;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 3rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 900px) {
   .scheduleWrap {
     grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
   }
 }
 
@@ -827,20 +828,22 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   overflow: hidden;
-  height: fit-content;
   border: 1px solid rgba(193, 156, 114, 0.08);
 }
 
 .scheduleTable {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .scheduleTable th, .scheduleTable td {
-  padding: 1.1rem 1.2rem;
+  padding: 0.9rem 0.7rem;
   text-align: left;
-  vertical-align: middle;
   border-bottom: 1px solid rgba(193, 156, 114, 0.08);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .scheduleTable tr {
@@ -855,21 +858,31 @@
   background-color: rgba(91, 39, 47, 0.04);
   color: var(--color-primary);
   font-weight: 600;
-  font-size: 0.92rem;
-  width: 35%;
+  font-size: 0.88rem;
+  width: 28%;
 }
 
 .scheduleTable td {
   color: #444;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+}
+
+.scheduleTable td:nth-child(2) {
+  width: 30%;
+}
+
+.scheduleTable td:nth-child(3) {
+  width: 18%;
+}
+
+.scheduleTable td:nth-child(4) {
+  width: 24%;
 }
 
 .time {
   font-weight: 600;
   color: var(--color-logo-gold);
-  margin-right: 0.8rem;
   display: inline-block;
-  min-width: 75px;
 }
 
 /* Order of Service */

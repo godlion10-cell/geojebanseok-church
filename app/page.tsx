@@ -316,15 +316,16 @@ export default function Home() {
             <p className={styles.sectionSubtitle}>은혜의 자리로 여러분을 초대합니다.</p>
             <div className={styles.scheduleWrap}>
               <div className={styles.scheduleTableWrap}>
+                <div className={styles.orderHeader}>예배 시간 안내</div>
                 <table className={styles.scheduleTable}>
                   <tbody>
                     <tr><th>주일대예배 (1부)</th><td><span className={styles.time}>오전 09:00</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
                     <tr><th>주일대예배 (2부)</th><td><span className={styles.time}>오전 11:00</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
-                    <tr><th>주일오후예배</th><td><span className={styles.time}>오후 13:50</span></td><td>2층 본당</td><td>이주민 (송정교회 연합)</td></tr>
-                    <tr><th>주일청소년</th><td><span className={styles.time}>오전 10:00</span></td><td>3층 교육관</td><td>김민정 (부활의 예수님)</td></tr>
-                    <tr><th>주일어린이</th><td><span className={styles.time}>오전 11:00</span></td><td>3층 교육관</td><td>김민정 (막달라 마리아)</td></tr>
-                    <tr><th>수요저녁예배</th><td><span className={styles.time}>저녁 19:30</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
-                    <tr><th>금요기도회</th><td><span className={styles.time}>저녁 20:00</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
+                    <tr><th>주일오후예배</th><td><span className={styles.time}>오후 01:50</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
+                    <tr><th>주일청소년</th><td><span className={styles.time}>오전 10:00</span></td><td>3층 교육관</td><td>김민정</td></tr>
+                    <tr><th>주일어린이</th><td><span className={styles.time}>오전 11:00</span></td><td>3층 교육관</td><td>김민정</td></tr>
+                    <tr><th>수요저녁예배</th><td><span className={styles.time}>저녁 07:30</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
+                    <tr><th>금요기도회</th><td><span className={styles.time}>저녁 08:00</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
                     <tr><th>새벽예배</th><td><span className={styles.time}>오전 05:30</span></td><td>2층 본당</td><td>이주민 목사</td></tr>
                   </tbody>
                 </table>
@@ -360,17 +361,18 @@ export default function Home() {
                   <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>축도</span> <span className={styles.orderContent}></span> <span className={styles.orderResp}>이주민 목사</span></div>
                 </div>
               </div>
-
-              <div className={styles.orderServiceBox} style={{ marginTop: '2rem' }}>
+            </div>
+            <div className={styles.scheduleWrap} style={{ marginTop: '1.5rem' }}>
+              <div className={styles.orderServiceBox} style={{ gridColumn: '1 / -1' }}>
                 <div className={styles.orderHeader}>교독문 134번 (부활절2)</div>
-                <div style={{ padding: '1.5rem', fontSize: '0.95rem', lineHeight: '1.8', color: '#444' }}>
-                  <p style={{ margin: '0 0 1rem' }}>내가 받은 것을 먼저 너희에게 전하였노니 이는 성경대로 그리스도께서 우리 죄를 위하여 죽으시고</p>
-                  <p style={{ margin: '0 0 1rem', fontWeight: 'bold', color: '#5b272f' }}>- 장사 지낸 바 되었다가 성경대로 사흘 만에 다시 살아나사 게바에게 보이시고</p>
-                  <p style={{ margin: '0 0 1rem' }}>후에 열두 제자에게와 그 후에 오백여 형제에게 일시에 보이셨나니</p>
-                  <p style={{ margin: '0 0 1rem', fontWeight: 'bold', color: '#5b272f' }}>- 그 중에 지금까지 대다수는 살아 있고 어떤 사람은 잠들었으며 그 후에 야고보에게 보이셨으며</p>
-                  <p style={{ margin: '0 0 1rem' }}>그 후에 모든 사도에게와 맨 나중에 만삭되지 못하여 난 자 같은 내게도 보이셨느니라</p>
-                  <p style={{ margin: '0 0 1rem', fontWeight: 'bold', color: '#5b272f' }}>- 그리스도께서 만일 다시 살아나지 못하셨으면 우리가 전파하는 것도 헛것이요 또 너희 믿음도 헛것이며 (고전 15:14)</p>
-                  <p style={{ margin: '0 0 1rem' }}>만일 그리스도 안에서 우리가 바라는 것이 다만 이 세상의 삶뿐이면 모든 사람 가운데 우리가 더욱 불쌍한 자이리라</p>
+                <div style={{ padding: '1.5rem 2rem', fontSize: '0.95rem', lineHeight: '1.8', color: '#444', columnCount: 2, columnGap: '2rem' }}>
+                  <p style={{ margin: '0 0 0.8rem' }}>내가 받은 것을 먼저 너희에게 전하였노니 이는 성경대로 그리스도께서 우리 죄를 위하여 죽으시고</p>
+                  <p style={{ margin: '0 0 0.8rem', fontWeight: 'bold', color: '#5b272f' }}>- 장사 지낸 바 되었다가 성경대로 사흘 만에 다시 살아나사 게바에게 보이시고</p>
+                  <p style={{ margin: '0 0 0.8rem' }}>후에 열두 제자에게와 그 후에 오백여 형제에게 일시에 보이셨나니</p>
+                  <p style={{ margin: '0 0 0.8rem', fontWeight: 'bold', color: '#5b272f' }}>- 그 중에 지금까지 대다수는 살아 있고 어떤 사람은 잠들었으며 그 후에 야고보에게 보이셨으며</p>
+                  <p style={{ margin: '0 0 0.8rem' }}>그 후에 모든 사도에게와 맨 나중에 만삭되지 못하여 난 자 같은 내게도 보이셨느니라</p>
+                  <p style={{ margin: '0 0 0.8rem', fontWeight: 'bold', color: '#5b272f' }}>- 그리스도께서 만일 다시 살아나지 못하셨으면 우리가 전파하는 것도 헛것이요 또 너희 믿음도 헛것이며 (고전 15:14)</p>
+                  <p style={{ margin: '0 0 0.8rem' }}>만일 그리스도 안에서 우리가 바라는 것이 다만 이 세상의 삶뿐이면 모든 사람 가운데 우리가 더욱 불쌍한 자이리라</p>
                   <p style={{ margin: '0', fontWeight: 'bold', color: '#5b272f' }}>- 그러나 이제 그리스도께서 죽은 자 가운데서 다시 살아나사 잠자는 자들의 첫 열매가 되셨도다 (고전 15:19-20)</p>
                 </div>
               </div>
