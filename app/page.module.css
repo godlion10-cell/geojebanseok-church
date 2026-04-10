@@ -1019,7 +1019,7 @@
   font-size: 1rem;
   color: var(--color-primary);
   margin-bottom: 0.3rem;
-  word-break: break-word;
+  word-break: keep-all;
   overflow-wrap: break-word;
 }
 
@@ -1151,7 +1151,7 @@
   border-bottom: 2px solid var(--color-background);
   padding-bottom: 0.6rem;
   font-weight: 700;
-  word-break: break-word;
+  word-break: keep-all;
   overflow-wrap: break-word;
 }
 

@@ -49,10 +49,17 @@ html, body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 *, *::before, *::after {
   box-sizing: inherit;
+}
+
+p, li, td, th, label, span, div {
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 a {
