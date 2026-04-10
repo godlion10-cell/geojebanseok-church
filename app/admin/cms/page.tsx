@@ -78,12 +78,13 @@ export default function CMSPage() {
   const [aiFile, setAiFile] = useState<File | null>(null);
   const [aiPreview, setAiPreview] = useState<string>('');
   const [aiAnalyzing, setAiAnalyzing] = useState(false);
-  const [aiStatus, setAiStatus] = useState<'idle' | 'compressing' | 'uploading' | 'analyzing' | 'parsing' | 'saving'>('idle');
+  const [aiStatus, setAiStatus] = useState<'idle' | 'uploading' | 'analyzing' | 'parsing' | 'saving'>('idle');
   const [aiResult, setAiResult] = useState<any>(null);
   const [aiError, setAiError] = useState('');
   const [aiSaving, setAiSaving] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [aiInstruction, setAiInstruction] = useState('');
+  const [aiDirectText, setAiDirectText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -272,28 +273,24 @@ export default function CMSPage() {
   };
 
   const handleAiAnalyze = async () => {
-    if (!aiFile) return;
+    if (!aiFile && !aiDirectText.trim()) return;
     setAiAnalyzing(true);
     setAiError('');
     setAiResult(null);
 
     try {
-      let fileToUpload = aiFile;
-
-      // 1. 이미지일 경우 압축 시도 (Vercel 용량 제한 및 속도 개선)
-      if (aiFile.type.startsWith('image/')) {
-        setAiStatus('compressing');
-        console.log('🖼️ 이미지 압축 시작...');
-        const compressed = await compressImage(aiFile);
-        if (compressed) {
-          fileToUpload = compressed;
-          console.log('✅ 이미지 압축 완료:', (compressed.size / 1024 / 1024).toFixed(2), 'MB');
-        }
-      }
-
       setAiStatus('uploading');
       const fd = new FormData();
-      fd.append('file', fileToUpload);
+
+      if (aiDirectText.trim()) {
+        // 텍스트 직접 입력 → 파일 없이 텍스트만 전송 (API 비용 최저)
+        fd.append('directText', aiDirectText.trim());
+      }
+
+      if (aiFile) {
+        fd.append('file', aiFile);
+      }
+
       if (aiInstruction.trim()) {
         fd.append('instruction', aiInstruction.trim());
       }
@@ -404,6 +401,7 @@ export default function CMSPage() {
     setAiResult(null);
     setAiError('');
     setAiInstruction('');
+    setAiDirectText('');
   };
 
   // ===== 로그인 화면 =====
@@ -473,160 +471,177 @@ export default function CMSPage() {
                   🤖 AI 스마트 업로드
                 </h3>
                 <p style={{ margin: 0, color: '#888', fontSize: '0.95rem', paddingLeft: '1.5rem' }}>
-                  사진, PDF, HWP(한글), 엑셀, Word, 동영상을 첨부하면 AI가 자동으로 분석하여 적절한 카테고리에 등록합니다.
+                  텍스트를 직접 붙여넣거나, 문서 파일(PDF, HWP, 엑셀)을 업로드하면 AI가 자동으로 분석하여 카테고리에 등록합니다.
                 </p>
               </div>
 
-              {/* 파일 업로드 영역 */}
-              {!aiFile && (
-                <div
-                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{
-                    border: `3px dashed ${dragOver ? '#c19c72' : '#e0d5c5'}`,
-                    borderRadius: '24px',
-                    padding: '4rem 2rem',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    background: dragOver ? '#fdf5ea' : '#fdfbf7',
-                    transition: 'all 0.3s',
-                    transform: dragOver ? 'scale(1.01)' : 'scale(1)',
-                  }}
-                >
-                  <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.6 }}>📤</div>
-                  <p style={{ fontSize: '1.2rem', fontWeight: 700, color: '#5b272f', margin: '0 0 0.5rem' }}>
-                    사진, PDF, HWP, 엑셀, 동영상을 여기에 드래그하세요
-                  </p>
-                  <p style={{ color: '#999', fontSize: '0.9rem', margin: 0 }}>
-                    또는 클릭하여 파일 선택 (주보 사진, 한글문서, PDF, 엑셀, 교회 활동 사진, 설교 영상 등)
-                  </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,video/*,.pdf,.hwp,.hwpx,.doc,.docx,.xls,.xlsx,.txt,.rtf"
-                    style={{ display: 'none' }}
-                    onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }}
-                  />
-                </div>
-              )}
+              {/* 텍스트 직접 입력 + 파일 업로드 영역 */}
+              {!aiResult && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-              {/* 파일 미리보기 + 분석 */}
-              {aiFile && !aiResult && (
-                <div style={{ background: '#fdfbf7', borderRadius: '20px', padding: '2rem', border: '1px solid #f0e8dc' }}>
-                  <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                    {/* 미리보기 */}
-                    <div style={{ flex: '0 0 280px' }}>
-                      {aiPreview === 'video' ? (
-                        <div style={{ width: '280px', height: '200px', borderRadius: '16px', background: '#2a1a1f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '3rem' }}>📹</div>
-                      ) : aiPreview === 'pdf' ? (
-                        <div style={{ width: '280px', height: '200px', borderRadius: '16px', background: 'linear-gradient(135deg, #e74c3c22, #c0392b22)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px solid #e74c3c33' }}>
-                          <span style={{ fontSize: '3.5rem' }}>📄</span>
-                          <span style={{ marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: '#c0392b' }}>PDF 문서</span>
-                        </div>
-                      ) : aiPreview === 'hwp' ? (
-                        <div style={{ width: '280px', height: '200px', borderRadius: '16px', background: 'linear-gradient(135deg, #3498db22, #2980b922)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px solid #3498db33' }}>
-                          <span style={{ fontSize: '3.5rem' }}>📝</span>
-                          <span style={{ marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: '#2980b9' }}>한글(HWP) 문서</span>
-                        </div>
-                      ) : aiPreview === 'excel' ? (
-                        <div style={{ width: '280px', height: '200px', borderRadius: '16px', background: 'linear-gradient(135deg, #27ae6022, #2ecc7122)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px solid #27ae6033' }}>
-                          <span style={{ fontSize: '3.5rem' }}>📊</span>
-                          <span style={{ marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: '#27ae60' }}>엑셀 문서</span>
-                        </div>
-                      ) : aiPreview === 'word' ? (
-                        <div style={{ width: '280px', height: '200px', borderRadius: '16px', background: 'linear-gradient(135deg, #2980b922, #3498db22)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px solid #2980b933' }}>
-                          <span style={{ fontSize: '3.5rem' }}>📋</span>
-                          <span style={{ marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: '#2980b9' }}>Word 문서</span>
-                        </div>
-                      ) : aiPreview === 'document' ? (
-                        <div style={{ width: '280px', height: '200px', borderRadius: '16px', background: 'linear-gradient(135deg, #95a5a622, #7f8c8d22)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px solid #95a5a633' }}>
-                          <span style={{ fontSize: '3.5rem' }}>📃</span>
-                          <span style={{ marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: '#7f8c8d' }}>텍스트 문서</span>
-                        </div>
-                      ) : aiPreview ? (
-                        <img src={aiPreview} alt="미리보기" style={{ width: '280px', height: '200px', objectFit: 'cover', borderRadius: '16px', border: '1px solid #e0d5c5' }} />
-                      ) : null}
-                      <p style={{ margin: '0.8rem 0 0', fontSize: '0.85rem', color: '#888', wordBreak: 'break-all' }}>📎 {aiFile.name}</p>
-                      <p style={{ margin: '0.3rem 0', fontSize: '0.8rem', color: '#bbb' }}>{(aiFile.size / 1024 / 1024).toFixed(1)} MB</p>
-                    </div>
-
-                    {/* 분석 버튼 */}
-                    {/* 지시사항 입력 */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center', minHeight: '200px' }}>
-                      <div style={{ background: 'white', borderRadius: '14px', padding: '1rem', border: '1px solid #f0e8dc' }}>
-                        <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', color: '#5b272f', marginBottom: '0.5rem' }}>
-                          📝 AI에게 지시사항 (선택)
-                        </label>
-                        <textarea
-                          value={aiInstruction}
-                          onChange={(e) => setAiInstruction(e.target.value)}
-                          rows={3}
-                          placeholder={'예시:\n• "교회 소식에서 헌금 안내만 추출해줘"\n• "설교 제목과 성경 본문만 정리해줘"\n• "이번 주 예배 시간표를 업데이트해줘"'}
-                          style={{
-                            width: '100%',
-                            padding: '0.8rem',
-                            border: '2px solid #f0f0f0',
-                            borderRadius: '10px',
-                            fontSize: '0.9rem',
-                            fontFamily: 'inherit',
-                            resize: 'vertical',
-                            background: '#fafafb',
-                            transition: 'border-color 0.2s',
-                          }}
-                          onFocus={(e) => (e.target.style.borderColor = '#c19c72')}
-                          onBlur={(e) => (e.target.style.borderColor = '#f0f0f0')}
-                        />
-                        <p style={{ margin: '0.4rem 0 0', fontSize: '0.78rem', color: '#bbb' }}>
-                          비워두면 AI가 자동으로 판단합니다. 원하는 수정사항을 입력하면 그에 맞게 분석합니다.
-                        </p>
-                      </div>
-                      {aiError && (
-                        <div style={{ padding: '1rem 1.5rem', background: '#fff5f5', border: '1px solid #f5c6c6', borderRadius: '12px', color: '#e74c3c', fontSize: '0.9rem' }}>
-                          ⚠️ {aiError}
-                        </div>
-                      )}
-
-                      <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button
-                          onClick={handleAiAnalyze}
-                          disabled={aiAnalyzing}
-                          className={css.saveBtn}
-                          style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                        >
-                          {aiAnalyzing ? (
-                            <><span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⚙️</span> {
-                              aiStatus === 'compressing' ? '이미지 최적화 중...' :
-                              aiStatus === 'uploading' ? '이미지 업로드 중...' :
-                              aiStatus === 'analyzing' ? 'AI 가 분석 중...' :
-                              aiStatus === 'parsing' ? '분석 결과 정리 중...' : '잠시만 기다려주세요...'
-                            }</>
-                          ) : (
-                            <>🤖 AI 분석 시작</>
-                          )}
-                        </button>
-                        <button onClick={resetAi} className={css.logoutBtn} disabled={aiAnalyzing}>✕ 취소</button>
-                      </div>
-
-                      {aiAnalyzing && (
-                        <div style={{ padding: '1.5rem', background: 'white', borderRadius: '16px', border: '1px solid #f0e8dc' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
-                            <div style={{ width: '24px', height: '24px', border: '3px solid #c19c72', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                            <span style={{ fontWeight: 700, color: '#5b272f' }}>
-                              {aiStatus === 'compressing' && '📦 큰 이미지를 업로드 가능하도록 최적화하고 있습니다...'}
-                              {aiStatus === 'uploading' && '🚀 최적화된 파일을 전송하고 있습니다...'}
-                              {aiStatus === 'analyzing' && '🤖 Google Gemini 1.5가 내용을 분석하고 있습니다...'}
-                              {aiStatus === 'parsing' && '✍️ 분석된 내용을 저장하기 좋게 정리하고 있습니다...'}
-                            </span>
-                          </div>
-                          <p style={{ margin: 0, fontSize: '0.85rem', color: '#999' }}>
-                            {aiStatus === 'analyzing' ? '주보의 텍스트를 읽고 카테고리를 분류하는 데는 약 5~15초가 소요됩니다.' : '잠시만 기다려 주시면 분석 결과가 표시됩니다.'}
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                  {/* ===== 텍스트 직접 입력창 ===== */}
+                  <div style={{ background: '#fdfbf7', borderRadius: '20px', padding: '1.5rem', border: '1px solid #f0e8dc' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '1rem', color: '#5b272f', marginBottom: '0.8rem' }}>
+                      📋 텍스트 직접 입력
+                      <span style={{ fontSize: '0.78rem', fontWeight: 400, color: '#999' }}>
+                        (주보 내용, 교회 소식, 공지사항 등을 복사해서 붙여넣기)
+                      </span>
+                    </label>
+                    <textarea
+                      value={aiDirectText}
+                      onChange={(e) => setAiDirectText(e.target.value)}
+                      rows={8}
+                      placeholder={`예시:\n\n1. 환영 및 등록 안내\n환영하고 축복합니다.\n\n2. 이번 주 공지사항\n수요예배: 저녁 7시 30분 본당\n금요기도회: 저녁 8시\n\n3. 새가족 소개\n홍길동 형제를 환영합니다.\n\n... 이렇게 주보 내용을 그대로 복사해서 붙여넣으면 AI가 자동으로 분류합니다.`}
+                      style={{
+                        width: '100%',
+                        padding: '1rem',
+                        border: '2px solid #f0e8dc',
+                        borderRadius: '14px',
+                        fontSize: '0.95rem',
+                        fontFamily: 'inherit',
+                        resize: 'vertical',
+                        background: 'white',
+                        lineHeight: '1.7',
+                        transition: 'border-color 0.2s',
+                      }}
+                      onFocus={(e) => (e.target.style.borderColor = '#c19c72')}
+                      onBlur={(e) => (e.target.style.borderColor = '#f0e8dc')}
+                    />
+                    {aiDirectText.trim() && (
+                      <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#27ae60', fontWeight: 600 }}>
+                        ✅ {aiDirectText.trim().length}자 입력됨 — 파일 없이 바로 분석 가능합니다
+                      </p>
+                    )}
                   </div>
+
+                  {/* ===== 구분선 ===== */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ flex: 1, height: '1px', background: '#e0d5c5' }} />
+                    <span style={{ fontSize: '0.85rem', color: '#bbb', fontWeight: 600 }}>또는 문서 파일 첨부</span>
+                    <div style={{ flex: 1, height: '1px', background: '#e0d5c5' }} />
+                  </div>
+
+                  {/* ===== 파일 업로드 영역 ===== */}
+                  {!aiFile ? (
+                    <div
+                      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                      onDragLeave={() => setDragOver(false)}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        border: `3px dashed ${dragOver ? '#c19c72' : '#e0d5c5'}`,
+                        borderRadius: '20px',
+                        padding: '2.5rem 2rem',
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        background: dragOver ? '#fdf5ea' : '#fdfbf7',
+                        transition: 'all 0.3s',
+                        transform: dragOver ? 'scale(1.01)' : 'scale(1)',
+                      }}
+                    >
+                      <div style={{ fontSize: '3rem', marginBottom: '0.8rem', opacity: 0.5 }}>📎</div>
+                      <p style={{ fontSize: '1.1rem', fontWeight: 700, color: '#5b272f', margin: '0 0 0.4rem' }}>
+                        문서 파일(PDF, 한글, 엑셀)을 여기에 드래그하세요
+                      </p>
+                      <p style={{ color: '#999', fontSize: '0.85rem', margin: 0 }}>
+                        또는 클릭하여 파일 선택 (주보 파일, 목장 보고서, 텍스트 직접 입력 등)
+                      </p>
+                      <div style={{ marginTop: '0.8rem', display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {['PDF', 'HWP', 'Excel', 'Word', 'TXT'].map(ext => (
+                          <span key={ext} style={{ padding: '2px 10px', borderRadius: '10px', fontSize: '0.75rem', background: '#f5ead5', color: '#8b6914', fontWeight: 600 }}>{ext}</span>
+                        ))}
+                      </div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.hwp,.hwpx,.doc,.docx,.xls,.xlsx,.txt,.rtf,.csv"
+                        style={{ display: 'none' }}
+                        onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }}
+                      />
+                    </div>
+                  ) : (
+                    <div style={{ background: '#fdfbf7', borderRadius: '16px', padding: '1.2rem 1.5rem', border: '1px solid #f0e8dc', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      {/* 파일 아이콘 */}
+                      <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: aiPreview === 'pdf' ? '#e74c3c15' : aiPreview === 'hwp' ? '#3498db15' : aiPreview === 'excel' ? '#27ae6015' : '#95a5a615', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', flexShrink: 0 }}>
+                        {aiPreview === 'pdf' ? '📄' : aiPreview === 'hwp' ? '📝' : aiPreview === 'excel' ? '📊' : aiPreview === 'word' ? '📋' : '📃'}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#5b272f', wordBreak: 'break-all' }}>{aiFile.name}</p>
+                        <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#999' }}>{(aiFile.size / 1024).toFixed(0)} KB</p>
+                      </div>
+                      <button onClick={() => { setAiFile(null); setAiPreview(''); }} style={{ padding: '0.4rem 0.8rem', border: '1px solid #ddd', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '0.8rem', color: '#e74c3c' }}>✕ 제거</button>
+                    </div>
+                  )}
+
+                  {/* ===== AI 지시사항 + 분석 버튼 ===== */}
+                  <div style={{ background: 'white', borderRadius: '14px', padding: '1.2rem', border: '1px solid #f0e8dc' }}>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', color: '#5b272f', marginBottom: '0.5rem' }}>
+                      📝 AI에게 지시사항 (선택)
+                    </label>
+                    <textarea
+                      value={aiInstruction}
+                      onChange={(e) => setAiInstruction(e.target.value)}
+                      rows={2}
+                      placeholder={'예: "교회 소식만 추출해줘" / "예배 시간표를 업데이트해줘" / "설교 제목과 본문만 정리해줘"'}
+                      style={{
+                        width: '100%',
+                        padding: '0.7rem',
+                        border: '2px solid #f0f0f0',
+                        borderRadius: '10px',
+                        fontSize: '0.88rem',
+                        fontFamily: 'inherit',
+                        resize: 'vertical',
+                        background: '#fafafb',
+                        transition: 'border-color 0.2s',
+                      }}
+                      onFocus={(e) => (e.target.style.borderColor = '#c19c72')}
+                      onBlur={(e) => (e.target.style.borderColor = '#f0f0f0')}
+                    />
+                  </div>
+
+                  {aiError && (
+                    <div style={{ padding: '1rem 1.5rem', background: '#fff5f5', border: '1px solid #f5c6c6', borderRadius: '12px', color: '#e74c3c', fontSize: '0.9rem' }}>
+                      ⚠️ {aiError}
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button
+                      onClick={handleAiAnalyze}
+                      disabled={aiAnalyzing || (!aiFile && !aiDirectText.trim())}
+                      className={css.saveBtn}
+                      style={{ padding: '1rem 2.5rem', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: (!aiFile && !aiDirectText.trim()) ? 0.5 : 1 }}
+                    >
+                      {aiAnalyzing ? (
+                        <><span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⚙️</span> {
+                          aiStatus === 'uploading' ? '데이터 전송 중...' :
+                          aiStatus === 'analyzing' ? 'AI 분석 중...' :
+                          aiStatus === 'parsing' ? '결과 정리 중...' : '잠시만 기다려주세요...'
+                        }</>
+                      ) : (
+                        <>🤖 AI 분석 시작</>
+                      )}
+                    </button>
+                    {(aiFile || aiDirectText.trim()) && (
+                      <button onClick={resetAi} className={css.logoutBtn} disabled={aiAnalyzing}>✕ 초기화</button>
+                    )}
+                  </div>
+
+                  {aiAnalyzing && (
+                    <div style={{ padding: '1.5rem', background: '#fdfbf7', borderRadius: '16px', border: '1px solid #f0e8dc' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
+                        <div style={{ width: '24px', height: '24px', border: '3px solid #c19c72', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                        <span style={{ fontWeight: 700, color: '#5b272f' }}>
+                          {aiStatus === 'uploading' && '📤 텍스트 데이터를 서버로 전송하고 있습니다...'}
+                          {aiStatus === 'analyzing' && '🤖 AI가 텍스트를 분석하고 카테고리를 분류하고 있습니다...'}
+                          {aiStatus === 'parsing' && '✍️ 분석된 내용을 저장하기 좋게 정리하고 있습니다...'}
+                        </span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: '#999' }}>
+                        텍스트 기반 분석은 약 3~10초가 소요됩니다. 잠시만 기다려주세요.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -739,14 +754,14 @@ export default function CMSPage() {
               {/* AI 기능 안내 */}
               <div style={{ marginTop: '2rem', padding: '1.5rem 2rem', background: '#fdf5ea', borderRadius: '16px', border: '1px solid #f5ead5' }}>
                 <h4 style={{ margin: '0 0 1rem', color: '#5b272f', fontSize: '1rem' }}>💡 AI가 자동으로 처리하는 것들</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.8rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.8rem' }}>
                   {[
-                    { icon: '📋', text: '주보 사진 → 교회 소식 텍스트 추출' },
-                    { icon: '📝', text: 'HWP/Word 문서 → 내용 자동 분석' },
-                    { icon: '📊', text: '엑셀/PDF → 시간표·데이터 추출' },
-                    { icon: '🎬', text: '설교 영상 → 제목·설교자 자동 입력' },
-                    { icon: '⏰', text: '시간표 사진 → 예배 시간 일괄 등록' },
-                    { icon: '📸', text: '행사 사진 → 소식 제목·설명 생성' },
+                    { icon: '📋', text: '텍스트 붙여넣기 → 카테고리 자동 분류' },
+                    { icon: '📄', text: 'PDF 문서 → 텍스트 추출 후 분석' },
+                    { icon: '📝', text: 'HWP/Word → 문서 내용 자동 분석' },
+                    { icon: '📊', text: '엑셀 → 시간표·데이터 추출' },
+                    { icon: '⏰', text: '시간표 텍스트 → 예배 시간 일괄 등록' },
+                    { icon: '💰', text: '텍스트 기반 = AI 비용 95% 절감' },
                   ].map((item, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.88rem', color: '#666' }}>
                       <span style={{ fontSize: '1.3rem' }}>{item.icon}</span>
