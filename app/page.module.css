@@ -468,16 +468,18 @@
 /*  VISION SECTION                         */
 /* ======================================== */
 .visionGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
   max-width: 960px;
   margin: 0 auto;
 }
 
 .visionCard {
+  flex: 1 1 calc(25% - 1.2rem);
+  min-width: 200px;
   background: white;
-  padding: 1.2rem 1rem;
+  padding: 2rem 1.2rem 1.5rem;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   border-top: 3px solid var(--color-primary);
@@ -485,6 +487,9 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .visionCard::before {
@@ -494,13 +499,13 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(91, 39, 47, 0.02), rgba(193, 156, 114, 0.03));
+  background: linear-gradient(135deg, rgba(91, 39, 47, 0.02), rgba(193, 156, 114, 0.04));
   opacity: 0;
   transition: opacity 0.4s;
 }
 
 .visionCard:hover {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
   box-shadow: var(--shadow-lg);
 }
 
@@ -509,31 +514,49 @@
 }
 
 .visionNum {
-  font-size: 1.5rem;
+  font-size: 2.2rem;
   font-weight: 900;
-  color: rgba(193, 156, 114, 0.2);
-  margin-bottom: 0.2rem;
+  color: rgba(193, 156, 114, 0.35);
+  margin-bottom: 0.3rem;
   font-family: 'Nanum Myeongjo', serif;
   position: relative;
+  line-height: 1;
+  letter-spacing: 0.05em;
+}
+
+.visionIconWrap {
+  color: var(--color-primary);
+  margin-bottom: 0.8rem;
+  position: relative;
+  opacity: 0.75;
+  transition: opacity 0.3s;
+}
+
+.visionCard:hover .visionIconWrap {
+  opacity: 1;
 }
 
 .visionTitle {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   color: var(--color-primary);
   font-weight: 700;
   margin-bottom: 0.8rem;
   position: relative;
-  word-break: break-word;
-  overflow-wrap: break-word;
+  word-break: keep-all;
 }
 
 .visionDesc {
-  color: #666;
+  color: #555;
   line-height: 1.8;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   position: relative;
   word-break: keep-all;
-  opacity: 0.9;
+  margin-top: auto;
+}
+
+@media (max-width: 768px) {
+  .visionGrid { flex-direction: column; }
+  .visionCard { flex: 1 1 100%; }
 }
 
 /* ======================================== */
@@ -659,16 +682,16 @@
 }
 
 .ministryGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 1.5rem;
 }
 
 @media (max-width: 768px) {
-  .ministryGrid { grid-template-columns: 1fr; }
+  .ministryGrid { flex-direction: column; }
 }
 
 .ministryCard {
+  flex: 1;
   background: white;
   border-radius: var(--radius-lg);
   padding: 2rem 1.5rem;
@@ -676,6 +699,8 @@
   border-top: 4px solid;
   text-align: left;
   transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
 }
 
 .ministryCard:hover {
@@ -683,9 +708,15 @@
   box-shadow: var(--shadow-md);
 }
 
-.ministryIcon {
-  font-size: 2rem;
+.ministryIconSvg {
+  color: var(--color-primary);
   margin-bottom: 0.8rem;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+
+.ministryCard:hover .ministryIconSvg {
+  opacity: 1;
 }
 
 .ministryCard h4 {
