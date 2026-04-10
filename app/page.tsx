@@ -245,28 +245,28 @@ export default function Home() {
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                   </div>
                   <h4>단단한 교회</h4>
-                  <p>하나님의 진리로 순전해지며</p>
+                  <p>인간의 생각을 자기부인 시키며,<br />하나님의 진리로만 순전해지는 교회</p>
                 </div>
                 <div className={styles.vmPillarCard}>
                   <div className={styles.vmPillarIcon}>
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
                   </div>
                   <h4>강건한 교회</h4>
-                  <p>예수의 생명력으로 세상을 이김</p>
+                  <p>율법적이고<br />종교적 신앙이 아니라,<br />예수의 생명으로 자신과 세상을 이기는 교회</p>
                 </div>
                 <div className={styles.vmPillarCard}>
                   <div className={styles.vmPillarIcon}>
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                   </div>
                   <h4>세우는 교회</h4>
-                  <p>다음 세대를 리더로 키우고</p>
+                  <p>믿음에는 본이 되며,<br />세상에는 빛이 되며,<br />다음세대를 영적 리더로 세우는 교회</p>
                 </div>
                 <div className={styles.vmPillarCard}>
                   <div className={styles.vmPillarIcon}>
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                   </div>
                   <h4>굳건한 교회</h4>
-                  <p>모든 영역에 하나님 나라를 확장함</p>
+                  <p>모든 영역, 모든 나라가<br />흔들리지 않는 하나님 나라 되도록<br />사명에 헌신하는 교회</p>
                 </div>
               </div>
 
