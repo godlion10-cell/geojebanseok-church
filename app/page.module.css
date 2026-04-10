@@ -1419,6 +1419,36 @@
   font-weight: 500;
 }
 
+/* 클릭 가능한 행 */
+.scheduleRowClickable {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.scheduleRowClickable:hover {
+  background-color: rgba(193, 156, 114, 0.12) !important;
+}
+
+.scheduleRowActive {
+  background-color: rgba(91, 39, 47, 0.08) !important;
+  border-left: 3px solid var(--color-logo-gold);
+}
+
+.scheduleRowActive th {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+/* 페이드 전환 애니메이션 */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.orderFade {
+  animation: fadeSlideIn 0.35s ease-out;
+}
+
 .orderGroup {
   padding: 1.3rem 1.5rem;
   border-bottom: 1px dashed rgba(193, 156, 114, 0.15);

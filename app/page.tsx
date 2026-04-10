@@ -79,6 +79,102 @@ const FALLBACK_SCHEDULES = [
   { id: 'sc8', title: '새벽예배', time: '오전 05:30', place: '2층 본당', officer: '이주민 목사' },
 ];
 
+// 예배 순서 데이터 (탭 전환용)
+const WORSHIP_ORDERS: Record<string, { title: string; groups: { heading: string; rows: { label: string; content: string; resp: string; bold?: boolean }[] }[] }> = {
+  '주일대예배 (1부)': {
+    title: '주일 오전 예배 순서',
+    groups: [
+      { heading: '◀ 개회 (하나님께 나아감)', rows: [
+        { label: '묵도', content: '', resp: '다같이' },
+        { label: '개회찬송', content: '예수 우리 왕이여 (38장)', resp: '다같이' },
+        { label: '신앙고백', content: '사도신경', resp: '다같이' },
+        { label: '교독문', content: '134번 (부활절2)', resp: '다같이' },
+        { label: '찬송', content: '할렐루야 우리 예수 (161장)', resp: '다같이' },
+        { label: '통성기도', content: '', resp: '다같이' },
+      ]},
+      { heading: '◀ 말씀의 선포', rows: [
+        { label: '성경봉독', content: '고린도전서 15:1~10', resp: '다같이' },
+        { label: '특송', content: '', resp: '성가대' },
+        { label: '말씀', content: '부활, 죽음을 이기는 하나님의 소망', resp: '이주민 목사', bold: true },
+        { label: '합심기도', content: '', resp: '다같이' },
+      ]},
+      { heading: '◀ 결단과 헌신', rows: [
+        { label: '예물봉헌', content: '내 구주 예수를 더욱 사랑 (314장)', resp: '다같이' },
+        { label: '교회소식', content: '', resp: '인도자' },
+      ]},
+      { heading: '◀ 세례식', rows: [
+        { label: '성례', content: '로마서 6:3~4', resp: '이주민 목사' },
+        { label: '찬송', content: '하나님의 독생자 (171장)', resp: '다같이' },
+        { label: '축도', content: '', resp: '이주민 목사' },
+      ]},
+    ],
+  },
+  '주일대예배 (2부)': {
+    title: '주일 오전 예배 순서',
+    groups: [
+      { heading: '◀ 개회 (하나님께 나아감)', rows: [
+        { label: '묵도', content: '', resp: '다같이' },
+        { label: '개회찬송', content: '예수 우리 왕이여 (38장)', resp: '다같이' },
+        { label: '신앙고백', content: '사도신경', resp: '다같이' },
+        { label: '교독문', content: '134번 (부활절2)', resp: '다같이' },
+        { label: '찬송', content: '할렐루야 우리 예수 (161장)', resp: '다같이' },
+        { label: '통성기도', content: '', resp: '다같이' },
+      ]},
+      { heading: '◀ 말씀의 선포', rows: [
+        { label: '성경봉독', content: '고린도전서 15:1~10', resp: '다같이' },
+        { label: '특송', content: '', resp: '성가대' },
+        { label: '말씀', content: '부활, 죽음을 이기는 하나님의 소망', resp: '이주민 목사', bold: true },
+        { label: '합심기도', content: '', resp: '다같이' },
+      ]},
+      { heading: '◀ 결단과 헌신', rows: [
+        { label: '예물봉헌', content: '내 구주 예수를 더욱 사랑 (314장)', resp: '다같이' },
+        { label: '교회소식', content: '', resp: '인도자' },
+        { label: '찬송', content: '하나님의 독생자 (171장)', resp: '다같이' },
+        { label: '축도', content: '', resp: '이주민 목사' },
+      ]},
+    ],
+  },
+  '주일청소년': {
+    title: '다음세대/주일청소년 예배',
+    groups: [
+      { heading: '◀ 예배 안내', rows: [
+        { label: '말씀', content: '부활의 예수님', resp: '', bold: true },
+        { label: '본문', content: '마가복음 16장', resp: '' },
+      ]},
+      { heading: '◀ 소식', rows: [
+        { label: '안내', content: '예배를 소중히 여기며, 주일예배에 승리해요.', resp: '' },
+        { label: '안내', content: '성경적 세계관으로 준비된 청소년 되어요.', resp: '' },
+      ]},
+    ],
+  },
+  '주일어린이': {
+    title: '다음세대/주일어린이 예배',
+    groups: [
+      { heading: '◀ 예배 안내', rows: [
+        { label: '말씀', content: '막달라 마리아가 본 예수님', resp: '', bold: true },
+        { label: '본문', content: '마가복음 16장', resp: '' },
+      ]},
+      { heading: '◀ 소식', rows: [
+        { label: '안내', content: '오늘은 부활절 파티로 함께해요.', resp: '' },
+        { label: '안내', content: '가정에서도 예배자 되어요.', resp: '' },
+      ]},
+    ],
+  },
+  '수요저녁예배': {
+    title: '수요저녁예배 순서',
+    groups: [
+      { heading: '◀ 예배 순서', rows: [
+        { label: '찬양', content: '', resp: '다같이' },
+        { label: '신앙고백', content: '', resp: '다같이' },
+        { label: '합심기도', content: '', resp: '다같이' },
+        { label: '성경봉독', content: '창 45:16~28 (다시 시작된 하나님의 인도)', resp: '', bold: true },
+        { label: '통성기도', content: '', resp: '다같이' },
+        { label: '주기도문', content: '', resp: '다같이' },
+      ]},
+    ],
+  },
+};
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<SectionKey>('about');
@@ -89,6 +185,7 @@ export default function Home() {
   const [newsItems, setNewsItems] = useState<any[]>([]);
   const [sermonItems, setSermonItems] = useState<any[]>([]);
   const [scheduleItems, setScheduleItems] = useState<any[]>([]);
+  const [selectedWorship, setSelectedWorship] = useState('주일대예배 (1부)');
 
   // 예배 시간 자동 체크 (30초마다)
   useEffect(() => {
@@ -395,9 +492,22 @@ export default function Home() {
                 <div className={styles.orderHeader}>예배 시간 안내</div>
                 <table className={styles.scheduleTable}>
                   <tbody>
-                    {displaySchedules.map((s: any) => (
-                      <tr key={s.id}><th>{s.title}</th><td><span className={styles.time}>{s.time}</span></td><td>{s.place}</td><td>{s.officer}</td></tr>
-                    ))}
+                    {displaySchedules.map((s: any) => {
+                      const isActive = s.title === selectedWorship;
+                      const hasOrder = WORSHIP_ORDERS[s.title];
+                      return (
+                        <tr
+                          key={s.id}
+                          className={`${hasOrder ? styles.scheduleRowClickable : ''} ${isActive ? styles.scheduleRowActive : ''}`}
+                          onClick={() => hasOrder && setSelectedWorship(s.title)}
+                        >
+                          <th>{s.title}</th>
+                          <td><span className={styles.time}>{s.time}</span></td>
+                          <td>{s.place}</td>
+                          <td>{s.officer}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
                 <div className={styles.scheduleFooterVerse}>
@@ -410,50 +520,23 @@ export default function Home() {
                   <div className={styles.verseRef}>— 마태복음 7:24</div>
                 </div>
               </div>
-              <div className={styles.orderServiceBox}>
-                <div className={styles.orderHeader}>주일 오전 예배 순서</div>
+              <div className={styles.orderServiceBox} key={selectedWorship}>
+                <div className={styles.orderHeader}>{WORSHIP_ORDERS[selectedWorship]?.title || '주일 오전 예배 순서'}</div>
                 <div className={styles.orderSub}>예배 10분 전에는 착석해 주시기 바랍니다.</div>
-                <div className={styles.orderGroup}>
-                  <div className={styles.orderGroupTitle}>◀ 개회 (하나님께 나아감)</div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>묵도</span> <span className={styles.orderContent}></span> <span className={styles.orderResp}>다같이</span></div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>개회찬송</span> <span className={styles.orderContent}>예수 우리 왕이여 (38장)</span> <span className={styles.orderResp}>다같이</span></div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>신앙고백</span> <span className={styles.orderContent}>사도신경</span> <span className={styles.orderResp}>다같이</span></div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>교독문</span> <span className={styles.orderContent}>134번 (부활절2)</span> <span className={styles.orderResp}>다같이</span></div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>찬송</span> <span className={styles.orderContent}>할렐루야 우리 예수 (161장)</span> <span className={styles.orderResp}>다같이</span></div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>통성기도</span> <span className={styles.orderContent}></span> <span className={styles.orderResp}>다같이</span></div>
-                </div>
-                <div className={styles.orderGroup}>
-                  <div className={styles.orderGroupTitle}>◀ 말씀의 선포</div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>성경봉독</span> <span className={styles.orderContent}>(고린도전서 15:1~10)</span> <span className={styles.orderResp}>다같이</span></div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>특송</span> <span className={styles.orderContent}></span> <span className={styles.orderResp}>성가대</span></div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>말씀</span> <span className={styles.orderContent} style={{fontWeight: 'bold', color: '#5b272f'}}>부활, 죽음을 이기는 하나님의 소망</span> <span className={styles.orderResp}>이주민 목사</span></div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>합심기도</span> <span className={styles.orderContent}></span> <span className={styles.orderResp}>다같이</span></div>
-                </div>
-                <div className={styles.orderGroup}>
-                  <div className={styles.orderGroupTitle}>◀ 결단과 헌신</div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>예물봉헌</span> <span className={styles.orderContent}>내 구주 예수를 더욱 사랑 (314장)</span> <span className={styles.orderResp}>다같이</span></div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>교회소식</span> <span className={styles.orderContent}></span> <span className={styles.orderResp}>인도자</span></div>
-                </div>
-                <div className={styles.orderGroup} style={{ borderBottom: 'none' }}>
-                  <div className={styles.orderGroupTitle}>◀ 세례식</div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}></span> <span className={styles.orderLabel}>성례</span> <span className={styles.orderContent}>(로마서 6:3~4)</span> <span className={styles.orderResp}>이주민 목사</span></div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>찬송</span> <span className={styles.orderContent}>하나님의 독생자 (171장)</span> <span className={styles.orderResp}>다같이</span></div>
-                  <div className={styles.orderRow}><span className={styles.orderMark}>*</span> <span className={styles.orderLabel}>축도</span> <span className={styles.orderContent}></span> <span className={styles.orderResp}>이주민 목사</span></div>
-                </div>
-              </div>
-            </div>
-            <div className={styles.scheduleWrap} style={{ marginTop: '1.5rem' }}>
-              <div className={styles.orderServiceBox} style={{ gridColumn: '1 / -1' }}>
-                <div className={styles.orderHeader}>교독문 134번 (부활절2)</div>
-                <div style={{ padding: '1.5rem 2rem', fontSize: '0.95rem', lineHeight: '1.8', color: '#444', columnCount: 2, columnGap: '2rem' }}>
-                  <p style={{ margin: '0 0 0.8rem' }}>내가 받은 것을 먼저 너희에게 전하였노니 이는 성경대로 그리스도께서 우리 죄를 위하여 죽으시고</p>
-                  <p style={{ margin: '0 0 0.8rem', fontWeight: 'bold', color: '#5b272f' }}>- 장사 지낸 바 되었다가 성경대로 사흘 만에 다시 살아나사 게바에게 보이시고</p>
-                  <p style={{ margin: '0 0 0.8rem' }}>후에 열두 제자에게와 그 후에 오백여 형제에게 일시에 보이셨나니</p>
-                  <p style={{ margin: '0 0 0.8rem', fontWeight: 'bold', color: '#5b272f' }}>- 그 중에 지금까지 대다수는 살아 있고 어떤 사람은 잠들었으며 그 후에 야고보에게 보이셨으며</p>
-                  <p style={{ margin: '0 0 0.8rem' }}>그 후에 모든 사도에게와 맨 나중에 만삭되지 못하여 난 자 같은 내게도 보이셨느니라</p>
-                  <p style={{ margin: '0 0 0.8rem', fontWeight: 'bold', color: '#5b272f' }}>- 그리스도께서 만일 다시 살아나지 못하셨으면 우리가 전파하는 것도 헛것이요 또 너희 믿음도 헛것이며 (고전 15:14)</p>
-                  <p style={{ margin: '0 0 0.8rem' }}>만일 그리스도 안에서 우리가 바라는 것이 다만 이 세상의 삶뿐이면 모든 사람 가운데 우리가 더욱 불쌍한 자이리라</p>
-                  <p style={{ margin: '0', fontWeight: 'bold', color: '#5b272f' }}>- 그러나 이제 그리스도께서 죽은 자 가운데서 다시 살아나사 잠자는 자들의 첫 열매가 되셨도다 (고전 15:19-20)</p>
+                <div className={styles.orderFade}>
+                  {WORSHIP_ORDERS[selectedWorship]?.groups.map((g, gi) => (
+                    <div key={gi} className={styles.orderGroup} style={gi === (WORSHIP_ORDERS[selectedWorship]?.groups.length ?? 0) - 1 ? { borderBottom: 'none' } : {}}>
+                      <div className={styles.orderGroupTitle}>{g.heading}</div>
+                      {g.rows.map((r, ri) => (
+                        <div key={ri} className={styles.orderRow}>
+                          <span className={styles.orderMark}>{r.bold ? '✦' : '*'}</span>
+                          <span className={styles.orderLabel}>{r.label}</span>
+                          <span className={styles.orderContent} style={r.bold ? { fontWeight: 'bold', color: '#5b272f' } : {}}>{r.content}</span>
+                          {r.resp && <span className={styles.orderResp}>{r.resp}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
