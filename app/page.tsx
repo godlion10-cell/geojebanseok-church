@@ -184,7 +184,7 @@ export default function Home() {
                   <span style={{ display: 'block', marginTop: '0.5rem' }}>— 마태복음 16:18</span>
                 </p>
                 <div className={styles.heroButtons}>
-                  <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>실시간 예배 참여하기</a>
+                  <button onClick={() => setActiveSection('sermon')} className={styles.btnPrimary}>실시간 예배 참여하기</button>
                   <button onClick={() => setActiveSection('vision')} className={styles.btnOutline}>비전과 사명 보기</button>
                 </div>
               </div>
@@ -335,11 +335,7 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <div className={styles.channelLink}>
-                <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
-                  🔴 실시간 생방송 바로가기
-                </a>
-              </div>
+
             </div>
           </section>
         )}
