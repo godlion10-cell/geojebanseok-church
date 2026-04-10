@@ -514,8 +514,10 @@
 
 .vpTreeImg {
   width: 100%;
-  max-width: 300px;
+  max-width: 360px;
+  max-height: 320px;
   height: auto;
+  object-fit: contain;
   border-radius: var(--radius-md);
   filter: drop-shadow(0 4px 12px rgba(91, 39, 47, 0.1));
 }
