@@ -166,57 +166,111 @@ export default function Home() {
 
         {/* 교회소개 */}
         {activeSection === 'about' && (
-          <section className={styles.heroSection}>
-            <div className={styles.heroBg}>
-              <div className={styles.heroBgImage}></div>
-              <div className={styles.heroOverlay}></div>
-            </div>
-            <div className={styles.heroContent}>
-              <div className={styles.heroTagline}>은혜 위에 세워진 공동체</div>
-              <h1 className={styles.heroTitle}>
-                <span className={styles.gold}>은혜 위에</span>
-                <span className={styles.burgundy}>바로 서는 교회</span>
-              </h1>
-              <p className={styles.heroQuote}>
-                &ldquo;그러므로 누구든지 나의 이 말을 듣고 행하는 자는<br />
-                그 집을 반석 위에 지은 지혜로운 사람 같으리니&rdquo;<br />
-                <span style={{ display: 'block', marginTop: '0.5rem' }}>— 마태복음 7:24</span>
-              </p>
-              <div className={styles.heroButtons}>
-                <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>실시간 예배 참여하기</a>
-                <button onClick={() => setActiveSection('news')} className={styles.btnOutline}>교회 소식 보기</button>
+          <>
+            <section className={styles.heroSection}>
+              <div className={styles.heroBg}>
+                <div className={styles.heroBgImage}></div>
+                <div className={styles.heroOverlay}></div>
               </div>
-            </div>
-          </section>
+              <div className={styles.heroContent}>
+                <div className={styles.heroTagline}>그리스도의 살아있는 몸 된 공동체</div>
+                <h1 className={styles.heroTitle}>
+                  <span className={styles.gold}>하나님의 손에 붙잡혀</span>
+                  <span className={styles.burgundy}>세상을 이기는 교회</span>
+                </h1>
+                <p className={styles.heroQuote}>
+                  &ldquo;너는 베드로라 내가 이 반석 위에 내 교회를 세우리니<br />
+                  음부의 권세가 이기지 못하리라&rdquo;<br />
+                  <span style={{ display: 'block', marginTop: '0.5rem' }}>— 마태복음 16:18</span>
+                </p>
+                <div className={styles.heroButtons}>
+                  <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>실시간 예배 참여하기</a>
+                  <button onClick={() => setActiveSection('vision')} className={styles.btnOutline}>비전과 사명 보기</button>
+                </div>
+              </div>
+            </section>
+
+            {/* 환영 인사말 */}
+            <section className={styles.tabSection}>
+              <h2 className={styles.sectionTitle}>반석교회에 오신 것을 환영합니다</h2>
+              <div className={styles.welcomeWrap}>
+                <div className={styles.welcomeCard}>
+                  <div className={styles.welcomeIcon}>⛪</div>
+                  <h3>교회 정체성</h3>
+                  <p>반석교회는 <strong>그리스도의 살아있는 몸 된 공동체</strong>로서, &lsquo;반석&rsquo; 같은 신앙을 추구합니다. 대한예수교 장로회 합동측에 속한 건전한 교회입니다.</p>
+                </div>
+                <div className={styles.welcomeCard}>
+                  <div className={styles.welcomeIcon}>🏔️</div>
+                  <h3>교회 비전</h3>
+                  <p><strong>&ldquo;하나님의 손에 붙잡혀, 세상을 이기는 교회&rdquo;</strong><br />다윗이 매끄러운 돌 다섯을 골라 블레셋 사람에게 나아간 것처럼, 오직 하나님만을 의지하며 나아갑니다.</p>
+                  <span className={styles.welcomeVerse}>— 사무엘상 17:40</span>
+                </div>
+                <div className={styles.welcomeCard} style={{ gridColumn: '1 / -1' }}>
+                  <div className={styles.mottoBox}>
+                    <div className={styles.mottoLabel}>영구 표어</div>
+                    <div className={styles.mottoText}>Stand on Grace !!</div>
+                    <div className={styles.mottoSub}>은혜 위에 바로 서라</div>
+                    <p className={styles.mottoDesc}>&ldquo;하나님의 주권적 은혜 위에 서면, 성령의 샘이 터진다!&rdquo;</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </>
         )}
 
         {/* 비전과 사명 */}
         {activeSection === 'vision' && (
           <section className={styles.tabSection}>
-            <h2 className={styles.sectionTitle}>비전과 사명</h2>
+            <h2 className={styles.sectionTitle}>4대 지향점</h2>
             <p className={styles.sectionSubtitle}>
-              반석교회는 대한예수교 장로회 합동측에 속한 건전한 교회입니다.
+              반석교회는 &lsquo;반석&rsquo; 같은 신앙 위에 네 가지 기둥을 세워갑니다.
             </p>
             <div className={styles.visionGrid}>
               <div className={styles.visionCard}>
                 <div className={styles.visionNum}>01</div>
-                <h3 className={styles.visionTitle}>한 걸음의 순종</h3>
-                <p className={styles.visionDesc}>주의 말씀을 따라 한 걸음씩 나아가는 교회</p>
+                <h3 className={styles.visionTitle}>💎 단단한 교회</h3>
+                <p className={styles.visionDesc}>인간의 생각을 자기부인 시키며,<br />하나님의 진리로만 순전해지는 교회</p>
               </div>
               <div className={styles.visionCard}>
                 <div className={styles.visionNum}>02</div>
-                <h3 className={styles.visionTitle}>한 영혼의 구원</h3>
-                <p className={styles.visionDesc}>영혼 구원을 위해 최선을 다하는 교회</p>
+                <h3 className={styles.visionTitle}>⚔️ 강건한 교회</h3>
+                <p className={styles.visionDesc}>율법적이고 종교적 신앙이 아니라,<br />예수의 생명으로 자신과 세상을 이기는 교회</p>
               </div>
               <div className={styles.visionCard}>
                 <div className={styles.visionNum}>03</div>
-                <h3 className={styles.visionTitle}>한 걸음의 섬김</h3>
-                <p className={styles.visionDesc}>섬김과 헌신으로 이웃과 세상을 섬기는 교회</p>
+                <h3 className={styles.visionTitle}>🌱 세우는 교회</h3>
+                <p className={styles.visionDesc}>믿음에는 본이 되며, 세상에는 빛이 되며,<br />다음세대를 영적 리더로 세우는 교회</p>
               </div>
               <div className={styles.visionCard}>
                 <div className={styles.visionNum}>04</div>
-                <h3 className={styles.visionTitle}>한 마음의 공동체</h3>
-                <p className={styles.visionDesc}>모두가 하나 되어 하나님의 꿈을 이루는 교회<br />(한 공동체의 꿈)</p>
+                <h3 className={styles.visionTitle}>🏛️ 굳건한 교회</h3>
+                <p className={styles.visionDesc}>모든 영역, 모든 나라가 흔들리지 않는<br />하나님 나라 되도록 사명에 헌신하는 교회</p>
+              </div>
+            </div>
+
+            {/* 사역의 핵심 컨셉 — 나무 비유 */}
+            <div className={styles.ministryWrap}>
+              <h3 className={styles.ministryTitle}>사역의 핵심 컨셉</h3>
+              <p className={styles.ministrySubtitle}>반석 위에 뿌리를 내리고, 은혜의 기둥을 세우며, 생명의 열매를 맺는 나무</p>
+              <div className={styles.ministryGrid}>
+                <div className={styles.ministryCard} style={{ borderTopColor: '#8B7355' }}>
+                  <div className={styles.ministryIcon}>🌿</div>
+                  <h4>뿌리 — 복음의 진리</h4>
+                  <p>반석 위에 내린 뿌리. 순전함의 기준은 &lsquo;오직 예수, 오직 성경&rsquo;이며, 신령한 젖을 사모하여 구원에 이르도록 자라납니다.</p>
+                  <span className={styles.ministryVerse}>벧전 2:2</span>
+                </div>
+                <div className={styles.ministryCard} style={{ borderTopColor: '#C19C72' }}>
+                  <div className={styles.ministryIcon}>🏗️</div>
+                  <h4>기둥 — 신앙의 본질 (은혜)</h4>
+                  <p>&ldquo;나의 나 된 것은 오직 하나님의 은혜&rdquo;임을 깨닫고, 철저히 은혜에 지배받는 교회가 됩니다.</p>
+                  <span className={styles.ministryVerse}>고전 15:10</span>
+                </div>
+                <div className={styles.ministryCard} style={{ borderTopColor: '#5B272F' }}>
+                  <div className={styles.ministryIcon}>🍇</div>
+                  <h4>열매 — 사역의 가치 (생명)</h4>
+                  <p>사역의 가치를 &lsquo;옳고 그름&rsquo;에 두지 않고, 새 언약의 일꾼으로서 영적으로 살아나고 &lsquo;살리는 것&rsquo;에 둡니다.</p>
+                  <span className={styles.ministryVerse}>고후 3:6</span>
+                </div>
               </div>
             </div>
           </section>

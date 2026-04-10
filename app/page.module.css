@@ -537,6 +537,184 @@
 }
 
 /* ======================================== */
+/*  WELCOME SECTION (교회소개 하단)          */
+/* ======================================== */
+.welcomeWrap {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .welcomeWrap { grid-template-columns: 1fr; }
+  .welcomeWrap > div:last-child { grid-column: 1 !important; }
+}
+
+.welcomeCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 2rem 1.5rem;
+  border: 1px solid rgba(193, 156, 114, 0.1);
+  transition: all 0.3s;
+}
+
+.welcomeCard:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.welcomeCard h3 {
+  color: var(--color-primary);
+  font-family: 'Nanum Myeongjo', serif;
+  font-size: 1.2rem;
+  margin: 0 0 0.8rem;
+}
+
+.welcomeCard p {
+  color: #555;
+  line-height: 1.8;
+  font-size: 0.93rem;
+  margin: 0;
+  word-break: keep-all;
+}
+
+.welcomeIcon {
+  font-size: 2.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.welcomeVerse {
+  display: block;
+  margin-top: 0.8rem;
+  color: var(--color-logo-gold);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Motto Box */
+.mottoBox {
+  text-align: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(91, 39, 47, 0.03), rgba(193, 156, 114, 0.06));
+  border-radius: var(--radius-lg);
+}
+
+.mottoLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-logo-gold);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.mottoText {
+  font-family: 'Nanum Myeongjo', serif;
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--color-primary);
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.02em;
+}
+
+.mottoSub {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-logo-gold);
+  margin-bottom: 0.8rem;
+}
+
+.mottoDesc {
+  color: #777;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin: 0;
+}
+
+/* ======================================== */
+/*  MINISTRY CONCEPT SECTION                */
+/* ======================================== */
+.ministryWrap {
+  max-width: 960px;
+  margin: 3rem auto 0;
+  text-align: center;
+}
+
+.ministryTitle {
+  font-family: 'Nanum Myeongjo', serif;
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.ministrySubtitle {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+  word-break: keep-all;
+}
+
+.ministryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .ministryGrid { grid-template-columns: 1fr; }
+}
+
+.ministryCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border-top: 4px solid;
+  text-align: left;
+  transition: all 0.3s;
+}
+
+.ministryCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.ministryIcon {
+  font-size: 2rem;
+  margin-bottom: 0.8rem;
+}
+
+.ministryCard h4 {
+  color: var(--color-primary);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 0.8rem;
+}
+
+.ministryCard p {
+  color: #666;
+  line-height: 1.8;
+  font-size: 0.9rem;
+  margin: 0;
+  word-break: keep-all;
+}
+
+.ministryVerse {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 3px 12px;
+  background: rgba(193, 156, 114, 0.1);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: var(--color-logo-gold);
+  font-weight: 600;
+}
+
+/* ======================================== */
 /*  SERMON SECTION                         */
 /* ======================================== */
 .sermonContainer {
