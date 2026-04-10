@@ -467,6 +467,164 @@
 /* ======================================== */
 /*  VISION SECTION                         */
 /* ======================================== */
+
+/* --- Desktop: Infographic Image --- */
+.visionDesktop {
+  display: block;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.visionInfographic {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+/* --- Mobile: HTML/CSS Version --- */
+.visionMobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .visionDesktop { display: none; }
+  .visionMobile { display: block; }
+}
+
+/* Mobile Header */
+.vmHeader {
+  text-align: center;
+  padding: 1.5rem 0;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, rgba(91, 39, 47, 0.04), rgba(193, 156, 114, 0.06));
+  border-radius: var(--radius-lg);
+}
+
+.vmMottoEn {
+  font-family: 'Nanum Myeongjo', serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--color-primary);
+  margin: 0 0 0.3rem;
+  letter-spacing: 0.02em;
+}
+
+.vmMottoKr {
+  font-size: 0.95rem;
+  color: var(--color-logo-gold);
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Mobile 4 Pillars Grid */
+.vmPillarsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.vmPillarCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 1.2rem 1rem;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  border-top: 3px solid var(--color-primary);
+}
+
+.vmPillarIcon {
+  color: var(--color-logo-gold);
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+}
+
+.vmPillarCard h4 {
+  font-size: 1rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+}
+
+.vmPillarCard p {
+  font-size: 0.82rem;
+  color: #777;
+  margin: 0;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+/* Mobile Tree Section */
+.vmTreeSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.vmTreeCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.2rem;
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid;
+  position: relative;
+}
+
+.vmTreeLabel {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: white;
+  background: var(--color-primary);
+  padding: 1px 8px;
+  border-radius: 10px;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vmTreeCard h4 {
+  font-size: 0.95rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  margin: 0 0 0.3rem;
+}
+
+.vmTreeCard p {
+  font-size: 0.82rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+  word-break: keep-all;
+}
+
+/* Mobile Vision Footer */
+.vmVisionBottom {
+  text-align: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(91, 39, 47, 0.06), rgba(193, 156, 114, 0.08));
+  border-radius: var(--radius-lg);
+}
+
+.vmVisionBottom h3 {
+  font-family: 'Nanum Myeongjo', serif;
+  font-size: 1.15rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.vmVisionBottom p {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.7;
+  margin: 0;
+  word-break: keep-all;
+}
+
+/* --- Legacy (keep for potential reuse) --- */
 .visionGrid {
   display: flex;
   flex-wrap: wrap;
