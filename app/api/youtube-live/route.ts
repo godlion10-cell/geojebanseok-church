@@ -7,7 +7,25 @@ const CHANNEL_ID = 'UCc_eP0i4YwSQmQ9du5-RHbA';
 
 export async function GET() {
   try {
-    // 방법 1: YouTube oembed API로 라이브 영상 확인
+    // 가장 확실하고 차단 없는 방법: YouTube RSS Feed에서 최근 1개의 비디오 가져오기
+    const rssRes = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`, {
+      cache: 'no-store',
+    });
+    const xml = await rssRes.text();
+    const rssMatch = xml.match(/<yt:videoId>([^<]+)<\/yt:videoId>/);
+    if (rssMatch && rssMatch[1]) {
+      const videoId = rssMatch[1];
+      // RSS에는 라이브 여부가 없으므로, 기본적으로 videoId만 내려주고
+      // 클라이언트에서 시간에 따라 라이브로 간주하게 함 (시간 맞으면 라이브)
+      return NextResponse.json({
+        live: true, 
+        videoId,
+        title: '반석교회 예배',
+        embedUrl: `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`
+      });
+    }
+
+    // 방법 2: YouTube oembed API로 라이브 영상 확인
     const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/channel/${CHANNEL_ID}/live&format=json`;
     const oembedRes = await fetch(oembedUrl, {
       cache: 'no-store',
