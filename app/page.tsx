@@ -217,7 +217,7 @@ export default function Home() {
     const fetchLive = () => {
       const timeBasedLive = checkIsLive();
 
-      fetch('/api/youtube-live')
+      fetch(`/api/youtube-live?t=${new Date().getTime()}`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
           if (data.live && data.videoId) {
