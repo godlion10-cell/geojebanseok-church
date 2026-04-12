@@ -204,6 +204,7 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState<SectionKey>('about');
   const [isLive, setIsLive] = useState(false);
   const [liveVideoId, setLiveVideoId] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const liveVideoRef = useRef<HTMLDivElement>(null);
 
   // DB에서 불러온 콘텐츠 상태
@@ -268,11 +269,17 @@ export default function Home() {
   const displaySermons = sermonItems.length > 0 ? sermonItems : FALLBACK_SERMONS;
   const displaySchedules = scheduleItems.length > 0 ? scheduleItems : FALLBACK_SCHEDULES;
 
-  const handleFullscreen = () => {
-    if (liveVideoRef.current) {
-      if (liveVideoRef.current.requestFullscreen) liveVideoRef.current.requestFullscreen();
-      else if ((liveVideoRef.current as any).webkitRequestFullscreen) (liveVideoRef.current as any).webkitRequestFullscreen();
-      else if ((liveVideoRef.current as any).msRequestFullscreen) (liveVideoRef.current as any).msRequestFullscreen();
+  const toggleExpand = () => {
+    const next = !isExpanded;
+    setIsExpanded(next);
+    if (next) {
+      // 크게보기: 스크롤 잠금 + 가로회전 시도
+      document.body.style.overflow = 'hidden';
+      try { (screen.orientation as any)?.lock?.('landscape').catch(() => {}); } catch (_e) {}
+    } else {
+      // 작게보기: 복원
+      document.body.style.overflow = '';
+      try { (screen.orientation as any)?.unlock?.(); } catch (_e) {}
     }
   };
 
@@ -460,18 +467,39 @@ export default function Home() {
                   <>
                     {liveVideoId ? (
                       /* YouTube에서 실제 라이브 videoId를 가져온 경우 - 임베드 */
-                      <div ref={liveVideoRef} className={styles.sermonVideoWrap} style={{ position: 'relative', aspectRatio: '16/9', width: '100%', background: '#000', overflow: 'hidden' }}>
+                      <div
+                        ref={liveVideoRef}
+                        className={styles.sermonVideoWrap}
+                        style={isExpanded ? {
+                          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                          zIndex: 9999, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        } : {
+                          position: 'relative', aspectRatio: '16/9', width: '100%', background: '#000', overflow: 'hidden',
+                        }}
+                      >
                         <iframe
                           width="100%" height="100%"
                           src={`https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=1&rel=0`}
                           frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                           allowFullScreen
-                          style={{ position: 'absolute', top: 0, left: 0 }}
+                          style={isExpanded ? {
+                            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain',
+                          } : {
+                            position: 'absolute', top: 0, left: 0,
+                          }}
                           title="반석교회 실시간 예배"
                         ></iframe>
-                        <button onClick={handleFullscreen} style={{ position: 'absolute', bottom: '15px', left: '15px', background: 'linear-gradient(135deg, #7a3a44, #4a1f26)', color: 'white', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '8px', padding: '8px 16px', fontSize: '0.95rem', fontWeight: 'bold', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 15px rgba(0,0,0,0.6)' }}>
-                          <span style={{ fontSize: '1.2rem' }}>📱</span> 영상 크게보기
+                        <button onClick={toggleExpand} style={{
+                          position: 'absolute', bottom: '15px', left: '15px',
+                          background: isExpanded ? 'rgba(0,0,0,0.7)' : 'linear-gradient(135deg, #7a3a44, #4a1f26)',
+                          color: 'white', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '8px',
+                          padding: '8px 16px', fontSize: '0.95rem', fontWeight: 'bold', cursor: 'pointer',
+                          zIndex: 10000, display: 'flex', alignItems: 'center', gap: '6px',
+                          boxShadow: '0 4px 15px rgba(0,0,0,0.6)',
+                        }}>
+                          <span style={{ fontSize: '1.2rem' }}>{isExpanded ? '🔲' : '📱'}</span>
+                          {isExpanded ? '영상 작게보기' : '영상 크게보기'}
                         </button>
                       </div>
                     ) : (
