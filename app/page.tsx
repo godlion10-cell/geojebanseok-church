@@ -84,93 +84,117 @@ const WORSHIP_ORDERS: Record<string, { title: string; groups: { heading: string;
   '주일대예배 (1부)': {
     title: '주일 오전 예배 순서',
     groups: [
-      { heading: '◀ 개회 (하나님께 나아감)', rows: [
-        { label: '묵도', content: '', resp: '다같이' },
-        { label: '개회찬송', content: '예수 우리 왕이여 (38장)', resp: '다같이' },
-        { label: '신앙고백', content: '사도신경', resp: '다같이' },
-        { label: '교독문', content: '134번 (부활절2)', resp: '다같이' },
-        { label: '찬송', content: '할렐루야 우리 예수 (161장)', resp: '다같이' },
-        { label: '통성기도', content: '', resp: '다같이' },
-      ]},
-      { heading: '◀ 말씀의 선포', rows: [
-        { label: '성경봉독', content: '고린도전서 15:1~10', resp: '다같이' },
-        { label: '특송', content: '', resp: '성가대' },
-        { label: '말씀', content: '부활, 죽음을 이기는 하나님의 소망', resp: '이주민 목사', bold: true },
-        { label: '합심기도', content: '', resp: '다같이' },
-      ]},
-      { heading: '◀ 결단과 헌신', rows: [
-        { label: '예물봉헌', content: '내 구주 예수를 더욱 사랑 (314장)', resp: '다같이' },
-        { label: '교회소식', content: '', resp: '인도자' },
-      ]},
-      { heading: '◀ 세례식', rows: [
-        { label: '성례', content: '로마서 6:3~4', resp: '이주민 목사' },
-        { label: '찬송', content: '하나님의 독생자 (171장)', resp: '다같이' },
-        { label: '축도', content: '', resp: '이주민 목사' },
-      ]},
+      {
+        heading: '◀ 개회 (하나님께 나아감)', rows: [
+          { label: '묵도', content: '', resp: '다같이' },
+          { label: '개회찬송', content: '예수 우리 왕이여 (38장)', resp: '다같이' },
+          { label: '신앙고백', content: '사도신경', resp: '다같이' },
+          { label: '교독문', content: '134번 (부활절2)', resp: '다같이' },
+          { label: '찬송', content: '할렐루야 우리 예수 (161장)', resp: '다같이' },
+          { label: '통성기도', content: '', resp: '다같이' },
+        ]
+      },
+      {
+        heading: '◀ 말씀의 선포', rows: [
+          { label: '성경봉독', content: '고린도전서 15:1~10', resp: '다같이' },
+          { label: '특송', content: '', resp: '성가대' },
+          { label: '말씀', content: '부활, 죽음을 이기는 하나님의 소망', resp: '이주민 목사', bold: true },
+          { label: '합심기도', content: '', resp: '다같이' },
+        ]
+      },
+      {
+        heading: '◀ 결단과 헌신', rows: [
+          { label: '예물봉헌', content: '내 구주 예수를 더욱 사랑 (314장)', resp: '다같이' },
+          { label: '교회소식', content: '', resp: '인도자' },
+        ]
+      },
+      {
+        heading: '◀ 세례식', rows: [
+          { label: '성례', content: '로마서 6:3~4', resp: '이주민 목사' },
+          { label: '찬송', content: '하나님의 독생자 (171장)', resp: '다같이' },
+          { label: '축도', content: '', resp: '이주민 목사' },
+        ]
+      },
     ],
   },
   '주일대예배 (2부)': {
     title: '주일 오전 예배 순서',
     groups: [
-      { heading: '◀ 개회 (하나님께 나아감)', rows: [
-        { label: '묵도', content: '', resp: '다같이' },
-        { label: '개회찬송', content: '예수 우리 왕이여 (38장)', resp: '다같이' },
-        { label: '신앙고백', content: '사도신경', resp: '다같이' },
-        { label: '교독문', content: '134번 (부활절2)', resp: '다같이' },
-        { label: '찬송', content: '할렐루야 우리 예수 (161장)', resp: '다같이' },
-        { label: '통성기도', content: '', resp: '다같이' },
-      ]},
-      { heading: '◀ 말씀의 선포', rows: [
-        { label: '성경봉독', content: '고린도전서 15:1~10', resp: '다같이' },
-        { label: '특송', content: '', resp: '성가대' },
-        { label: '말씀', content: '부활, 죽음을 이기는 하나님의 소망', resp: '이주민 목사', bold: true },
-        { label: '합심기도', content: '', resp: '다같이' },
-      ]},
-      { heading: '◀ 결단과 헌신', rows: [
-        { label: '예물봉헌', content: '내 구주 예수를 더욱 사랑 (314장)', resp: '다같이' },
-        { label: '교회소식', content: '', resp: '인도자' },
-        { label: '찬송', content: '하나님의 독생자 (171장)', resp: '다같이' },
-        { label: '축도', content: '', resp: '이주민 목사' },
-      ]},
+      {
+        heading: '◀ 개회 (하나님께 나아감)', rows: [
+          { label: '묵도', content: '', resp: '다같이' },
+          { label: '개회찬송', content: '예수 우리 왕이여 (38장)', resp: '다같이' },
+          { label: '신앙고백', content: '사도신경', resp: '다같이' },
+          { label: '교독문', content: '134번 (부활절2)', resp: '다같이' },
+          { label: '찬송', content: '할렐루야 우리 예수 (161장)', resp: '다같이' },
+          { label: '통성기도', content: '', resp: '다같이' },
+        ]
+      },
+      {
+        heading: '◀ 말씀의 선포', rows: [
+          { label: '성경봉독', content: '고린도전서 15:1~10', resp: '다같이' },
+          { label: '특송', content: '', resp: '성가대' },
+          { label: '말씀', content: '부활, 죽음을 이기는 하나님의 소망', resp: '이주민 목사', bold: true },
+          { label: '합심기도', content: '', resp: '다같이' },
+        ]
+      },
+      {
+        heading: '◀ 결단과 헌신', rows: [
+          { label: '예물봉헌', content: '내 구주 예수를 더욱 사랑 (314장)', resp: '다같이' },
+          { label: '교회소식', content: '', resp: '인도자' },
+          { label: '찬송', content: '하나님의 독생자 (171장)', resp: '다같이' },
+          { label: '축도', content: '', resp: '이주민 목사' },
+        ]
+      },
     ],
   },
   '주일청소년': {
     title: '다음세대/주일청소년 예배',
     groups: [
-      { heading: '◀ 예배 안내', rows: [
-        { label: '말씀', content: '부활의 예수님', resp: '', bold: true },
-        { label: '본문', content: '마가복음 16장', resp: '' },
-      ]},
-      { heading: '◀ 소식', rows: [
-        { label: '안내', content: '예배를 소중히 여기며, 주일예배에 승리해요.', resp: '' },
-        { label: '안내', content: '성경적 세계관으로 준비된 청소년 되어요.', resp: '' },
-      ]},
+      {
+        heading: '◀ 예배 안내', rows: [
+          { label: '말씀', content: '부활의 예수님', resp: '', bold: true },
+          { label: '본문', content: '마가복음 16장', resp: '' },
+        ]
+      },
+      {
+        heading: '◀ 소식', rows: [
+          { label: '안내', content: '예배를 소중히 여기며, 주일예배에 승리해요.', resp: '' },
+          { label: '안내', content: '성경적 세계관으로 준비된 청소년 되어요.', resp: '' },
+        ]
+      },
     ],
   },
   '주일어린이': {
     title: '다음세대/주일어린이 예배',
     groups: [
-      { heading: '◀ 예배 안내', rows: [
-        { label: '말씀', content: '막달라 마리아가 본 예수님', resp: '', bold: true },
-        { label: '본문', content: '마가복음 16장', resp: '' },
-      ]},
-      { heading: '◀ 소식', rows: [
-        { label: '안내', content: '오늘은 부활절 파티로 함께해요.', resp: '' },
-        { label: '안내', content: '가정에서도 예배자 되어요.', resp: '' },
-      ]},
+      {
+        heading: '◀ 예배 안내', rows: [
+          { label: '말씀', content: '막달라 마리아가 본 예수님', resp: '', bold: true },
+          { label: '본문', content: '마가복음 16장', resp: '' },
+        ]
+      },
+      {
+        heading: '◀ 소식', rows: [
+          { label: '안내', content: '오늘은 부활절 파티로 함께해요.', resp: '' },
+          { label: '안내', content: '가정에서도 예배자 되어요.', resp: '' },
+        ]
+      },
     ],
   },
   '수요저녁예배': {
     title: '수요저녁예배 순서',
     groups: [
-      { heading: '◀ 예배 순서', rows: [
-        { label: '찬양', content: '', resp: '다같이' },
-        { label: '신앙고백', content: '', resp: '다같이' },
-        { label: '합심기도', content: '', resp: '다같이' },
-        { label: '성경봉독', content: '창 45:16~28 (다시 시작된 하나님의 인도)', resp: '', bold: true },
-        { label: '통성기도', content: '', resp: '다같이' },
-        { label: '주기도문', content: '', resp: '다같이' },
-      ]},
+      {
+        heading: '◀ 예배 순서', rows: [
+          { label: '찬양', content: '', resp: '다같이' },
+          { label: '신앙고백', content: '', resp: '다같이' },
+          { label: '합심기도', content: '', resp: '다같이' },
+          { label: '성경봉독', content: '창 45:16~28 (다시 시작된 하나님의 인도)', resp: '', bold: true },
+          { label: '통성기도', content: '', resp: '다같이' },
+          { label: '주기도문', content: '', resp: '다같이' },
+        ]
+      },
     ],
   },
 };
@@ -188,29 +212,42 @@ export default function Home() {
   const [scheduleItems, setScheduleItems] = useState<any[]>([]);
   const [selectedWorship, setSelectedWorship] = useState('주일대예배 (1부)');
 
-  // 예배 시간 자동 체크 (30초마다) + YouTube 실제 라이브 확인
+  // YouTube 라이브 체크 + 자동 탭 전환
   useEffect(() => {
-    const checkLive = () => {
+    const fetchLive = () => {
       const timeBasedLive = checkIsLive();
-      setIsLive(timeBasedLive);
-      if (timeBasedLive) {
-        // 시간표에 맞으면 YouTube API에서 실제 videoId 가져오기
-        fetch('/api/youtube-live')
-          .then(res => res.json())
-          .then(data => {
-            if (data.live && data.videoId) {
-              setLiveVideoId(data.videoId);
-            }
-          })
-          .catch(() => {});
-      } else {
-        setLiveVideoId(null);
-      }
+
+      fetch('/api/youtube-live')
+        .then(res => res.json())
+        .then(data => {
+          if (data.live && data.videoId) {
+            setIsLive(true);
+            setLiveVideoId(data.videoId);
+            setActiveSection('sermon');
+          } else if (timeBasedLive) {
+            setIsLive(true);
+            setLiveVideoId(null);
+            setActiveSection('sermon');
+          } else {
+            setIsLive(false);
+            setLiveVideoId(null);
+          }
+        })
+        .catch(() => {
+          if (timeBasedLive) {
+            setIsLive(true);
+            setActiveSection('sermon');
+          } else {
+            setIsLive(false);
+            setLiveVideoId(null);
+          }
+        });
     };
-    checkLive();
-    const timer = setInterval(checkLive, 60000);
+    fetchLive();
+    const timer = setInterval(fetchLive, 60000);
     return () => clearInterval(timer);
   }, []);
+
 
   // DB에서 콘텐츠 로딩
   useEffect(() => {
@@ -453,7 +490,7 @@ export default function Home() {
                     <div className={styles.sermonMainInfo}>
                       <h3>🔴 실시간 예배 중</h3>
                       <p>지금 반석교회에서 예배가 진행되고 있습니다.<br />{liveVideoId ? '예배 화면을 클릭하시면 소리를 켜실 수 있습니다.' : '아래 버튼을 눌러 유튜브에서 참여하세요!'}<br />
-                      <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer" style={{ color: '#c19c72', textDecoration: 'underline', fontSize: '0.9rem' }}>유튜브 앱에서 보기 →</a></p>
+                        <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer" style={{ color: '#c19c72', textDecoration: 'underline', fontSize: '0.9rem' }}>유튜브 앱에서 보기 →</a></p>
                     </div>
                   </>
                 ) : (
@@ -467,7 +504,7 @@ export default function Home() {
                     <div className={styles.sermonMainInfo}>
                       <h3>📺 예배 생중계 안내</h3>
                       <p>주일 오전 9시 · 11시 / 수요 저녁 7:30 / 금요 저녁 8시<br />예배 시간에 이곳에서 실시간으로 참여하실 수 있습니다.<br />
-                      <a href="https://www.youtube.com/@petros-church" target="_blank" rel="noopener noreferrer" style={{ color: '#c19c72', textDecoration: 'underline' }}>유튜브 채널에서 지난 설교 보기 →</a></p>
+                        <a href="https://www.youtube.com/@petros-church" target="_blank" rel="noopener noreferrer" style={{ color: '#c19c72', textDecoration: 'underline' }}>유튜브 채널에서 지난 설교 보기 →</a></p>
                     </div>
                   </>
                 )}

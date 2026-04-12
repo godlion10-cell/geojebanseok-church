@@ -42,7 +42,7 @@ export async function GET() {
     });
 
     const html = await res.text();
-    
+
     // ytInitialPlayerResponse 또는 ytInitialData에서 비디오 정보 추출
     const playerResMatch = html.match(/ytInitialPlayerResponse\s*=\s*({[\s\S]+?})\s*;/);
     if (playerResMatch) {
