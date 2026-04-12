@@ -60,7 +60,7 @@ export async function GET() {
             embedUrl: `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`,
           });
         }
-      } catch {
+      } catch (e) {
         // JSON 파싱 실패 시 다음 방법으로
       }
     }
