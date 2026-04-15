@@ -303,7 +303,8 @@ export default function CMSPage() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        setAiError(data.error || 'AI 분석에 실패했습니다.');
+        const rawInfo = data.raw ? `\n\n[AI 원문 응답 일부]: ${data.raw}` : '';
+        setAiError((data.error || 'AI 분석에 실패했습니다.') + rawInfo);
       } else {
         console.log('✅ AI 분석 결과 수신 성공');
         setAiResult({ ...data.analysis, uploadedFile: data.uploadedFile });
