@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './page.module.css';
 import Link from 'next/link';
+import { updateLiveStatus } from '@/app/actions/live-status';
 
 // 예배 시간 체크 함수
 function checkIsLive(): boolean {
@@ -222,13 +223,21 @@ export default function Home() {
         .then(res => res.json())
         .then(data => {
           if (data.live && data.videoId) {
-            setIsLive(true);
-            setLiveVideoId(data.videoId);
-            setActiveSection('sermon');
+            // 라이브 상태를 다시 체크하고 끝났다면 반영
+            updateLiveStatus(data.videoId).then((res) => {
+              if (res?.status === 'ended') {
+                setIsLive(false);
+                setLiveVideoId(null);
+              } else {
+                setIsLive(true);
+                setLiveVideoId(data.videoId);
+                setActiveSection('sermon');
+              }
+            });
           } else if (timeBasedLive) {
             setIsLive(true);
             setLiveVideoId(null);
-            setActiveSection('sermon');
+            // setActiveSection('sermon');
           } else {
             setIsLive(false);
             setLiveVideoId(null);
@@ -523,11 +532,11 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    <div className={styles.sermonVideoWrap} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f8f4f0 0%, #eee5dd 50%, #f0e8e0 100%)', textAlign: 'center', padding: '2rem' }}>
-                      <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.7 }}>✝️</div>
-                      <h3 style={{ color: '#5b272f', fontSize: '1.3rem', fontWeight: 700, margin: '0 0 0.8rem' }}>하나님의 평안이 함께 하시길 기도합니다</h3>
-                      <p style={{ color: '#8b7355', fontSize: '0.95rem', lineHeight: 1.7, margin: '0 0 1.5rem', maxWidth: '320px' }}>현재 예배 시간이 아닙니다.<br />다음 예배에서 함께 예배드려요! 🙏</p>
-                      <div style={{ background: 'rgba(91, 39, 47, 0.06)', borderRadius: '12px', padding: '0.8rem 1.5rem', fontSize: '0.85rem', color: '#5b272f', fontWeight: 600 }}>📅 다음 예배: {getNextWorship()}</div>
+                    <div className={styles.sermonVideoWrap} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #172554 100%)', textAlign: 'center', padding: '2rem' }}>
+                      <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.9 }}>✝️</div>
+                      <h3 style={{ color: '#ffffff', fontSize: '1.3rem', fontWeight: 700, margin: '0 0 0.8rem' }}>하나님의 평안이 함께 하시길 기도합니다</h3>
+                      <p style={{ color: '#bfdbfe', fontSize: '0.95rem', lineHeight: 1.7, margin: '0 0 1.5rem', maxWidth: '320px' }}>현재 예배 시간이 아닙니다.<br />다음 예배에서 함께 예배드려요! 🙏</p>
+                      <div style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '0.8rem 1.5rem', fontSize: '0.85rem', color: '#ffffff', fontWeight: 600 }}>📅 다음 예배: {getNextWorship()}</div>
                     </div>
                     <div className={styles.sermonMainInfo}>
                       <h3>📺 예배 생중계 안내</h3>
