@@ -106,6 +106,21 @@ PDF 내 텍스트를 최대한 정확하게 추출하세요.`;
   return prompt;
 }
 
+// ===== Gemini 응답에서 텍스트 추출 (thinking 모델 대응) =====
+function extractGeminiText(data: any): string {
+  const parts = data?.candidates?.[0]?.content?.parts || [];
+  // thinking 모델은 여러 part를 반환함. text가 있는 part만 합침 (thought part 제외)
+  const textParts = parts
+    .filter((p: any) => p.text && !p.thought)
+    .map((p: any) => p.text);
+  if (textParts.length > 0) return textParts.join('\n');
+  // fallback: 모든 text part (thought 포함)
+  const allText = parts
+    .filter((p: any) => p.text)
+    .map((p: any) => p.text);
+  return allText.join('\n') || '';
+}
+
 // ===== Gemini API 호출 (텍스트 전용 — 비용 최저) =====
 async function callGeminiText(apiKey: string, prompt: string): Promise<{ success: boolean; text?: string; rateLimited?: boolean; error?: string }> {
   const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
@@ -129,7 +144,7 @@ async function callGeminiText(apiKey: string, prompt: string): Promise<{ success
   }
 
   const data = await res.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const text = extractGeminiText(data);
   return { success: true, text };
 }
 
@@ -160,7 +175,7 @@ async function callGeminiWithPdf(apiKey: string, prompt: string, base64: string)
   }
 
   const data = await res.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const text = extractGeminiText(data);
   return { success: true, text };
 }
 
@@ -308,16 +323,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'AI 응답이 비어있습니다.' }, { status: 500 });
     }
 
-    // JSON 추출
-    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
+    // JSON 추출 (markdown 코드블록, 일반 JSON 등 다양한 형식 대응)
+    let jsonStr = '';
+    
+    // 1차: ```json ... ``` 코드블록에서 추출
+    const codeBlockMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (codeBlockMatch) {
+      jsonStr = codeBlockMatch[1].trim();
+    }
+    
+    // 2차: { ... } 패턴으로 추출
+    if (!jsonStr) {
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonStr = jsonMatch[0];
+      }
+    }
+    
+    if (!jsonStr) {
+      console.error('JSON 추출 실패. 원본 응답:', rawText.substring(0, 500));
       return NextResponse.json(
-        { error: 'AI 응답에서 JSON을 추출하지 못했습니다.', raw: rawText },
+        { error: 'AI 응답에서 JSON을 추출하지 못했습니다.', raw: rawText.substring(0, 300) },
         { status: 500 }
       );
     }
 
-    const parsed = JSON.parse(jsonMatch[0]);
+    const parsed = JSON.parse(jsonStr);
 
     return NextResponse.json({
       success: true,
