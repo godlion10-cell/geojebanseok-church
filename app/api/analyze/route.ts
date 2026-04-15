@@ -130,7 +130,7 @@ async function callGeminiText(apiKey: string, prompt: string): Promise<{ success
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.1, maxOutputTokens: 4096 },
+      generationConfig: { temperature: 0.1, maxOutputTokens: 16384 },
     }),
   });
 
@@ -160,7 +160,7 @@ async function callGeminiWithPdf(apiKey: string, prompt: string, base64: string)
         { text: prompt },
         { inlineData: { mimeType: 'application/pdf', data: base64 } },
       ] }],
-      generationConfig: { temperature: 0.1, maxOutputTokens: 4096 },
+      generationConfig: { temperature: 0.1, maxOutputTokens: 16384 },
     }),
   });
 
@@ -348,7 +348,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const parsed = JSON.parse(jsonStr);
+    // JSON 파싱 (실패 시 특수문자 정리 후 재시도)
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonStr);
+    } catch (parseErr) {
+      console.error('JSON.parse 1차 실패, 정리 후 재시도:', (parseErr as Error).message);
+      try {
+        // 잘린 JSON 복구: 열린 중괄호/따옴표 닫기
+        let fixed = jsonStr
+          .replace(/[\x00-\x1F\x7F]/g, ' ')  // 제어문자 제거
+          .replace(/\\(?!["\\bfnrtu/])/g, '\\\\');  // 잘못된 이스케이프 수정
+        
+        // 잘린 문자열 복구 시도
+        const openBraces = (fixed.match(/\{/g) || []).length;
+        const closeBraces = (fixed.match(/\}/g) || []).length;
+        const openQuotes = (fixed.match(/(?<!\\)"/g) || []).length;
+        
+        // 따옴표가 홀수이면 닫아줌
+        if (openQuotes % 2 !== 0) fixed += '"';
+        // 중괄호가 안 맞으면 닫아줌
+        for (let i = 0; i < openBraces - closeBraces; i++) fixed += '}';
+        // 열린 배열 닫기
+        const openBrackets = (fixed.match(/\[/g) || []).length;
+        const closeBrackets = (fixed.match(/\]/g) || []).length;
+        for (let i = 0; i < openBrackets - closeBrackets; i++) fixed += ']';
+        
+        parsed = JSON.parse(fixed);
+        console.log('✅ JSON 복구 성공');
+      } catch (fixErr) {
+        console.error('JSON 복구도 실패:', jsonStr.substring(0, 300));
+        return NextResponse.json(
+          { error: 'AI 응답 JSON 파싱에 실패했습니다. 다시 시도해주세요.', raw: jsonStr.substring(0, 300) },
+          { status: 500 }
+        );
+      }
+    }
 
     return NextResponse.json({
       success: true,
