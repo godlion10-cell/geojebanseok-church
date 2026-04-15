@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './page.module.css';
 import Link from 'next/link';
-import { updateLiveStatus } from '@/app/actions/live-status';
+import { checkAndEndLive } from '@/app/actions/live-status';
 
 // 예배 시간 체크 함수
 function checkIsLive(): boolean {
@@ -224,8 +224,8 @@ export default function Home() {
         .then(data => {
           if (data.live && data.videoId) {
             // 라이브 상태를 다시 체크하고 끝났다면 반영
-            updateLiveStatus(data.videoId).then((res) => {
-              if (res?.status === 'ended') {
+            checkAndEndLive(data.videoId).then((res) => {
+              if (res?.ended) {
                 setIsLive(false);
                 setLiveVideoId(null);
               } else {
