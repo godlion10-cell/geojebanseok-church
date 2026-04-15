@@ -108,7 +108,7 @@ PDF 내 텍스트를 최대한 정확하게 추출하세요.`;
 
 // ===== Gemini API 호출 (텍스트 전용 — 비용 최저) =====
 async function callGeminiText(apiKey: string, prompt: string): Promise<{ success: boolean; text?: string; rateLimited?: boolean; error?: string }> {
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   const res = await fetch(geminiUrl, {
     method: 'POST',
@@ -135,7 +135,7 @@ async function callGeminiText(apiKey: string, prompt: string): Promise<{ success
 
 // ===== Gemini API 호출 (PDF 파일 첨부) =====
 async function callGeminiWithPdf(apiKey: string, prompt: string, base64: string): Promise<{ success: boolean; text?: string; rateLimited?: boolean; error?: string }> {
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   const res = await fetch(geminiUrl, {
     method: 'POST',
