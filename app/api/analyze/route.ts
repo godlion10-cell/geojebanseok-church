@@ -5,8 +5,6 @@ export async function GET() {
   return NextResponse.json({
     gemini: !!process.env.GEMINI_API_KEY,
     geminiPrefix: process.env.GEMINI_API_KEY?.substring(0, 8) || 'NOT SET',
-    openai: !!process.env.OPENAI_API_KEY,
-    openaiPrefix: process.env.OPENAI_API_KEY?.substring(0, 8) || 'NOT SET',
   });
 }
 
@@ -125,7 +123,7 @@ async function callGeminiText(apiKey: string, prompt: string): Promise<{ success
     const errText = await res.text();
     console.error('Gemini API error:', errText);
     if (res.status === 429 || errText.includes('RESOURCE_EXHAUSTED')) {
-      return { success: false, rateLimited: true, error: 'Gemini 할당량 초과' };
+      return { success: false, rateLimited: true, error: 'Gemini 할당량 초과. 잠시 후 다시 시도해주세요.' };
     }
     return { success: false, error: `Gemini 에러 (${res.status})` };
   }
@@ -155,40 +153,13 @@ async function callGeminiWithPdf(apiKey: string, prompt: string, base64: string)
     const errText = await res.text();
     console.error('Gemini PDF API error:', errText);
     if (res.status === 429 || errText.includes('RESOURCE_EXHAUSTED')) {
-      return { success: false, rateLimited: true, error: 'Gemini 할당량 초과' };
+      return { success: false, rateLimited: true, error: 'Gemini 할당량 초과. 잠시 후 다시 시도해주세요.' };
     }
     return { success: false, error: `Gemini 에러 (${res.status})` };
   }
 
   const data = await res.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  return { success: true, text };
-}
-
-// ===== OpenAI API 호출 (텍스트 전용) =====
-async function callOpenAIText(apiKey: string, prompt: string): Promise<{ success: boolean; text?: string; error?: string }> {
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.1,
-      max_tokens: 4096,
-    }),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error('OpenAI API error:', errText);
-    return { success: false, error: `OpenAI 에러 (${res.status})` };
-  }
-
-  const data = await res.json();
-  const text = data?.choices?.[0]?.message?.content || '';
   return { success: true, text };
 }
 
@@ -242,70 +213,34 @@ function extractTextFromBinary(buffer: Buffer, fileName: string): string {
   return `[${fileName}] — 텍스트 추출을 시도했으나 내용을 읽을 수 없습니다.`;
 }
 
-// ===== AI 호출 (Gemini 우선, 실패 시 OpenAI 폴백) =====
-async function callAI(prompt: string, geminiKey?: string, openaiKey?: string, pdfBase64?: string): Promise<{ rawText: string; model: string }> {
-  let rawText = '';
-  let usedModel = '';
+// ===== AI 호출 (Gemini 전용) =====
+async function callAI(prompt: string, geminiKey: string, pdfBase64?: string): Promise<{ rawText: string; model: string }> {
+  console.log(`🤖 Gemini API 호출 중... (${pdfBase64 ? 'PDF 첨부' : '텍스트 기반'})`);
+  
+  const result = pdfBase64
+    ? await callGeminiWithPdf(geminiKey, prompt, pdfBase64)
+    : await callGeminiText(geminiKey, prompt);
 
-  // 1️⃣ Gemini 먼저 시도
-  if (geminiKey) {
-    console.log('🤖 Gemini API 호출 중... (텍스트 기반)');
-    const result = pdfBase64
-      ? await callGeminiWithPdf(geminiKey, prompt, pdfBase64)
-      : await callGeminiText(geminiKey, prompt);
-
-    if (result.success && result.text) {
-      rawText = result.text;
-      usedModel = 'Gemini';
-      console.log('✅ Gemini 분석 성공');
-    } else if (result.rateLimited && openaiKey) {
-      console.log('⚠️ Gemini 할당량 초과 → OpenAI로 자동 전환');
-      const oResult = await callOpenAIText(openaiKey, prompt);
-      if (oResult.success && oResult.text) {
-        rawText = oResult.text;
-        usedModel = 'OpenAI (자동 전환)';
-      } else {
-        throw new Error(oResult.error || 'OpenAI 분석 실패');
-      }
-    } else if (result.rateLimited) {
-      throw new Error('Gemini 할당량 초과. OPENAI_API_KEY를 설정하시면 자동 전환됩니다.');
-    } else if (openaiKey) {
-      console.log('⚠️ Gemini 실패 → OpenAI로 자동 전환');
-      const oResult = await callOpenAIText(openaiKey, prompt);
-      if (oResult.success && oResult.text) {
-        rawText = oResult.text;
-        usedModel = 'OpenAI (자동 전환)';
-      } else {
-        throw new Error(oResult.error || 'OpenAI 분석 실패');
-      }
-    } else {
-      throw new Error(result.error || 'Gemini 분석 실패');
-    }
-  }
-  // 2️⃣ Gemini 키 없으면 OpenAI만 사용
-  else if (openaiKey) {
-    console.log('🤖 OpenAI 호출 중...');
-    const result = await callOpenAIText(openaiKey, prompt);
-    if (result.success && result.text) {
-      rawText = result.text;
-      usedModel = 'OpenAI';
-    } else {
-      throw new Error(result.error || 'OpenAI 분석 실패');
-    }
+  if (result.success && result.text) {
+    console.log('✅ Gemini 분석 성공');
+    return { rawText: result.text, model: 'Gemini' };
   }
 
-  return { rawText, model: usedModel };
+  if (result.rateLimited) {
+    throw new Error('Gemini API 할당량이 초과되었습니다. 잠시 후 다시 시도해주세요.');
+  }
+
+  throw new Error(result.error || 'Gemini 분석에 실패했습니다.');
 }
 
 // ===== 메인 API Route =====
 export async function POST(request: NextRequest) {
   try {
     const geminiKey = process.env.GEMINI_API_KEY;
-    const openaiKey = process.env.OPENAI_API_KEY;
 
-    if (!geminiKey && !openaiKey) {
+    if (!geminiKey) {
       return NextResponse.json(
-        { error: 'AI API 키가 설정되지 않았습니다. Vercel 환경 변수에 GEMINI_API_KEY 또는 OPENAI_API_KEY를 추가해주세요.' },
+        { error: 'GEMINI_API_KEY가 설정되지 않았습니다. Vercel 환경 변수를 확인해주세요.' },
         { status: 500 }
       );
     }
@@ -365,8 +300,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '입력 데이터가 없습니다.' }, { status: 400 });
     }
 
-    // AI 호출
-    const { rawText, model } = await callAI(prompt, geminiKey, openaiKey, pdfBase64);
+    // AI 호출 (Gemini 전용)
+    const { rawText, model } = await callAI(prompt, geminiKey, pdfBase64);
 
     if (!rawText) {
       return NextResponse.json({ error: 'AI 응답이 비어있습니다.' }, { status: 500 });
@@ -399,3 +334,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
