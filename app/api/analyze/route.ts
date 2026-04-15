@@ -108,7 +108,7 @@ PDF 내 텍스트를 최대한 정확하게 추출하세요.`;
 
 // ===== Gemini API 호출 (텍스트 전용 — 비용 최저) =====
 async function callGeminiText(apiKey: string, prompt: string): Promise<{ success: boolean; text?: string; rateLimited?: boolean; error?: string }> {
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
   const res = await fetch(geminiUrl, {
     method: 'POST',
@@ -125,7 +125,7 @@ async function callGeminiText(apiKey: string, prompt: string): Promise<{ success
     if (res.status === 429 || errText.includes('RESOURCE_EXHAUSTED')) {
       return { success: false, rateLimited: true, error: 'Gemini 할당량 초과. 잠시 후 다시 시도해주세요.' };
     }
-    return { success: false, error: `Gemini 에러 (${res.status})` };
+    return { success: false, error: `Gemini 에러 (${res.status}): ${errText}` };
   }
 
   const data = await res.json();
@@ -135,7 +135,7 @@ async function callGeminiText(apiKey: string, prompt: string): Promise<{ success
 
 // ===== Gemini API 호출 (PDF 파일 첨부) =====
 async function callGeminiWithPdf(apiKey: string, prompt: string, base64: string): Promise<{ success: boolean; text?: string; rateLimited?: boolean; error?: string }> {
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
   const res = await fetch(geminiUrl, {
     method: 'POST',
@@ -143,7 +143,7 @@ async function callGeminiWithPdf(apiKey: string, prompt: string, base64: string)
     body: JSON.stringify({
       contents: [{ parts: [
         { text: prompt },
-        { inline_data: { mime_type: 'application/pdf', data: base64 } },
+        { inlineData: { mimeType: 'application/pdf', data: base64 } },
       ] }],
       generationConfig: { temperature: 0.1, maxOutputTokens: 4096 },
     }),
@@ -155,7 +155,8 @@ async function callGeminiWithPdf(apiKey: string, prompt: string, base64: string)
     if (res.status === 429 || errText.includes('RESOURCE_EXHAUSTED')) {
       return { success: false, rateLimited: true, error: 'Gemini 할당량 초과. 잠시 후 다시 시도해주세요.' };
     }
-    return { success: false, error: `Gemini 에러 (${res.status})` };
+    // 프론트엔드에서 정확한 400 에러 원인을 볼 수 있도록 에러 원문을 포함합니다.
+    return { success: false, error: `Gemini 에러 (${res.status}): ${errText}` };
   }
 
   const data = await res.json();
