@@ -155,12 +155,13 @@ export async function createContent(formData: FormData) {
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
     const category = formData.get("category") as string;
+    const type = formData.get("type") as string || "NEWS";
 
     const data: any = {
       title,
       content,
-      category, 
-      published: true,
+      category,
+      type,
     };
 
     await (prisma as any).contentItem.create({
