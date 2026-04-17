@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './page.module.css';
 import Link from 'next/link';
-import { checkAndEndLive } from '@/app/actions/live-status';
 
 // 예배 시간 체크 함수
 function checkIsLive(): boolean {
@@ -223,21 +222,18 @@ export default function Home() {
         .then(res => res.json())
         .then(data => {
           if (data.live && data.videoId) {
-            // 라이브 상태를 다시 체크하고 끝났다면 반영
-            checkAndEndLive(data.videoId).then((res) => {
-              if (res?.ended) {
-                setIsLive(false);
-                setLiveVideoId(null);
-              } else {
-                setIsLive(true);
-                setLiveVideoId(data.videoId);
-                setActiveSection('sermon');
-              }
-            });
+            // YouTube Data API로 실제 라이브 확인됨
+            setIsLive(true);
+            setLiveVideoId(data.videoId);
+            setActiveSection('sermon');
+          } else if (timeBasedLive && data.videoId) {
+            // 예배 시간 + RSS 최신 영상 → 바로 임베드
+            setIsLive(true);
+            setLiveVideoId(data.videoId);
           } else if (timeBasedLive) {
+            // 예배 시간이지만 videoId 없음
             setIsLive(true);
             setLiveVideoId(null);
-            // setActiveSection('sermon');
           } else {
             setIsLive(false);
             setLiveVideoId(null);
@@ -246,7 +242,6 @@ export default function Home() {
         .catch(() => {
           if (timeBasedLive) {
             setIsLive(true);
-            setActiveSection('sermon');
           } else {
             setIsLive(false);
             setLiveVideoId(null);
@@ -254,7 +249,7 @@ export default function Home() {
         });
     };
     fetchLive();
-    const timer = setInterval(fetchLive, 60000);
+    const timer = setInterval(fetchLive, 30000);
     return () => clearInterval(timer);
   }, []);
 
@@ -474,59 +469,48 @@ export default function Home() {
               <div className={styles.sermonMain}>
                 {isLive ? (
                   <>
-                    {liveVideoId ? (
-                      /* YouTube에서 실제 라이브 videoId를 가져온 경우 - 임베드 */
-                      <div
-                        ref={liveVideoRef}
-                        className={styles.sermonVideoWrap}
+                    {/* ✅ 예배 시간 - 바로 영상 임베드 */}
+                    <div
+                      ref={liveVideoRef}
+                      className={styles.sermonVideoWrap}
+                      style={isExpanded ? {
+                        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                        zIndex: 9999, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      } : {
+                        position: 'relative', aspectRatio: '16/9', width: '100%', background: '#000', overflow: 'hidden',
+                      }}
+                    >
+                      <iframe
+                        width="100%" height="100%"
+                        src={liveVideoId
+                          ? `https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=1&rel=0`
+                          : `https://www.youtube.com/embed/live_stream?channel=UCc_eP0i4YwSQmQ9du5-RHbA&autoplay=1&mute=1&rel=0`
+                        }
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                        allowFullScreen
                         style={isExpanded ? {
-                          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-                          zIndex: 9999, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain',
                         } : {
-                          position: 'relative', aspectRatio: '16/9', width: '100%', background: '#000', overflow: 'hidden',
+                          position: 'absolute', top: 0, left: 0,
                         }}
-                      >
-                        <iframe
-                          width="100%" height="100%"
-                          src={`https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=1&rel=0`}
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                          allowFullScreen
-                          style={isExpanded ? {
-                            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain',
-                          } : {
-                            position: 'absolute', top: 0, left: 0,
-                          }}
-                          title="반석교회 실시간 예배"
-                        ></iframe>
-                        <button onClick={toggleExpand} style={{
-                          position: 'absolute', bottom: '15px', left: '15px',
-                          background: isExpanded ? 'rgba(0,0,0,0.7)' : 'linear-gradient(135deg, #7a3a44, #4a1f26)',
-                          color: 'white', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '8px',
-                          padding: '8px 16px', fontSize: '0.95rem', fontWeight: 'bold', cursor: 'pointer',
-                          zIndex: 10000, display: 'flex', alignItems: 'center', gap: '6px',
-                          boxShadow: '0 4px 15px rgba(0,0,0,0.6)',
-                        }}>
-                          <span style={{ fontSize: '1.2rem' }}>{isExpanded ? '🔲' : '📱'}</span>
-                          {isExpanded ? '영상 작게보기' : '영상 크게보기'}
-                        </button>
-                      </div>
-                    ) : (
-                      /* videoId를 못 가져온 경우 - YouTube 링크 버튼 */
-                      <div className={styles.sermonVideoWrap} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #1a0a0e 0%, #2d1520 50%, #1a0a0e 100%)', textAlign: 'center', padding: '2rem', minHeight: '300px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', background: 'rgba(255,0,0,0.15)', padding: '0.5rem 1.2rem', borderRadius: '20px', border: '1px solid rgba(255,50,50,0.3)' }}>
-                          <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ff3333', display: 'inline-block', animation: 'blink 1.5s ease-in-out infinite' }}></span>
-                          <span style={{ color: '#ff6666', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px' }}>LIVE NOW</span>
-                        </div>
-                        <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>✝️</div>
-                        <h3 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: 700, margin: '0 0 0.8rem' }}>지금 예배가 진행되고 있습니다</h3>
-                        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', lineHeight: 1.7, margin: '0 0 2rem' }}>반석교회와 함께 은혜를 나눠요 🙏</p>
-                        <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'linear-gradient(135deg, #ff0000, #cc0000)', color: '#fff', padding: '1rem 2.5rem', borderRadius: '50px', fontSize: '1.15rem', fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 25px rgba(255,0,0,0.35)' }}>▶ 유튜브에서 실시간 예배 보기</a>
-                      </div>
-                    )}
+                        title="반석교회 실시간 예배"
+                      ></iframe>
+                      <button onClick={toggleExpand} style={{
+                        position: 'absolute', bottom: '15px', left: '15px',
+                        background: isExpanded ? 'rgba(0,0,0,0.7)' : 'linear-gradient(135deg, #7a3a44, #4a1f26)',
+                        color: 'white', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '8px',
+                        padding: '8px 16px', fontSize: '0.95rem', fontWeight: 'bold', cursor: 'pointer',
+                        zIndex: 10000, display: 'flex', alignItems: 'center', gap: '6px',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.6)',
+                      }}>
+                        <span style={{ fontSize: '1.2rem' }}>{isExpanded ? '🔲' : '📱'}</span>
+                        {isExpanded ? '영상 작게보기' : '영상 크게보기'}
+                      </button>
+                    </div>
                     <div className={styles.sermonMainInfo}>
                       <h3>🔴 실시간 예배 중</h3>
-                      <p>지금 반석교회에서 예배가 진행되고 있습니다.<br />{liveVideoId ? '예배 화면을 클릭하시면 소리를 켜실 수 있습니다.' : '아래 버튼을 눌러 유튜브에서 참여하세요!'}<br />
+                      <p>지금 반석교회에서 예배가 진행되고 있습니다.<br />화면을 클릭하시면 소리를 켜실 수 있습니다.<br />
                         <a href="https://www.youtube.com/@petros-church/live" target="_blank" rel="noopener noreferrer" style={{ color: '#c19c72', textDecoration: 'underline', fontSize: '0.9rem' }}>유튜브 앱에서 보기 →</a></p>
                     </div>
                   </>
