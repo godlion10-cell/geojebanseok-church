@@ -206,6 +206,7 @@ export default function Home() {
   const [liveVideoId, setLiveVideoId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const liveVideoRef = useRef<HTMLDivElement>(null);
+  const streamEndedRef = useRef(false); // 🔴 스트림 종료 플래그
 
   // DB에서 불러온 콘텐츠 상태
   const [newsItems, setNewsItems] = useState<any[]>([]);
@@ -213,10 +214,31 @@ export default function Home() {
   const [scheduleItems, setScheduleItems] = useState<any[]>([]);
   const [selectedWorship, setSelectedWorship] = useState('주일대예배 (1부)');
 
-  // YouTube 라이브 체크 + 자동 탭 전환
+  // 🔴 스트림 종료 처리 함수
+  const handleStreamEnded = () => {
+    streamEndedRef.current = true;
+    setIsLive(false);
+    setLiveVideoId(null);
+    setIsExpanded(false);
+    document.body.style.overflow = '';
+  };
+
+  // YouTube 라이브 체크 + 자동 탭 전환 (30초마다)
   useEffect(() => {
     const fetchLive = () => {
       const timeBasedLive = checkIsLive();
+
+      // 예배 시간이 끝나면 스트림 종료 플래그 리셋 (다음 예배를 위해)
+      if (!timeBasedLive) {
+        streamEndedRef.current = false;
+      }
+
+      // 스트림이 종료된 상태면 다시 라이브로 전환하지 않음
+      if (streamEndedRef.current) {
+        setIsLive(false);
+        setLiveVideoId(null);
+        return;
+      }
 
       fetch(`/api/youtube-live?t=${new Date().getTime()}`, { cache: 'no-store' })
         .then(res => res.json())
@@ -240,7 +262,7 @@ export default function Home() {
           }
         })
         .catch(() => {
-          if (timeBasedLive) {
+          if (timeBasedLive && !streamEndedRef.current) {
             setIsLive(true);
           } else {
             setIsLive(false);
@@ -259,6 +281,7 @@ export default function Home() {
 
     let player: any = null;
     let destroyed = false;
+    let stateCheckInterval: any = null;
 
     const initPlayer = () => {
       if (destroyed) return;
@@ -270,22 +293,29 @@ export default function Home() {
           events: {
             onStateChange: (event: any) => {
               // 0 = ended, -1 = unstarted
-              if (event.data === 0 || event.data === -1) {
-                setIsLive(false);
-                setLiveVideoId(null);
-                setIsExpanded(false);
-                document.body.style.overflow = '';
+              if (event.data === 0) {
+                handleStreamEnded();
               }
             },
             onError: () => {
-              // 영상 오류 (라이브 종료 포함)
-              setIsLive(false);
-              setLiveVideoId(null);
-              setIsExpanded(false);
-              document.body.style.overflow = '';
+              handleStreamEnded();
             },
           },
         });
+
+        // 추가: 10초마다 플레이어 상태를 직접 체크 (이벤트를 놓칠 경우 대비)
+        stateCheckInterval = setInterval(() => {
+          if (destroyed || !player) return;
+          try {
+            const state = player.getPlayerState?.();
+            // 0 = ended, -1 = unstarted, 5 = video cued
+            if (state === 0 || state === -1) {
+              handleStreamEnded();
+            }
+          } catch {
+            // 플레이어 접근 실패 시 무시
+          }
+        }, 10000);
       } catch (e) {
         console.warn('YT Player init failed:', e);
       }
@@ -293,10 +323,8 @@ export default function Home() {
 
     // YouTube IFrame API 로드 또는 기존 것 사용
     if ((window as any).YT && (window as any).YT.Player) {
-      // 이미 로드됨 - iframe이 DOM에 있을 때 초기화
       setTimeout(initPlayer, 500);
     } else {
-      // API 스크립트 로드
       if (!document.getElementById('yt-iframe-api')) {
         const tag = document.createElement('script');
         tag.id = 'yt-iframe-api';
@@ -310,6 +338,7 @@ export default function Home() {
 
     return () => {
       destroyed = true;
+      if (stateCheckInterval) clearInterval(stateCheckInterval);
       if (player && player.destroy) {
         try { player.destroy(); } catch {}
       }
