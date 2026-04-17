@@ -354,6 +354,17 @@ export default function Home() {
           if (data.news?.length > 0) setNewsItems(data.news);
           if (data.sermons?.length > 0) setSermonItems(data.sermons);
           if (data.schedules?.length > 0) setScheduleItems(data.schedules);
+          // DB에서 예배 순서 불러와서 WORSHIP_ORDERS에 병합
+          if (data.worshipOrders?.length > 0) {
+            for (const wo of data.worshipOrders) {
+              if (wo.category && wo.content) {
+                try {
+                  const parsed = JSON.parse(wo.content);
+                  WORSHIP_ORDERS[wo.category] = parsed;
+                } catch {}
+              }
+            }
+          }
         }
       })
       .catch(err => console.error('콘텐츠 로딩 실패:', err));

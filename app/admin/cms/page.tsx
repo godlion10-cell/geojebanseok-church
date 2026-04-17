@@ -57,7 +57,7 @@ const DEFAULT_SCHEDULES = [
 export default function CMSPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [password, setPassword] = useState('');
-  const [activeTab, setActiveTab] = useState<'news' | 'sermon' | 'schedule' | 'smart'>('news');
+  const [activeTab, setActiveTab] = useState<'news' | 'sermon' | 'schedule' | 'worship' | 'smart'>('news');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -65,6 +65,9 @@ export default function CMSPage() {
   const [newsItems, setNewsItems] = useState<ContentItem[]>([]);
   const [sermons, setSermons] = useState<ContentItem[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [worshipOrders, setWorshipOrders] = useState<ContentItem[]>([]);
+  const [selectedWorship, setSelectedWorship] = useState('주일대예배 (1부)');
+  const [worshipEditData, setWorshipEditData] = useState<any>(null);
 
   // Edit modal state
   const [editModal, setEditModal] = useState<{
@@ -97,17 +100,88 @@ export default function CMSPage() {
     }
   }, []);
 
+  // 기본 예배 순서 데이터
+  const DEFAULT_WORSHIP_ORDERS: Record<string, { title: string; groups: { heading: string; rows: { label: string; content: string; resp: string; bold?: boolean }[] }[] }> = {
+    '주일대예배 (1부)': {
+      title: '주일 오전 예배 순서',
+      groups: [
+        { heading: '◀ 개회 (하나님께 나아감)', rows: [
+          { label: '묵도', content: '', resp: '다같이' },
+          { label: '개회찬송', content: '예수 우리 왕이여 (38장)', resp: '다같이' },
+          { label: '신앙고백', content: '사도신경', resp: '다같이' },
+          { label: '교독문', content: '134번 (부활절2)', resp: '다같이' },
+          { label: '찬송', content: '할렐루야 우리 예수 (161장)', resp: '다같이' },
+          { label: '통성기도', content: '', resp: '다같이' },
+        ]},
+        { heading: '◀ 말씀의 선포', rows: [
+          { label: '성경봉독', content: '고린도전서 15:1~10', resp: '다같이' },
+          { label: '특송', content: '', resp: '성가대' },
+          { label: '말씀', content: '부활, 죽음을 이기는 하나님의 소망', resp: '이주민 목사', bold: true },
+          { label: '합심기도', content: '', resp: '다같이' },
+        ]},
+        { heading: '◀ 결단과 헌신', rows: [
+          { label: '예물봉헌', content: '내 구주 예수를 더욱 사랑 (314장)', resp: '다같이' },
+          { label: '교회소식', content: '', resp: '인도자' },
+          { label: '찬송', content: '하나님의 독생자 (171장)', resp: '다같이' },
+          { label: '축도', content: '', resp: '이주민 목사' },
+        ]},
+      ],
+    },
+    '주일대예배 (2부)': {
+      title: '주일 오전 예배 순서',
+      groups: [
+        { heading: '◀ 개회 (하나님께 나아감)', rows: [
+          { label: '묵도', content: '', resp: '다같이' },
+          { label: '개회찬송', content: '예수 우리 왕이여 (38장)', resp: '다같이' },
+          { label: '신앙고백', content: '사도신경', resp: '다같이' },
+          { label: '교독문', content: '134번 (부활절2)', resp: '다같이' },
+          { label: '찬송', content: '할렐루야 우리 예수 (161장)', resp: '다같이' },
+          { label: '통성기도', content: '', resp: '다같이' },
+        ]},
+        { heading: '◀ 말씀의 선포', rows: [
+          { label: '성경봉독', content: '고린도전서 15:1~10', resp: '다같이' },
+          { label: '특송', content: '', resp: '성가대' },
+          { label: '말씀', content: '부활, 죽음을 이기는 하나님의 소망', resp: '이주민 목사', bold: true },
+          { label: '합심기도', content: '', resp: '다같이' },
+        ]},
+        { heading: '◀ 결단과 헌신', rows: [
+          { label: '예물봉헌', content: '내 구주 예수를 더욱 사랑 (314장)', resp: '다같이' },
+          { label: '교회소식', content: '', resp: '인도자' },
+          { label: '찬송', content: '하나님의 독생자 (171장)', resp: '다같이' },
+          { label: '축도', content: '', resp: '이주민 목사' },
+        ]},
+      ],
+    },
+    '수요저녁예배': {
+      title: '수요저녁예배 순서',
+      groups: [
+        { heading: '◀ 예배 순서', rows: [
+          { label: '찬양', content: '', resp: '다같이' },
+          { label: '신앙고백', content: '', resp: '다같이' },
+          { label: '합심기도', content: '', resp: '다같이' },
+          { label: '성경봉독', content: '창 45:16~28', resp: '', bold: true },
+          { label: '통성기도', content: '', resp: '다같이' },
+          { label: '주기도문', content: '', resp: '다같이' },
+        ]},
+      ],
+    },
+  };
+
+  const WORSHIP_NAMES = ['주일대예배 (1부)', '주일대예배 (2부)', '수요저녁예배'];
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [newsRes, sermonRes, scheduleRes] = await Promise.all([
+      const [newsRes, sermonRes, scheduleRes, worshipRes] = await Promise.all([
         getContentItems('NEWS'),
         getContentItems('SERMON'),
-        getSchedules()
+        getSchedules(),
+        getContentItems('WORSHIP_ORDER'),
       ]);
       if (newsRes.success) setNewsItems(newsRes.data || []);
       if (sermonRes.success) setSermons(sermonRes.data || []);
       if (scheduleRes.success) setSchedules(scheduleRes.data || []);
+      if (worshipRes.success) setWorshipOrders(worshipRes.data || []);
     } catch (err: any) {
       console.error('데이터 로딩 실패:', err);
     }
@@ -457,6 +531,7 @@ export default function CMSPage() {
           <button className={`${css.catBtn} ${activeTab === 'news' ? css.catBtnActive : ''}`} onClick={() => setActiveTab('news')}>📢 교회 소식</button>
           <button className={`${css.catBtn} ${activeTab === 'sermon' ? css.catBtnActive : ''}`} onClick={() => setActiveTab('sermon')}>📺 설교 말씀</button>
           <button className={`${css.catBtn} ${activeTab === 'schedule' ? css.catBtnActive : ''}`} onClick={() => setActiveTab('schedule')}>🗓️ 예배 안내</button>
+          <button className={`${css.catBtn} ${activeTab === 'worship' ? css.catBtnActive : ''}`} onClick={() => setActiveTab('worship')}>📋 예배 순서</button>
         </aside>
 
         <main className={css.editorCard}>
@@ -881,7 +956,228 @@ export default function CMSPage() {
                 </div>
               )}
 
-              {(activeTab === 'news' ? newsItems : activeTab === 'sermon' ? sermons : schedules).length === 0 && (
+              {/* 예배 순서 관리 */}
+              {activeTab === 'worship' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.4rem', color: '#5b272f', borderLeft: '5px solid #c19c72', paddingLeft: '1rem' }}>
+                      📋 예배 순서 관리
+                    </h3>
+                  </div>
+
+                  {/* 예배 선택 탭 */}
+                  <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                    {WORSHIP_NAMES.map(name => (
+                      <button
+                        key={name}
+                        onClick={() => {
+                          setSelectedWorship(name);
+                          setWorshipEditData(null);
+                        }}
+                        style={{
+                          padding: '0.6rem 1.2rem',
+                          borderRadius: '10px',
+                          border: selectedWorship === name ? '2px solid #5b272f' : '1px solid #ddd',
+                          background: selectedWorship === name ? '#5b272f' : 'white',
+                          color: selectedWorship === name ? 'white' : '#333',
+                          fontWeight: selectedWorship === name ? 700 : 400,
+                          cursor: 'pointer',
+                          fontSize: '0.9rem',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {(() => {
+                    // DB에서 해당 예배 순서 찾기, 없으면 기본값 사용
+                    const dbItem = worshipOrders.find(w => w.category === selectedWorship);
+                    let currentOrder: any;
+                    try {
+                      currentOrder = dbItem?.content ? JSON.parse(dbItem.content) : DEFAULT_WORSHIP_ORDERS[selectedWorship];
+                    } catch {
+                      currentOrder = DEFAULT_WORSHIP_ORDERS[selectedWorship];
+                    }
+                    if (!currentOrder) currentOrder = { title: selectedWorship, groups: [] };
+
+                    // 편집 데이터 초기화
+                    const editData = worshipEditData || currentOrder;
+
+                    const updateEditRow = (gi: number, ri: number, field: string, value: string) => {
+                      const newData = JSON.parse(JSON.stringify(editData));
+                      newData.groups[gi].rows[ri][field] = value;
+                      setWorshipEditData(newData);
+                    };
+
+                    const updateGroupHeading = (gi: number, value: string) => {
+                      const newData = JSON.parse(JSON.stringify(editData));
+                      newData.groups[gi].heading = value;
+                      setWorshipEditData(newData);
+                    };
+
+                    const updateTitle = (value: string) => {
+                      const newData = JSON.parse(JSON.stringify(editData));
+                      newData.title = value;
+                      setWorshipEditData(newData);
+                    };
+
+                    const addRow = (gi: number) => {
+                      const newData = JSON.parse(JSON.stringify(editData));
+                      newData.groups[gi].rows.push({ label: '', content: '', resp: '', bold: false });
+                      setWorshipEditData(newData);
+                    };
+
+                    const removeRow = (gi: number, ri: number) => {
+                      const newData = JSON.parse(JSON.stringify(editData));
+                      newData.groups[gi].rows.splice(ri, 1);
+                      setWorshipEditData(newData);
+                    };
+
+                    const addGroup = () => {
+                      const newData = JSON.parse(JSON.stringify(editData));
+                      newData.groups.push({ heading: '◀ 새 순서', rows: [{ label: '', content: '', resp: '', bold: false }] });
+                      setWorshipEditData(newData);
+                    };
+
+                    const removeGroup = (gi: number) => {
+                      if (!confirm('이 순서 그룹을 삭제하시겠습니까?')) return;
+                      const newData = JSON.parse(JSON.stringify(editData));
+                      newData.groups.splice(gi, 1);
+                      setWorshipEditData(newData);
+                    };
+
+                    const handleWorshipSave = async () => {
+                      setSaving(true);
+                      try {
+                        const dataToSave = worshipEditData || currentOrder;
+                        const fd = new FormData();
+                        fd.set('type', 'WORSHIP_ORDER');
+                        fd.set('category', selectedWorship);
+                        fd.set('title', dataToSave.title || selectedWorship);
+                        fd.set('content', JSON.stringify(dataToSave));
+                        fd.set('url', '');
+
+                        let res;
+                        if (dbItem) {
+                          res = await updateContentItem(dbItem.id, fd);
+                        } else {
+                          res = await addContentItem(fd);
+                        }
+
+                        if (res.success) {
+                          alert('✅ 예배 순서가 저장되었습니다!');
+                          setWorshipEditData(null);
+                          fetchData();
+                        } else {
+                          alert(res.error || '저장 실패');
+                        }
+                      } catch (err: any) {
+                        alert(`오류: ${err.message || '저장 중 문제가 발생했습니다.'}`);
+                      } finally {
+                        setSaving(false);
+                      }
+                    };
+
+                    const handleWorshipInit = async () => {
+                      if (!confirm(`"${selectedWorship}" 기본 예배 순서를 등록하시겠습니까?`)) return;
+                      const defaultData = DEFAULT_WORSHIP_ORDERS[selectedWorship];
+                      if (!defaultData) return;
+                      setWorshipEditData(defaultData);
+                    };
+
+                    return (
+                      <div>
+                        {/* 제목 입력 */}
+                        <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                          <label style={{ fontWeight: 700, color: '#5b272f', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>표시 제목:</label>
+                          <input
+                            value={editData.title || ''}
+                            onChange={(e) => updateTitle(e.target.value)}
+                            placeholder="예: 주일 오전 예배 순서"
+                            style={{ flex: 1, padding: '0.6rem 1rem', border: '2px solid #f0e8dc', borderRadius: '10px', fontSize: '0.95rem', background: '#fdfbf7' }}
+                          />
+                        </div>
+
+                        {/* 그룹별 편집 */}
+                        {editData.groups?.map((group: any, gi: number) => (
+                          <div key={gi} style={{ marginBottom: '1.5rem', border: '1px solid #f0e8dc', borderRadius: '16px', overflow: 'hidden' }}>
+                            {/* 그룹 헤더 */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#5b272f', padding: '0.8rem 1rem' }}>
+                              <input
+                                value={group.heading}
+                                onChange={(e) => updateGroupHeading(gi, e.target.value)}
+                                style={{ flex: 1, padding: '0.4rem 0.8rem', border: 'none', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.15)', color: 'white' }}
+                                placeholder="순서 그룹명"
+                              />
+                              <button onClick={() => removeGroup(gi)} style={{ padding: '0.3rem 0.6rem', border: 'none', borderRadius: '6px', background: 'rgba(255,100,100,0.3)', color: '#ffcccc', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                            </div>
+
+                            {/* 행 목록 */}
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                              <thead>
+                                <tr style={{ background: '#fdf5ea' }}>
+                                  <th style={{ padding: '0.5rem', textAlign: 'left', fontSize: '0.8rem', color: '#999', width: '120px' }}>순서</th>
+                                  <th style={{ padding: '0.5rem', textAlign: 'left', fontSize: '0.8rem', color: '#999' }}>내용</th>
+                                  <th style={{ padding: '0.5rem', textAlign: 'left', fontSize: '0.8rem', color: '#999', width: '120px' }}>담당</th>
+                                  <th style={{ padding: '0.5rem', textAlign: 'center', fontSize: '0.8rem', color: '#999', width: '50px' }}>굵게</th>
+                                  <th style={{ padding: '0.5rem', width: '40px' }}></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {group.rows?.map((row: any, ri: number) => (
+                                  <tr key={ri} style={{ borderBottom: '1px solid #f5f0ea' }}>
+                                    <td style={{ padding: '0.4rem' }}>
+                                      <input value={row.label} onChange={(e) => updateEditRow(gi, ri, 'label', e.target.value)} placeholder="묵도" style={{ width: '100%', padding: '0.4rem', border: '1px solid #e8e0d5', borderRadius: '6px', fontSize: '0.85rem' }} />
+                                    </td>
+                                    <td style={{ padding: '0.4rem' }}>
+                                      <input value={row.content} onChange={(e) => updateEditRow(gi, ri, 'content', e.target.value)} placeholder="찬송 내용" style={{ width: '100%', padding: '0.4rem', border: '1px solid #e8e0d5', borderRadius: '6px', fontSize: '0.85rem' }} />
+                                    </td>
+                                    <td style={{ padding: '0.4rem' }}>
+                                      <input value={row.resp} onChange={(e) => updateEditRow(gi, ri, 'resp', e.target.value)} placeholder="다같이" style={{ width: '100%', padding: '0.4rem', border: '1px solid #e8e0d5', borderRadius: '6px', fontSize: '0.85rem' }} />
+                                    </td>
+                                    <td style={{ padding: '0.4rem', textAlign: 'center' }}>
+                                      <input type="checkbox" checked={!!row.bold} onChange={(e) => updateEditRow(gi, ri, 'bold', e.target.checked ? 'true' : '')} style={{ cursor: 'pointer' }} />
+                                    </td>
+                                    <td style={{ padding: '0.4rem', textAlign: 'center' }}>
+                                      <button onClick={() => removeRow(gi, ri)} style={{ padding: '2px 6px', border: '1px solid #f5c6c6', borderRadius: '4px', background: '#fff5f5', cursor: 'pointer', fontSize: '0.7rem', color: '#e74c3c' }}>✕</button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                            <div style={{ padding: '0.5rem 1rem', background: '#fdfbf7' }}>
+                              <button onClick={() => addRow(gi)} style={{ padding: '0.3rem 1rem', border: '1px dashed #c19c72', borderRadius: '8px', background: 'transparent', cursor: 'pointer', fontSize: '0.8rem', color: '#c19c72', fontWeight: 600 }}>+ 순서 추가</button>
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* 그룹 추가 + 저장 버튼 */}
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-between', marginTop: '1.5rem' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button onClick={addGroup} style={{ padding: '0.7rem 1.5rem', border: '2px dashed #c19c72', borderRadius: '10px', background: '#fdf5ea', cursor: 'pointer', fontSize: '0.9rem', color: '#8b6914', fontWeight: 600 }}>+ 순서 그룹 추가</button>
+                            {!dbItem && (
+                              <button onClick={handleWorshipInit} className={css.logoutBtn} style={{ fontSize: '0.85rem' }}>📥 기본값 불러오기</button>
+                            )}
+                          </div>
+                          <button onClick={handleWorshipSave} disabled={saving} className={css.saveBtn} style={{ padding: '0.7rem 2rem' }}>
+                            {saving ? '저장 중...' : '💾 예배 순서 저장'}
+                          </button>
+                        </div>
+
+                        {!dbItem && (
+                          <div style={{ marginTop: '1.5rem', padding: '1rem 1.5rem', background: '#fdf5ea', borderRadius: '12px', border: '1px solid #f5ead5', fontSize: '0.9rem', color: '#b8860b' }}>
+                            💡 아직 DB에 저장된 예배 순서가 없습니다. 위 내용을 수정한 후 <strong>"예배 순서 저장"</strong> 버튼을 누르면 DB에 저장됩니다.
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {activeTab !== 'worship' && (activeTab === 'news' ? newsItems : activeTab === 'sermon' ? sermons : schedules).length === 0 && (
                 <div style={{ marginTop: '1.5rem', padding: '1.2rem 1.5rem', background: '#fdf5ea', borderRadius: '12px', border: '1px solid #f5ead5', fontSize: '0.9rem', color: '#b8860b' }}>
                   💡 현재 기본 데이터가 표시되고 있습니다. <strong>"기본 데이터 일괄 등록"</strong> 버튼을 눌러 DB에 저장하면, 이후 자유롭게 수정하고 삭제할 수 있습니다.
                 </div>
