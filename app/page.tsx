@@ -253,6 +253,68 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
+  // 🔴 YouTube IFrame Player API - 라이브 종료 자동 감지
+  useEffect(() => {
+    if (!isLive || !liveVideoId) return;
+
+    let player: any = null;
+    let destroyed = false;
+
+    const initPlayer = () => {
+      if (destroyed) return;
+      try {
+        const YT = (window as any).YT;
+        if (!YT || !YT.Player) return;
+
+        player = new YT.Player('yt-live-player', {
+          events: {
+            onStateChange: (event: any) => {
+              // 0 = ended, -1 = unstarted
+              if (event.data === 0 || event.data === -1) {
+                setIsLive(false);
+                setLiveVideoId(null);
+                setIsExpanded(false);
+                document.body.style.overflow = '';
+              }
+            },
+            onError: () => {
+              // 영상 오류 (라이브 종료 포함)
+              setIsLive(false);
+              setLiveVideoId(null);
+              setIsExpanded(false);
+              document.body.style.overflow = '';
+            },
+          },
+        });
+      } catch (e) {
+        console.warn('YT Player init failed:', e);
+      }
+    };
+
+    // YouTube IFrame API 로드 또는 기존 것 사용
+    if ((window as any).YT && (window as any).YT.Player) {
+      // 이미 로드됨 - iframe이 DOM에 있을 때 초기화
+      setTimeout(initPlayer, 500);
+    } else {
+      // API 스크립트 로드
+      if (!document.getElementById('yt-iframe-api')) {
+        const tag = document.createElement('script');
+        tag.id = 'yt-iframe-api';
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+      }
+      (window as any).onYouTubeIframeAPIReady = () => {
+        setTimeout(initPlayer, 300);
+      };
+    }
+
+    return () => {
+      destroyed = true;
+      if (player && player.destroy) {
+        try { player.destroy(); } catch {}
+      }
+    };
+  }, [isLive, liveVideoId]);
 
   // DB에서 콘텐츠 로딩
   useEffect(() => {
@@ -481,10 +543,11 @@ export default function Home() {
                       }}
                     >
                       <iframe
+                        id="yt-live-player"
                         width="100%" height="100%"
                         src={liveVideoId
-                          ? `https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=1&rel=0`
-                          : `https://www.youtube.com/embed/live_stream?channel=UCc_eP0i4YwSQmQ9du5-RHbA&autoplay=1&mute=1&rel=0`
+                          ? `https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=1&rel=0&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
+                          : `https://www.youtube.com/embed/live_stream?channel=UCc_eP0i4YwSQmQ9du5-RHbA&autoplay=1&mute=1&rel=0&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
                         }
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
