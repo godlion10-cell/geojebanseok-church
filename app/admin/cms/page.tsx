@@ -859,7 +859,7 @@ export default function CMSPage() {
                 </h3>
                 <div style={{ display: 'flex', gap: '0.8rem' }}>
                   {(activeTab === 'news' ? newsItems : activeTab === 'sermon' ? sermons : schedules).length === 0 && (
-                    <button className={css.logoutBtn} style={{ fontSize: '0.85rem' }} onClick={() => handleInitialize(activeTab)} disabled={saving}>
+                    <button className={css.logoutBtn} style={{ fontSize: '0.85rem' }} onClick={() => handleInitialize(activeTab as 'news' | 'sermon' | 'schedule')} disabled={saving}>
                       {saving ? '등록 중...' : '📥 기본 데이터 일괄 등록'}
                     </button>
                   )}
