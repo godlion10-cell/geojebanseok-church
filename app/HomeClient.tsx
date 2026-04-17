@@ -77,27 +77,30 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 🔴 YouTube API로 실제 라이브 여부 확인 (30초마다)
+  // 🔴 예배 시간이면 최신 영상을 바로 임베드 (라이브 중이면 라이브 영상이 자동으로 표시)
   useEffect(() => {
     const checkLive = async () => {
-      try {
-        const res = await fetch('/api/youtube-live');
-        const data = await res.json();
-        
-        if (data.live && data.videoId) {
-          // YouTube에서 실제 라이브 감지됨
-          setIsLive(true);
-          setLiveVideoId(data.videoId);
-        } else {
-          // API에서 라이브 감지 안됨 → 시간 기반 체크도 참고
-          const timeBasedLive = checkIsLive();
-          setIsLive(timeBasedLive);
+      const timeBasedLive = checkIsLive();
+      setIsLive(timeBasedLive);
+      
+      if (timeBasedLive) {
+        try {
+          const res = await fetch('/api/youtube-live');
+          const data = await res.json();
+          
+          if (data.live && data.videoId) {
+            // YouTube Data API로 확인된 실제 라이브
+            setLiveVideoId(data.videoId);
+          } else if (data.videoId) {
+            // RSS에서 가져온 최신 영상 (라이브 중이면 이것이 라이브 영상)
+            setLiveVideoId(data.videoId);
+          } else {
+            setLiveVideoId(null);
+          }
+        } catch {
           setLiveVideoId(null);
         }
-      } catch {
-        // API 실패 시 시간 기반으로만 판단
-        const timeBasedLive = checkIsLive();
-        setIsLive(timeBasedLive);
+      } else {
         setLiveVideoId(null);
       }
     };
