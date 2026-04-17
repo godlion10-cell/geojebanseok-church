@@ -77,26 +77,32 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 🔴 예배 시간 자동 체크 (30초마다) + YouTube 실제 라이브 확인
+  // 🔴 YouTube API로 실제 라이브 여부 확인 (30초마다)
   useEffect(() => {
-    const checkLive = () => {
-      const timeBasedLive = checkIsLive();
-      setIsLive(timeBasedLive);
-      if (timeBasedLive) {
-        fetch('/api/youtube-live')
-          .then(res => res.json())
-          .then(data => {
-            if (data.live && data.videoId) {
-              setLiveVideoId(data.videoId);
-            }
-          })
-          .catch(() => {});
-      } else {
+    const checkLive = async () => {
+      try {
+        const res = await fetch('/api/youtube-live');
+        const data = await res.json();
+        
+        if (data.live && data.videoId) {
+          // YouTube에서 실제 라이브 감지됨
+          setIsLive(true);
+          setLiveVideoId(data.videoId);
+        } else {
+          // API에서 라이브 감지 안됨 → 시간 기반 체크도 참고
+          const timeBasedLive = checkIsLive();
+          setIsLive(timeBasedLive);
+          setLiveVideoId(null);
+        }
+      } catch {
+        // API 실패 시 시간 기반으로만 판단
+        const timeBasedLive = checkIsLive();
+        setIsLive(timeBasedLive);
         setLiveVideoId(null);
       }
     };
     checkLive();
-    const timer = setInterval(checkLive, 60000);
+    const timer = setInterval(checkLive, 30000);
     return () => clearInterval(timer);
   }, []);
 
