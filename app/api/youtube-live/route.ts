@@ -8,36 +8,11 @@ const CHANNEL_ID = 'UCc_eP0i4YwSQmQ9du5-RHbA';
 export async function GET() {
   try {
     // ========================================
-    // 방법 1: YouTube Data API v3 (가장 정확)
+    // YouTube Data API v3로 라이브 여부 확인 (가장 정확)
     // ========================================
     const API_KEY = process.env.YOUTUBE_API_KEY;
-    if (API_KEY) {
-      try {
-        const searchRes = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&eventType=live&type=video&key=${API_KEY}`,
-          { cache: 'no-store' }
-        );
-        if (searchRes.ok) {
-          const searchData = await searchRes.json();
-          if (searchData.items && searchData.items.length > 0) {
-            return NextResponse.json({
-              live: true,
-              videoId: searchData.items[0].id.videoId,
-              title: searchData.items[0].snippet.title,
-              method: 'youtube-data-api',
-            });
-          }
-          // API 정상 + 라이브 없음 → live: false
-          // 아래 RSS로 최신 videoId라도 가져옴
-        }
-      } catch (e) {
-        console.error('YouTube Data API error:', e);
-      }
-    }
-
-    // ========================================
-    // RSS에서 최신 비디오 ID 가져오기
-    // ========================================
+    
+    // RSS에서 최신 비디오 ID 가져오기 (항상 필요)
     let latestVideoId = '';
     let videoTitle = '';
     try {
@@ -56,38 +31,42 @@ export async function GET() {
       console.error('RSS fetch error:', e);
     }
 
-    if (!latestVideoId) {
-      return NextResponse.json({ live: false, videoId: null, reason: 'No video found' });
-    }
-
-    // ========================================
-    // 방법 2: 라이브 썸네일로 라이브 여부 확인
-    // YouTube는 라이브 중인 영상에만 hqdefault_live.jpg를 제공
-    // ========================================
-    try {
-      const thumbRes = await fetch(
-        `https://i.ytimg.com/vi/${latestVideoId}/hqdefault_live.jpg`,
-        { method: 'HEAD', cache: 'no-store' }
-      );
-
-      if (thumbRes.ok && thumbRes.status === 200) {
-        return NextResponse.json({
-          live: true,
-          videoId: latestVideoId,
-          title: videoTitle,
-          method: 'live-thumbnail',
-        });
+    if (API_KEY) {
+      try {
+        const searchRes = await fetch(
+          `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&eventType=live&type=video&key=${API_KEY}`,
+          { cache: 'no-store' }
+        );
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          if (searchData.items && searchData.items.length > 0) {
+            // ✅ YouTube Data API가 실제 라이브를 확인함
+            return NextResponse.json({
+              live: true,
+              videoId: searchData.items[0].id.videoId,
+              title: searchData.items[0].snippet.title,
+              method: 'youtube-data-api',
+            });
+          }
+          // API 정상 응답 + 라이브 없음 → live: false
+          return NextResponse.json({
+            live: false,
+            videoId: latestVideoId || null,
+            title: videoTitle,
+            method: 'youtube-data-api',
+          });
+        }
+      } catch (e) {
+        console.error('YouTube Data API error:', e);
       }
-    } catch {
-      // 썸네일 체크 실패 → 라이브 아님으로 판단
     }
 
-    // 라이브가 아님
+    // API Key가 없거나 API 오류 시 → 라이브 아닌 것으로 처리
     return NextResponse.json({
       live: false,
-      videoId: latestVideoId,
+      videoId: latestVideoId || null,
       title: videoTitle,
-      method: 'rss',
+      method: 'rss-only',
     });
 
   } catch (error: any) {
