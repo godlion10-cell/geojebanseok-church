@@ -77,35 +77,59 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 🔴 예배 시간이면 최신 영상을 바로 임베드 (라이브 중이면 라이브 영상이 자동으로 표시)
+  // 🔴 YouTube 라이브 체크 (30초마다)
+  // 핵심: YouTube API에서 live:true이면 시간과 관계없이 바로 라이브 표시
   useEffect(() => {
+    let streamEnded = false;
+
     const checkLive = async () => {
       const timeBasedLive = checkIsLive();
-      setIsLive(timeBasedLive);
-      
-      if (timeBasedLive) {
-        try {
-          const res = await fetch('/api/youtube-live');
-          const data = await res.json();
-          
-          if (data.live && data.videoId) {
-            // YouTube Data API로 확인된 실제 라이브
-            setLiveVideoId(data.videoId);
-          } else if (data.videoId) {
-            // RSS에서 가져온 최신 영상 (라이브 중이면 이것이 라이브 영상)
-            setLiveVideoId(data.videoId);
-          } else {
-            setLiveVideoId(null);
-          }
-        } catch {
+
+      // 스트림 종료 상태면 예배 시간이 끝날 때까지 유지
+      if (streamEnded) {
+        if (!timeBasedLive) {
+          streamEnded = false; // 다음 예배를 위해 리셋
+        }
+        setIsLive(false);
+        setLiveVideoId(null);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/youtube-live?t=${new Date().getTime()}`, { cache: 'no-store' });
+        const data = await res.json();
+        
+        if (data.live && data.videoId) {
+          // ✅ YouTube Data API로 실제 라이브 확인 → 시간 관계없이 바로 표시
+          setIsLive(true);
+          setLiveVideoId(data.videoId);
+        } else if (timeBasedLive && data.videoId) {
+          // 예배 시간 + 최신 영상 → 임베드
+          setIsLive(true);
+          setLiveVideoId(data.videoId);
+        } else if (isLive && !data.live) {
+          // 🔴 이전에 라이브였는데 이제 아님 → 종료 처리
+          console.log('[라이브 종료 감지] YouTube 라이브가 종료되었습니다.');
+          streamEnded = true;
+          setIsLive(false);
+          setLiveVideoId(null);
+        } else {
+          setIsLive(false);
           setLiveVideoId(null);
         }
-      } else {
-        setLiveVideoId(null);
+      } catch {
+        if (timeBasedLive && !streamEnded) {
+          setIsLive(true);
+        } else {
+          setIsLive(false);
+          setLiveVideoId(null);
+        }
       }
     };
+
     checkLive();
-    const timer = setInterval(checkLive, 30000);
+    // 라이브 중일 때는 15초마다, 아닐 때는 30초마다 체크
+    const timer = setInterval(checkLive, 15000);
     return () => clearInterval(timer);
   }, []);
 
