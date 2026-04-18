@@ -224,13 +224,12 @@ export default function Home() {
   };
 
   // YouTube 라이브 체크 + 자동 탭 전환 (30초마다)
-  // 🔴 핵심: YouTube API에서 live:true이면 시간과 관계없이 바로 라이브 표시
+  // 🔴 핵심: YouTube API에서 live:true일 때만 라이브 표시 (시간 기반 판단 제거)
   useEffect(() => {
     const fetchLive = () => {
-      const timeBasedLive = checkIsLive();
-
       // 스트림이 종료된 상태면 다시 라이브로 전환하지 않음
       if (streamEndedRef.current) {
+        const timeBasedLive = checkIsLive();
         // 예배 시간이 완전히 끝나면 종료 플래그 리셋 (다음 예배를 위해)
         if (!timeBasedLive) {
           streamEndedRef.current = false;
@@ -244,30 +243,19 @@ export default function Home() {
         .then(res => res.json())
         .then(data => {
           if (data.live && data.videoId) {
-            // ✅ YouTube Data API로 실제 라이브 확인 → 시간 관계없이 바로 표시
+            // ✅ YouTube에서 실제 라이브 확인됨 → 바로 표시
             setIsLive(true);
             setLiveVideoId(data.videoId);
             setActiveSection('sermon');
-          } else if (timeBasedLive && data.videoId) {
-            // 예배 시간 + RSS 최신 영상 → 바로 임베드
-            setIsLive(true);
-            setLiveVideoId(data.videoId);
-          } else if (timeBasedLive) {
-            // 예배 시간이지만 videoId 없음
-            setIsLive(true);
-            setLiveVideoId(null);
           } else {
+            // YouTube에서 라이브 아님 → 라이브 화면 안 보여줌
             setIsLive(false);
             setLiveVideoId(null);
           }
         })
         .catch(() => {
-          if (timeBasedLive && !streamEndedRef.current) {
-            setIsLive(true);
-          } else {
-            setIsLive(false);
-            setLiveVideoId(null);
-          }
+          setIsLive(false);
+          setLiveVideoId(null);
         });
     };
     fetchLive();

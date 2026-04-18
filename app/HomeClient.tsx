@@ -77,16 +77,15 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 🔴 YouTube 라이브 체크 (30초마다)
-  // 핵심: YouTube API에서 live:true이면 시간과 관계없이 바로 라이브 표시
+  // 🔴 YouTube 라이브 체크 (15초마다)
+  // 핵심: YouTube API에서 live:true일 때만 라이브 표시 (시간 기반 판단 제거)
   useEffect(() => {
     let streamEnded = false;
 
     const checkLive = async () => {
-      const timeBasedLive = checkIsLive();
-
       // 스트림 종료 상태면 예배 시간이 끝날 때까지 유지
       if (streamEnded) {
+        const timeBasedLive = checkIsLive();
         if (!timeBasedLive) {
           streamEnded = false; // 다음 예배를 위해 리셋
         }
@@ -100,11 +99,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
         const data = await res.json();
         
         if (data.live && data.videoId) {
-          // ✅ YouTube Data API로 실제 라이브 확인 → 시간 관계없이 바로 표시
-          setIsLive(true);
-          setLiveVideoId(data.videoId);
-        } else if (timeBasedLive && data.videoId) {
-          // 예배 시간 + 최신 영상 → 임베드
+          // ✅ YouTube에서 실제 라이브 확인됨 → 바로 표시
           setIsLive(true);
           setLiveVideoId(data.videoId);
         } else if (isLive && !data.live) {
@@ -114,21 +109,17 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
           setIsLive(false);
           setLiveVideoId(null);
         } else {
+          // YouTube에서 라이브 아님 → 라이브 화면 안 보여줌
           setIsLive(false);
           setLiveVideoId(null);
         }
       } catch {
-        if (timeBasedLive && !streamEnded) {
-          setIsLive(true);
-        } else {
-          setIsLive(false);
-          setLiveVideoId(null);
-        }
+        setIsLive(false);
+        setLiveVideoId(null);
       }
     };
 
     checkLive();
-    // 라이브 중일 때는 15초마다, 아닐 때는 30초마다 체크
     const timer = setInterval(checkLive, 15000);
     return () => clearInterval(timer);
   }, []);
