@@ -4,21 +4,6 @@ import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import Link from 'next/link';
 
-// 예배 시간 체크 함수 (방송을 확인할지 말지 결정하는 보조 수단으로만 사용)
-function checkIsLiveTime(): boolean {
-  const now = new Date();
-  const day = now.getDay();
-  const t = now.getHours() * 60 + now.getMinutes();
-  return (
-    (day === 0 && t >= 530 && t <= 630) ||   // 주일 1부 08:50~10:30
-    (day === 0 && t >= 640 && t <= 750) ||   // 주일 2부 10:40~12:30
-    (day === 0 && t >= 830 && t <= 930) ||   // 주일 오후 13:50~15:30
-    (day === 3 && t >= 1160 && t <= 1260) || // 수요 저녁 19:20~21:00
-    (day === 5 && t >= 1190 && t <= 1290) || // 금요 기도회 19:50~21:30
-    (day >= 1 && day <= 6 && t >= 320 && t <= 390) // 새벽예배 05:20~06:30
-  );
-}
-
 function getNextWorship(): string {
   const now = new Date();
   const day = now.getDay();
