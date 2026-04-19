@@ -23,82 +23,85 @@ function isWorshipTime(): boolean {
 }
 
 /**
- * 채널 /live 페이지에서 canonical URL로 실제 라이브 비디오 ID 추출
- * 여러 방법으로 시도: 직접 fetch → CORS 프록시 → 폴백
+ * 채널 /live 페이지의 canonical URL에서 실제 라이브 비디오 ID를 추출
+ * + oEmbed API로 우리 채널 영상인지 검증
  */
-async function getVideoIdFromChannelLive(): Promise<{ videoId: string; title: string; method: string } | null> {
-  const targetUrl = `https://www.youtube.com/@${CHANNEL_HANDLE}/live`;
-
-  // 시도할 URL 목록 (직접 + 프록시들)
-  const fetchUrls = [
-    { url: targetUrl, name: 'direct', headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept-Language': 'ko-KR,ko;q=0.9',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'Cookie': 'CONSENT=PENDING+987; SOCS=CAESEwgDEgk2MTcyNTcyNTIaAmVuIAEaBgiA_LyaBg',
-    }},
-    { url: `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, name: 'corsproxy', headers: {} },
-  ];
-
-  for (const attempt of fetchUrls) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000); // 8초 타임아웃
-
-      const res = await fetch(attempt.url, {
+async function getVideoIdFromChannelLive(): Promise<{ videoId: string; title: string; debug?: string } | null> {
+  try {
+    const livePageRes = await fetch(
+      `https://www.youtube.com/@${CHANNEL_HANDLE}/live`,
+      {
         cache: 'no-store',
-        headers: attempt.headers,
-        signal: controller.signal,
-      });
-      clearTimeout(timeout);
-
-      if (!res.ok) continue;
-      const html = await res.text();
-      if (html.length < 10000) continue; // 너무 짧으면 에러 페이지
-
-      // canonical URL에서 비디오 ID 추출
-      let videoId: string | null = null;
-      const canonicalMatch = html.match(/<link\s+rel="canonical"\s+href="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"/);
-      if (canonicalMatch) {
-        videoId = canonicalMatch[1];
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Cookie': 'CONSENT=PENDING+987; SOCS=CAESEwgDEgk2MTcyNTcyNTIaAmVuIAEaBgiA_LyaBg',
+        },
       }
+    );
 
-      // og:url 폴백
-      if (!videoId) {
-        const ogMatch = html.match(/<meta\s+property="og:url"\s+content="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"/);
-        if (ogMatch) videoId = ogMatch[1];
-      }
-
-      if (!videoId) continue;
-
-      // oEmbed로 우리 채널 영상인지 검증
-      try {
-        const oembedRes = await fetch(
-          `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
-          { cache: 'no-store' }
-        );
-        if (oembedRes.ok) {
-          const oembed = await oembedRes.json();
-          const authorUrl = (oembed.author_url || '').toLowerCase();
-          const authorName = (oembed.author_name || '').toLowerCase();
-          const isOurs = authorUrl.includes(CHANNEL_HANDLE) || authorName.includes('반석') || authorName.includes('petros');
-          if (!isOurs) {
-            console.log(`[youtube-live] Wrong channel via ${attempt.name}: ${oembed.author_name}`);
-            continue;
-          }
-          return { videoId, title: oembed.title || '', method: `canonical-${attempt.name}` };
-        }
-      } catch (_e) {}
-
-      // oEmbed 실패시에도 채널 /live 의 canonical은 해당 채널 영상이므로 신뢰
-      return { videoId, title: '', method: `canonical-${attempt.name}-no-verify` };
-    } catch (e: any) {
-      console.log(`[youtube-live] ${attempt.name} failed: ${e.message}`);
-      continue;
+    if (!livePageRes.ok) {
+      console.log(`[scrape] HTTP ${livePageRes.status}`);
+      return null;
     }
-  }
+    const html = await livePageRes.text();
+    console.log(`[scrape] HTML length: ${html.length}`);
 
-  return null;
+    // canonical URL에서 비디오 ID 추출
+    const canonicalMatch = html.match(/<link\s+rel="canonical"\s+href="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"/);
+    if (!canonicalMatch) {
+      // og:url도 시도
+      const ogMatch = html.match(/<meta\s+property="og:url"\s+content="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"/);
+      if (!ogMatch) {
+        console.log(`[scrape] No canonical or og:url found. Has consent: ${html.includes('consent.youtube.com')}`);
+        // 마지막 시도: 제목에서 videoId 패턴 찾기
+        const titleVideoId = html.match(/"videoId":"([a-zA-Z0-9_-]{11})","title":"[^"]*반석/);
+        if (titleVideoId) {
+          return { videoId: titleVideoId[1], title: '' };
+        }
+        return null;
+      }
+      const videoId = ogMatch[1];
+      console.log(`[scrape] Found via og:url: ${videoId}`);
+      return { videoId, title: '' };
+    }
+    const videoId = canonicalMatch[1];
+    console.log(`[scrape] Found via canonical: ${videoId}`);
+
+    // oEmbed API로 이 비디오가 우리 채널의 것인지 검증
+    try {
+      const oembedRes = await fetch(
+        `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
+        { cache: 'no-store' }
+      );
+
+      if (oembedRes.ok) {
+        const oembedData = await oembedRes.json();
+        const authorUrl = (oembedData.author_url || '').toLowerCase();
+        const authorName = (oembedData.author_name || '').toLowerCase();
+
+        const isOurChannel =
+          authorUrl.includes(CHANNEL_HANDLE) ||
+          authorName.includes('반석') ||
+          authorName.includes('petros');
+
+        if (!isOurChannel) {
+          console.log(`[scrape] Wrong channel: ${oembedData.author_name}`);
+          return null;
+        }
+
+        return { videoId, title: oembedData.title || '' };
+      }
+    } catch {
+      // oEmbed 실패시 canonical의 videoId를 그대로 신뢰
+    }
+
+    return { videoId, title: '' };
+  } catch (e: any) {
+    console.log(`[scrape] Error: ${e.message}`);
+    return null;
+  }
 }
 
 export async function GET(request: Request) {
@@ -109,7 +112,7 @@ export async function GET(request: Request) {
     const API_KEY = process.env.YOUTUBE_API_KEY;
     const debugInfo: string[] = [];
 
-    // === 방법 1: YouTube Data API v3 (가장 정확) ===
+    // === 방법 1: YouTube Data API v3 ===
     if (API_KEY) {
       try {
         debugInfo.push('Trying YouTube Data API...');
@@ -128,9 +131,12 @@ export async function GET(request: Request) {
               ...(debug && { debug: debugInfo }),
             });
           }
-          debugInfo.push('Data API: no live streams');
+          debugInfo.push('Data API: no live items found');
           return NextResponse.json({
-            live: false, videoId: null, title: '', method: 'youtube-data-api',
+            live: false,
+            videoId: null,
+            title: '',
+            method: 'youtube-data-api',
             ...(debug && { debug: debugInfo }),
           });
         } else {
@@ -143,25 +149,26 @@ export async function GET(request: Request) {
       debugInfo.push('No YOUTUBE_API_KEY');
     }
 
-    // === 방법 2: 채널 페이지 canonical URL 추출 (직접 + CORS 프록시) ===
-    debugInfo.push('Trying canonical URL extraction...');
-    const result = await getVideoIdFromChannelLive();
+    // === 방법 2: 채널 /live 페이지 canonical + oEmbed 검증 ===
+    debugInfo.push('Trying canonical URL scrape...');
+    const channelResult = await getVideoIdFromChannelLive();
 
-    if (result) {
-      debugInfo.push(`Found: ${result.videoId} via ${result.method}`);
+    if (channelResult) {
+      debugInfo.push(`Found videoId: ${channelResult.videoId}`);
       return NextResponse.json({
         live: true,
-        videoId: result.videoId,
-        title: result.title,
-        method: result.method,
+        videoId: channelResult.videoId,
+        title: channelResult.title,
+        method: 'canonical-oembed',
         ...(debug && { debug: debugInfo }),
       });
+    } else {
+      debugInfo.push('Canonical scrape failed or returned null');
     }
-    debugInfo.push('All canonical extraction methods failed');
 
-    // === 방법 3: 예배 시간이면 채널 embed 사용 ===
+    // === 방법 3: 예배 시간 폴백 ===
     if (isWorshipTime()) {
-      debugInfo.push('Using worship time fallback');
+      debugInfo.push('Falling back to worship time');
       return NextResponse.json({
         live: true,
         videoId: null,
@@ -173,15 +180,21 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({
-      live: false, videoId: null, title: '', method: 'none',
+      live: false,
+      videoId: null,
+      title: '',
+      method: 'none',
       ...(debug && { debug: debugInfo }),
     });
 
   } catch (error: any) {
     if (isWorshipTime()) {
       return NextResponse.json({
-        live: true, videoId: null, title: '실시간 예배',
-        method: 'error-fallback', channelId: CHANNEL_ID,
+        live: true,
+        videoId: null,
+        title: '실시간 예배',
+        method: 'error-fallback',
+        channelId: CHANNEL_ID,
       });
     }
     return NextResponse.json({ live: false, videoId: null, error: error.message });
