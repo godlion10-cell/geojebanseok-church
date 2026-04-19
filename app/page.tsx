@@ -545,8 +545,8 @@ export default function Home() {
                         id="yt-live-player"
                         width="100%" height="100%"
                         src={liveVideoId
-                          ? `https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=1&rel=0&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
-                          : `https://www.youtube.com/embed/live_stream?channel=UCc_eP0i4YwSQmQ9du5-RHbA&autoplay=1&mute=1&rel=0&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
+                          ? `https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=1&rel=0`
+                          : `https://www.youtube.com/embed/live_stream?channel=UCc_eP0i4YwSQmQ9du5-RHbA&autoplay=1&mute=1&rel=0`
                         }
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
@@ -554,7 +554,7 @@ export default function Home() {
                         style={isExpanded ? {
                           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain',
                         } : {
-                          position: 'absolute', top: 0, left: 0,
+                          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
                         }}
                         title="반석교회 실시간 예배"
                       ></iframe>
