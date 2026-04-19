@@ -223,26 +223,25 @@ export default function Home() {
     document.body.style.overflow = '';
   };
 
-  // 클라이언트 측에서 YouTube oEmbed API로 라이브 비디오 ID 직접 가져오기
+  // 클라이언트 측에서 CORS 프록시를 통해 라이브 비디오 ID 직접 가져오기
   // (서버에서 봇 차단당할 때 폴백으로 사용)
   const fetchVideoIdFromClient = async (): Promise<string | null> => {
     try {
-      // YouTube oEmbed API는 CORS를 허용하므로 클라이언트에서 직접 호출 가능
-      // 채널 핸들/live URL에 대해 oEmbed를 호출하면 현재 라이브 영상 정보를 얻을 수 있음
-      const res = await fetch(
-        `https://www.youtube.com/oembed?url=https://www.youtube.com/@petros-church/live&format=json`
-      );
+      // corsproxy.io를 통해 YouTube 채널 라이브 페이지의 HTML을 가져옴
+      const targetUrl = 'https://www.youtube.com/@petros-church/live';
+      const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
       if (!res.ok) return null;
-      const data = await res.json();
-      // html 필드에서 embed URL의 비디오 ID 추출
-      const match = data.html?.match(/embed\/([a-zA-Z0-9_-]{11})/);
-      if (match) {
-        // 채널명 검증
-        const author = (data.author_name || '').toLowerCase();
-        if (author.includes('반석') || author.includes('petros')) {
-          return match[1];
-        }
-      }
+      const html = await res.text();
+      if (html.length < 10000) return null;
+
+      // canonical URL에서 비디오 ID 추출
+      const canonical = html.match(/<link\s+rel="canonical"\s+href="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"/);
+      if (canonical) return canonical[1];
+
+      // og:url 폴백
+      const ogUrl = html.match(/<meta\s+property="og:url"\s+content="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"/);
+      if (ogUrl) return ogUrl[1];
+
       return null;
     } catch {
       return null;
