@@ -224,7 +224,7 @@ export default function Home() {
   };
 
   // YouTube 라이브 체크 + 자동 탭 전환 (30초마다)
-  // 🔴 핵심: YouTube API에서 live:true일 때만 라이브 표시 (시간 기반 판단 제거)
+  // 서버 API가 live:true를 반환하면 표시 (API키/스크래핑/시간 기반 폴백 모두 서버에서 처리)
   useEffect(() => {
     const fetchLive = () => {
       // 스트림이 종료된 상태면 다시 라이브로 전환하지 않음
@@ -242,20 +242,28 @@ export default function Home() {
       fetch(`/api/youtube-live?t=${new Date().getTime()}`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
-          if (data.live && data.videoId) {
-            // ✅ YouTube에서 실제 라이브 확인됨 → 바로 표시
+          if (data.live) {
+            // ✅ 서버에서 라이브 확인됨 → 바로 표시
+            // videoId가 있으면 사용, 없으면 채널 라이브 embed 사용
             setIsLive(true);
-            setLiveVideoId(data.videoId);
+            setLiveVideoId(data.videoId || null);
             setActiveSection('sermon');
           } else {
-            // YouTube에서 라이브 아님 → 라이브 화면 안 보여줌
+            // 라이브 아님
             setIsLive(false);
             setLiveVideoId(null);
           }
         })
         .catch(() => {
-          setIsLive(false);
-          setLiveVideoId(null);
+          // API 호출 실패 시 시간 기반으로 폴백
+          if (checkIsLive()) {
+            setIsLive(true);
+            setLiveVideoId(null);
+            setActiveSection('sermon');
+          } else {
+            setIsLive(false);
+            setLiveVideoId(null);
+          }
         });
     };
     fetchLive();
