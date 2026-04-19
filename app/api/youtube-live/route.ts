@@ -48,10 +48,12 @@ async function getVideoIdFromChannelLive(): Promise<{ videoId: string; title: st
     const html = await livePageRes.text();
     console.log(`[scrape] HTML length: ${html.length}`);
 
-    // 실제 라이브 방송 중인지 확인 (라이브 아니면 과거 영상이 나옴)
-    const isActuallyLive = html.includes('"isLive":true') || html.includes('"isLiveContent":true');
+    // 실제 라이브 방송 중인지 확인
+    // "isLive":true는 채널에 라이브URL이 있으면 항상 true이므로 사용 불가
+    // BADGE_STYLE_TYPE_LIVE_NOW가 실제 방송 중일 때만 나타남
+    const isActuallyLive = html.includes('BADGE_STYLE_TYPE_LIVE_NOW');
     if (!isActuallyLive) {
-      console.log('[scrape] Not actually live - skipping canonical extraction');
+      console.log('[scrape] Not actually live (no LIVE_NOW badge)');
       return null;
     }
 
