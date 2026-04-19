@@ -48,6 +48,13 @@ async function getVideoIdFromChannelLive(): Promise<{ videoId: string; title: st
     const html = await livePageRes.text();
     console.log(`[scrape] HTML length: ${html.length}`);
 
+    // 실제 라이브 방송 중인지 확인 (라이브 아니면 과거 영상이 나옴)
+    const isActuallyLive = html.includes('"isLive":true') || html.includes('"isLiveContent":true');
+    if (!isActuallyLive) {
+      console.log('[scrape] Not actually live - skipping canonical extraction');
+      return null;
+    }
+
     // canonical URL에서 비디오 ID 추출
     const canonicalMatch = html.match(/<link\s+rel="canonical"\s+href="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"/);
     if (!canonicalMatch) {
