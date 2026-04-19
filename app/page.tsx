@@ -302,12 +302,12 @@ export default function Home() {
   // 🔴 서버 API 폴링으로 라이브 종료 자동 감지 (15초마다)
   // YouTube IFrame Player의 크로스 오리진 제한을 우회하기 위해 서버측에서 확인
   useEffect(() => {
-    if (!isLive || !liveVideoId) return;
+    if (!isLive) return; // videoId 없어도 라이브 상태면 종료 감지 필요
 
     let destroyed = false;
 
     const checkEnded = async () => {
-      if (destroyed || !liveVideoId) return;
+      if (destroyed) return;
       try {
         // 서버 API로 YouTube Data API를 통해 라이브 상태 직접 확인
         const res = await fetch(`/api/youtube-live?t=${new Date().getTime()}`, { cache: 'no-store' });
@@ -330,7 +330,7 @@ export default function Home() {
       destroyed = true;
       clearInterval(endCheckTimer);
     };
-  }, [isLive, liveVideoId]);
+  }, [isLive]);
 
   // DB에서 콘텐츠 로딩
   useEffect(() => {

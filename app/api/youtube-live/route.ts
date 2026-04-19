@@ -100,7 +100,7 @@ async function getVideoIdFromChannelLive(): Promise<{ videoId: string; title: st
 
         return { videoId, title: oembedData.title || '' };
       }
-    } catch {
+    } catch (_e) {
       // oEmbed 실패시 canonical의 videoId를 그대로 신뢰
     }
 
