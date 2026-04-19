@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './page.module.css';
 import Link from 'next/link';
+import OptimizedLogo from '../components/OptimizedLogo';
 
 // ===== 헬퍼 함수들 =====
 function checkIsLiveTime(): boolean {
@@ -197,7 +198,7 @@ export default function Home() {
       {/* HEADER */}
       <header className={styles.header}>
         <div className={styles.logo} onClick={() => setActiveSection('about')} style={{ cursor: 'pointer' }}>
-          <img src="/logo.svg" alt="반석교회 로고" style={{ height: '54px', objectFit: 'contain' }} />
+          <OptimizedLogo />
         </div>
         <button className={styles.mobileMenuBtn} onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? '✕' : '☰'}
