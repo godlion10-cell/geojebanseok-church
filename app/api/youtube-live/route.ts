@@ -4,12 +4,11 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const CHANNEL_ID = 'UCc_eP0i4YwSQmQ9du5-RHbA';
-const CHANNEL_HANDLE = 'petros-church';
 
 // 예배 시간 체크 (서버 측 - KST 기준)
 function isWorshipTime(): boolean {
-  // KST = UTC+9
   const now = new Date();
+  // Vercel 서버는 UTC 기준이므로 KST로 변환
   const kst = new Date(now.getTime() + (9 * 60 * 60 * 1000) + (now.getTimezoneOffset() * 60 * 1000));
   const day = kst.getDay();
   const t = kst.getHours() * 60 + kst.getMinutes();
@@ -37,6 +36,7 @@ export async function GET() {
         if (searchRes.ok) {
           const searchData = await searchRes.json();
           if (searchData.items && searchData.items.length > 0) {
+            // ✅ YouTube Data API가 실제 라이브를 확인 → 정확한 videoId 반환
             return NextResponse.json({
               live: true,
               videoId: searchData.items[0].id.videoId,
@@ -57,100 +57,55 @@ export async function GET() {
       }
     }
 
-    // === 방법 2: 채널 라이브 페이지 스크래핑 (API 키 불필요) ===
+    // === 방법 2: 채널 oEmbed API로 라이브 확인 (API 키 불필요) ===
+    // YouTube oEmbed는 채널 라이브 URL이 유효한지 확인 가능
     try {
-      const livePageRes = await fetch(
-        `https://www.youtube.com/@${CHANNEL_HANDLE}/live`,
+      const oembedRes = await fetch(
+        `https://www.youtube.com/oembed?url=https://www.youtube.com/channel/${CHANNEL_ID}/live&format=json`,
         {
           cache: 'no-store',
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
           },
         }
       );
-
-      if (livePageRes.ok) {
-        const html = await livePageRes.text();
-
-        // 라이브 중인 비디오 ID 추출 방법들
-        let videoId: string | null = null;
-        let title: string | null = null;
-
-        // 방법 2-1: canonical URL에서 video ID 추출
-        const canonicalMatch = html.match(/<link\s+rel="canonical"\s+href="https:\/\/www\.youtube\.com\/watch\?v=([^"]+)"/);
-        if (canonicalMatch) {
-          videoId = canonicalMatch[1];
-        }
-
-        // 방법 2-2: og:url meta tag에서 추출
-        if (!videoId) {
-          const ogUrlMatch = html.match(/<meta\s+property="og:url"\s+content="https:\/\/www\.youtube\.com\/watch\?v=([^"]+)"/);
-          if (ogUrlMatch) {
-            videoId = ogUrlMatch[1];
-          }
-        }
-
-        // 방법 2-3: videoId 패턴 매칭
-        if (!videoId) {
-          const videoIdMatch = html.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
-          if (videoIdMatch) {
-            videoId = videoIdMatch[1];
-          }
-        }
-
-        // 제목 추출
-        const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/);
-        if (titleMatch) {
-          title = titleMatch[1];
-        }
-
-        // 라이브 여부 확인: 페이지 내에서 라이브 관련 시그널 찾기
-        const isLiveIndicator =
-          html.includes('"isLive":true') ||
-          html.includes('"isLiveContent":true') ||
-          html.includes('"liveBroadcastDetails"') ||
-          html.includes('"isLiveNow":true') ||
-          (html.includes('"style":"LIVE"') && html.includes('"isLive"'));
-
-        if (videoId && isLiveIndicator) {
+      
+      if (oembedRes.ok) {
+        const oembedData = await oembedRes.json();
+        // oEmbed가 성공하면 해당 채널에 라이브가 있다는 뜻
+        // title에서 채널명이 나오는지 확인 (우리 채널 영상인지 검증)
+        const title = oembedData.title || '';
+        const authorName = oembedData.author_name || '';
+        
+        // 채널명이 "거제반석교회" 또는 "petros"를 포함하는지 확인
+        const isOurChannel = authorName.includes('반석') || authorName.includes('petros') || authorName.includes('Petros');
+        
+        if (isOurChannel) {
+          // ✅ 우리 채널의 라이브가 확인됨
+          // videoId는 없지만, 프론트엔드에서 채널 기반 embed 사용
           return NextResponse.json({
             live: true,
-            videoId,
-            title: title || '',
-            method: 'channel-scrape',
+            videoId: null,  // 채널 embed 사용 신호
+            title: title,
+            method: 'oembed',
+            channelId: CHANNEL_ID,
           });
         }
-
-        // 스크래핑은 성공했지만 라이브 시그널 없음
-        // 예배 시간이면 비디오 ID가 있으면 일단 라이브로 표시 (스크래핑이 완벽하지 않을 수 있음)
-        if (videoId && isWorshipTime()) {
-          return NextResponse.json({
-            live: true,
-            videoId,
-            title: title || '',
-            method: 'channel-scrape-worship-time',
-          });
-        }
-
-        return NextResponse.json({
-          live: false,
-          videoId: videoId || null,
-          title: title || '',
-          method: 'channel-scrape',
-        });
       }
     } catch (e) {
-      console.error('Channel page scrape error:', e);
+      console.error('oEmbed check error:', e);
     }
 
-    // === 방법 3: 예배 시간이면 채널 라이브 임베드를 직접 사용 ===
+    // === 방법 3: 예배 시간이면 채널 라이브 embed를 바로 사용 ===
+    // videoId 없이 채널 기반 embed URL을 프론트에서 직접 사용
+    // YouTube가 자동으로 현재 라이브 중인 영상으로 연결해줌
     if (isWorshipTime()) {
       return NextResponse.json({
         live: true,
-        videoId: null,  // videoId가 null이면 channel embed 사용
+        videoId: null,  // videoId를 null로 보내면 프론트에서 채널 embed 사용
         title: '실시간 예배',
         method: 'worship-time-fallback',
+        channelId: CHANNEL_ID,
       });
     }
 
@@ -163,13 +118,14 @@ export async function GET() {
     });
 
   } catch (error: any) {
-    // 에러 시에도 예배 시간이면 라이브로 처리
+    // 에러 시에도 예배 시간이면 라이브로 처리 (채널 embed 사용)
     if (isWorshipTime()) {
       return NextResponse.json({
         live: true,
         videoId: null,
         title: '실시간 예배',
         method: 'error-worship-fallback',
+        channelId: CHANNEL_ID,
       });
     }
     return NextResponse.json({ live: false, videoId: null, error: error.message });
