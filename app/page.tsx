@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import Link from 'next/link';
 
+
+
 function getNextWorship(): string {
   const now = new Date();
   const day = now.getDay();
@@ -191,6 +193,7 @@ export default function Home() {
   const [liveVideoId, setLiveVideoId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
+
   // DB에서 불러온 콘텐츠 상태
   const [newsItems, setNewsItems] = useState<any[]>([]);
   const [sermonItems, setSermonItems] = useState<any[]>([]);
@@ -201,8 +204,6 @@ export default function Home() {
   // - API가 live:true → 라이브 표시
   // - API가 live:false → 시간과 상관없이 즉시 종료 처리
   useEffect(() => {
-    let checkTimer: ReturnType<typeof setInterval>;
-
     const syncLiveStatus = async () => {
       try {
         const res = await fetch(`/api/youtube-live?t=${Date.now()}`, { cache: 'no-store' });
@@ -227,9 +228,8 @@ export default function Home() {
     };
 
     syncLiveStatus();
-    checkTimer = setInterval(syncLiveStatus, 15000);
-
-    return () => clearInterval(checkTimer);
+    const timer = setInterval(syncLiveStatus, 15000);
+    return () => clearInterval(timer);
   }, []);
 
   // DB에서 콘텐츠 로딩
