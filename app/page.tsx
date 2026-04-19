@@ -223,14 +223,38 @@ export default function Home() {
     document.body.style.overflow = '';
   };
 
+  // 클라이언트 측에서 YouTube oEmbed API로 라이브 비디오 ID 직접 가져오기
+  // (서버에서 봇 차단당할 때 폴백으로 사용)
+  const fetchVideoIdFromClient = async (): Promise<string | null> => {
+    try {
+      // YouTube oEmbed API는 CORS를 허용하므로 클라이언트에서 직접 호출 가능
+      // 채널 핸들/live URL에 대해 oEmbed를 호출하면 현재 라이브 영상 정보를 얻을 수 있음
+      const res = await fetch(
+        `https://www.youtube.com/oembed?url=https://www.youtube.com/@petros-church/live&format=json`
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      // html 필드에서 embed URL의 비디오 ID 추출
+      const match = data.html?.match(/embed\/([a-zA-Z0-9_-]{11})/);
+      if (match) {
+        // 채널명 검증
+        const author = (data.author_name || '').toLowerCase();
+        if (author.includes('반석') || author.includes('petros')) {
+          return match[1];
+        }
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
   // YouTube 라이브 체크 + 자동 탭 전환 (30초마다)
-  // 서버 API가 live:true를 반환하면 표시 (API키/스크래핑/시간 기반 폴백 모두 서버에서 처리)
   useEffect(() => {
-    const fetchLive = () => {
+    const fetchLive = async () => {
       // 스트림이 종료된 상태면 다시 라이브로 전환하지 않음
       if (streamEndedRef.current) {
         const timeBasedLive = checkIsLive();
-        // 예배 시간이 완전히 끝나면 종료 플래그 리셋 (다음 예배를 위해)
         if (!timeBasedLive) {
           streamEndedRef.current = false;
         }
@@ -239,32 +263,37 @@ export default function Home() {
         return;
       }
 
-      fetch(`/api/youtube-live?t=${new Date().getTime()}`, { cache: 'no-store' })
-        .then(res => res.json())
-        .then(data => {
-          if (data.live) {
-            // ✅ 서버에서 라이브 확인됨 → 바로 표시
-            // videoId가 있으면 사용, 없으면 채널 라이브 embed 사용
-            setIsLive(true);
-            setLiveVideoId(data.videoId || null);
-            setActiveSection('sermon');
-          } else {
-            // 라이브 아님
-            setIsLive(false);
-            setLiveVideoId(null);
+      try {
+        const res = await fetch(`/api/youtube-live?t=${new Date().getTime()}`, { cache: 'no-store' });
+        const data = await res.json();
+
+        if (data.live) {
+          let videoId = data.videoId || null;
+
+          // 서버에서 videoId를 못 가져왔으면 클라이언트에서 직접 시도
+          if (!videoId) {
+            videoId = await fetchVideoIdFromClient();
           }
-        })
-        .catch(() => {
-          // API 호출 실패 시 시간 기반으로 폴백
-          if (checkIsLive()) {
-            setIsLive(true);
-            setLiveVideoId(null);
-            setActiveSection('sermon');
-          } else {
-            setIsLive(false);
-            setLiveVideoId(null);
-          }
-        });
+
+          setIsLive(true);
+          setLiveVideoId(videoId);
+          setActiveSection('sermon');
+        } else {
+          setIsLive(false);
+          setLiveVideoId(null);
+        }
+      } catch {
+        // API 호출 실패 시 시간+클라이언트 oEmbed 폴백
+        if (checkIsLive()) {
+          const videoId = await fetchVideoIdFromClient();
+          setIsLive(true);
+          setLiveVideoId(videoId);
+          setActiveSection('sermon');
+        } else {
+          setIsLive(false);
+          setLiveVideoId(null);
+        }
+      }
     };
     fetchLive();
     const timer = setInterval(fetchLive, 30000);

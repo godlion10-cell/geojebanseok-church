@@ -23,12 +23,11 @@ function isWorshipTime(): boolean {
 }
 
 /**
- * 채널 /live 페이지의 canonical URL에서 실제 라이브 비디오 ID를 추출하고,
- * oEmbed API로 해당 비디오가 우리 채널 소유인지 검증합니다.
+ * 채널 /live 페이지의 canonical URL에서 실제 라이브 비디오 ID를 추출
+ * + oEmbed API로 우리 채널 영상인지 검증
  */
-async function getVideoIdFromChannelLive(): Promise<{ videoId: string; title: string } | null> {
+async function getVideoIdFromChannelLive(): Promise<{ videoId: string; title: string; debug?: string } | null> {
   try {
-    // 1단계: 채널 /live 페이지에서 canonical URL 추출
     const livePageRes = await fetch(
       `https://www.youtube.com/@${CHANNEL_HANDLE}/live`,
       {
@@ -43,55 +42,57 @@ async function getVideoIdFromChannelLive(): Promise<{ videoId: string; title: st
     if (!livePageRes.ok) return null;
     const html = await livePageRes.text();
 
-    // canonical URL에서 비디오 ID 추출 (이것이 해당 페이지의 메인 비디오)
+    // canonical URL에서 비디오 ID 추출
     const canonicalMatch = html.match(/<link\s+rel="canonical"\s+href="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"/);
     if (!canonicalMatch) return null;
     const videoId = canonicalMatch[1];
 
-    // 2단계: oEmbed API로 이 비디오가 우리 채널의 것인지 검증
-    const oembedRes = await fetch(
-      `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
-      { cache: 'no-store' }
-    );
+    // oEmbed API로 이 비디오가 우리 채널의 것인지 검증
+    try {
+      const oembedRes = await fetch(
+        `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
+        { cache: 'no-store' }
+      );
 
-    if (!oembedRes.ok) {
-      // oEmbed 실패해도 canonical에서 추출한 ID는 신뢰할 수 있음
-      // (채널 /live 페이지의 canonical은 해당 채널의 라이브 영상을 가리킴)
-      return { videoId, title: '' };
+      if (oembedRes.ok) {
+        const oembedData = await oembedRes.json();
+        const authorUrl = (oembedData.author_url || '').toLowerCase();
+        const authorName = (oembedData.author_name || '').toLowerCase();
+
+        const isOurChannel =
+          authorUrl.includes(CHANNEL_HANDLE) ||
+          authorName.includes('반석') ||
+          authorName.includes('petros');
+
+        if (!isOurChannel) {
+          return null;
+        }
+
+        return { videoId, title: oembedData.title || '' };
+      }
+    } catch {
+      // oEmbed 실패시 canonical의 videoId를 그대로 신뢰
     }
 
-    const oembedData = await oembedRes.json();
-    const authorUrl = (oembedData.author_url || '').toLowerCase();
-    const authorName = (oembedData.author_name || '').toLowerCase();
-
-    // 우리 채널의 영상인지 확인
-    const isOurChannel =
-      authorUrl.includes(CHANNEL_HANDLE) ||
-      authorName.includes('반석') ||
-      authorName.includes('petros');
-
-    if (!isOurChannel) {
-      console.warn(`[youtube-live] 다른 채널의 영상 감지됨: ${oembedData.author_name} (${oembedData.title})`);
-      return null;
-    }
-
-    return {
-      videoId,
-      title: oembedData.title || '',
-    };
-  } catch (e) {
-    console.error('[youtube-live] 채널 라이브 페이지 파싱 실패:', e);
+    // oEmbed 실패해도, 채널 /live 페이지의 canonical은 해당 채널 라이브를 가리키므로 신뢰
+    return { videoId, title: '' };
+  } catch (e: any) {
     return null;
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const debug = url.searchParams.get('debug') === '1';
+
   try {
     const API_KEY = process.env.YOUTUBE_API_KEY;
+    const debugInfo: string[] = [];
 
-    // === 방법 1: YouTube Data API v3 (가장 정확, API 키 필요) ===
+    // === 방법 1: YouTube Data API v3 ===
     if (API_KEY) {
       try {
+        debugInfo.push('Trying YouTube Data API...');
         const searchRes = await fetch(
           `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&eventType=live&type=video&key=${API_KEY}`,
           { cache: 'no-store' }
@@ -104,50 +105,63 @@ export async function GET() {
               videoId: searchData.items[0].id.videoId,
               title: searchData.items[0].snippet.title,
               method: 'youtube-data-api',
+              ...(debug && { debug: debugInfo }),
             });
           }
+          debugInfo.push('Data API: no live items found');
           return NextResponse.json({
             live: false,
             videoId: null,
             title: '',
             method: 'youtube-data-api',
+            ...(debug && { debug: debugInfo }),
           });
+        } else {
+          debugInfo.push(`Data API error: ${searchRes.status}`);
         }
-      } catch (e) {
-        console.error('YouTube Data API error:', e);
+      } catch (e: any) {
+        debugInfo.push(`Data API exception: ${e.message}`);
       }
+    } else {
+      debugInfo.push('No YOUTUBE_API_KEY');
     }
 
-    // === 방법 2: 채널 /live 페이지 canonical URL + oEmbed 검증 ===
-    // API 키 없이도 정확한 라이브 비디오 ID를 가져올 수 있음
-    const channelLiveResult = await getVideoIdFromChannelLive();
+    // === 방법 2: 채널 /live 페이지 canonical + oEmbed 검증 ===
+    debugInfo.push('Trying canonical URL scrape...');
+    const channelResult = await getVideoIdFromChannelLive();
 
-    if (channelLiveResult) {
+    if (channelResult) {
+      debugInfo.push(`Found videoId: ${channelResult.videoId}`);
       return NextResponse.json({
         live: true,
-        videoId: channelLiveResult.videoId,
-        title: channelLiveResult.title,
+        videoId: channelResult.videoId,
+        title: channelResult.title,
         method: 'canonical-oembed',
+        ...(debug && { debug: debugInfo }),
       });
+    } else {
+      debugInfo.push('Canonical scrape failed or returned null');
     }
 
-    // === 방법 3: 예배 시간이면 채널 라이브 embed 사용 ===
+    // === 방법 3: 예배 시간 폴백 ===
     if (isWorshipTime()) {
+      debugInfo.push('Falling back to worship time');
       return NextResponse.json({
         live: true,
         videoId: null,
         title: '실시간 예배',
         method: 'worship-time-fallback',
         channelId: CHANNEL_ID,
+        ...(debug && { debug: debugInfo }),
       });
     }
 
-    // 라이브 없음
     return NextResponse.json({
       live: false,
       videoId: null,
       title: '',
       method: 'none',
+      ...(debug && { debug: debugInfo }),
     });
 
   } catch (error: any) {
