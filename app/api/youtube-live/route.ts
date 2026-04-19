@@ -88,7 +88,7 @@ async function getVideoIdFromChannelLive(): Promise<{ videoId: string; title: st
           }
           return { videoId, title: oembed.title || '', method: `canonical-${attempt.name}` };
         }
-      } catch {}
+      } catch (_e) {}
 
       // oEmbed 실패시에도 채널 /live 의 canonical은 해당 채널 영상이므로 신뢰
       return { videoId, title: '', method: `canonical-${attempt.name}-no-verify` };

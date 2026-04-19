@@ -243,7 +243,7 @@ export default function Home() {
       if (ogUrl) return ogUrl[1];
 
       return null;
-    } catch {
+    } catch (_e) {
       return null;
     }
   };
@@ -281,7 +281,7 @@ export default function Home() {
           setIsLive(false);
           setLiveVideoId(null);
         }
-      } catch {
+      } catch (_e) {
         // API 호출 실패 시 시간+클라이언트 oEmbed 폴백
         if (checkIsLive()) {
           const videoId = await fetchVideoIdFromClient();
@@ -348,7 +348,7 @@ export default function Home() {
                 try {
                   const parsed = JSON.parse(wo.content);
                   WORSHIP_ORDERS[wo.category] = parsed;
-                } catch {}
+                } catch (_e) {}
               }
             }
           }
