@@ -997,7 +997,7 @@ export default function CMSPage() {
                     let currentOrder: any;
                     try {
                       currentOrder = dbItem?.content ? JSON.parse(dbItem.content) : DEFAULT_WORSHIP_ORDERS[selectedWorship];
-                    } catch {
+                    } catch (_e) {
                       currentOrder = DEFAULT_WORSHIP_ORDERS[selectedWorship];
                     }
                     if (!currentOrder) currentOrder = { title: selectedWorship, groups: [] };

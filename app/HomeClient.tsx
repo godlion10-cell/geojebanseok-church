@@ -113,7 +113,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
           setIsLive(false);
           setLiveVideoId(null);
         }
-      } catch {
+      } catch (_e) {
         setIsLive(false);
         setLiveVideoId(null);
       }
