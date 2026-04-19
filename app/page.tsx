@@ -1,10 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from './page.module.css';
 import Link from 'next/link';
 
-
+// 예배 시간 체크 함수
+function checkIsLive(): boolean {
+  const now = new Date();
+  const day = now.getDay();
+  const t = now.getHours() * 60 + now.getMinutes();
+  return (
+    (day === 0 && t >= 530 && t <= 630) ||   // 주일 1부 08:50~10:30
+    (day === 0 && t >= 640 && t <= 750) ||   // 주일 2부 10:40~12:30
+    (day === 0 && t >= 830 && t <= 930) ||   // 주일 오후 13:50~15:30
+    (day === 3 && t >= 1160 && t <= 1260) || // 수요 저녁 19:20~21:00
+    (day === 5 && t >= 1190 && t <= 1290) || // 금요 기도회 19:50~21:30
+    (day >= 1 && day <= 6 && t >= 320 && t <= 390) // 새벽예배 05:20~06:30
+  );
+}
 
 function getNextWorship(): string {
   const now = new Date();
@@ -192,7 +205,8 @@ export default function Home() {
   const [isLive, setIsLive] = useState(false);
   const [liveVideoId, setLiveVideoId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-
+  const liveVideoRef = useRef<HTMLDivElement>(null);
+  const streamEndedRef = useRef(false); // 🔴 스트림 종료 플래그
 
   // DB에서 불러온 콘텐츠 상태
   const [newsItems, setNewsItems] = useState<any[]>([]);
@@ -200,37 +214,123 @@ export default function Home() {
   const [scheduleItems, setScheduleItems] = useState<any[]>([]);
   const [selectedWorship, setSelectedWorship] = useState('주일대예배 (1부)');
 
-  // 💡 핵심: 라이브 상태 통합 관리 (15초마다 서버 API 확인)
-  // - API가 live:true → 라이브 표시
-  // - API가 live:false → 시간과 상관없이 즉시 종료 처리
+  // 🔴 스트림 종료 처리 함수
+  const handleStreamEnded = () => {
+    streamEndedRef.current = true;
+    setIsLive(false);
+    setLiveVideoId(null);
+    setIsExpanded(false);
+    document.body.style.overflow = '';
+  };
+
+  // 클라이언트 측에서 CORS 프록시를 통해 라이브 비디오 ID 직접 가져오기
+  // (서버에서 봇 차단당할 때 폴백으로 사용)
+  const fetchVideoIdFromClient = async (): Promise<string | null> => {
+    try {
+      // corsproxy.io를 통해 YouTube 채널 라이브 페이지의 HTML을 가져옴
+      const targetUrl = 'https://www.youtube.com/@petros-church/live';
+      const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
+      if (!res.ok) return null;
+      const html = await res.text();
+      if (html.length < 10000) return null;
+
+      // canonical URL에서 비디오 ID 추출
+      const canonical = html.match(/<link\s+rel="canonical"\s+href="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"/);
+      if (canonical) return canonical[1];
+
+      // og:url 폴백
+      const ogUrl = html.match(/<meta\s+property="og:url"\s+content="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"/);
+      if (ogUrl) return ogUrl[1];
+
+      return null;
+    } catch (_e) {
+      return null;
+    }
+  };
+
+  // YouTube 라이브 체크 + 자동 탭 전환 (30초마다)
   useEffect(() => {
-    const syncLiveStatus = async () => {
+    const fetchLive = async () => {
+      // 스트림이 종료된 상태면 다시 라이브로 전환하지 않음
+      if (streamEndedRef.current) {
+        const timeBasedLive = checkIsLive();
+        if (!timeBasedLive) {
+          streamEndedRef.current = false;
+        }
+        setIsLive(false);
+        setLiveVideoId(null);
+        return;
+      }
+
       try {
-        const res = await fetch(`/api/youtube-live?t=${Date.now()}`, { cache: 'no-store' });
+        const res = await fetch(`/api/youtube-live?t=${new Date().getTime()}`, { cache: 'no-store' });
         const data = await res.json();
 
-        if (!data.live) {
-          // 🔴 API가 "라이브 아님" → 시간과 상관없이 무조건 종료 처리
+        if (data.live) {
+          let videoId = data.videoId || null;
+
+          // 서버에서 videoId를 못 가져왔으면 클라이언트에서 직접 시도
+          if (!videoId) {
+            videoId = await fetchVideoIdFromClient();
+          }
+
+          setIsLive(true);
+          setLiveVideoId(videoId);
+          setActiveSection('sermon');
+        } else {
           setIsLive(false);
           setLiveVideoId(null);
-          setIsExpanded(false);
-          document.body.style.overflow = '';
-        } else {
-          // 🔵 실제 라이브 중 → 비디오 ID 세팅 및 라이브 모드 전환
-          setIsLive(true);
-          setLiveVideoId(data.videoId || null);
         }
-      } catch (error) {
-        console.error('[라이브 상태 체크 오류]', error);
-        // API 오류 시 안전하게 라이브 종료 상태로 유지
-        setIsLive(false);
+      } catch (_e) {
+        // API 호출 실패 시 시간+클라이언트 oEmbed 폴백
+        if (checkIsLive()) {
+          const videoId = await fetchVideoIdFromClient();
+          setIsLive(true);
+          setLiveVideoId(videoId);
+          setActiveSection('sermon');
+        } else {
+          setIsLive(false);
+          setLiveVideoId(null);
+        }
+      }
+    };
+    fetchLive();
+    const timer = setInterval(fetchLive, 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // 🔴 서버 API 폴링으로 라이브 종료 자동 감지 (15초마다)
+  // YouTube IFrame Player의 크로스 오리진 제한을 우회하기 위해 서버측에서 확인
+  useEffect(() => {
+    if (!isLive) return; // videoId 없어도 라이브 상태면 종료 감지 필요
+
+    let destroyed = false;
+
+    const checkEnded = async () => {
+      if (destroyed) return;
+      try {
+        // 서버 API로 YouTube Data API를 통해 라이브 상태 직접 확인
+        const res = await fetch(`/api/youtube-live?t=${new Date().getTime()}`, { cache: 'no-store' });
+        const data = await res.json();
+        
+        if (!data.live) {
+          // YouTube에서 라이브가 종료됨 → 시간 관계없이 즉시 종료 처리
+          console.log('[라이브 종료 감지] YouTube 라이브가 종료되었습니다.');
+          handleStreamEnded();
+        }
+      } catch (e) {
+        console.warn('[라이브 종료 체크 실패]', e);
       }
     };
 
-    syncLiveStatus();
-    const timer = setInterval(syncLiveStatus, 15000);
-    return () => clearInterval(timer);
-  }, []);
+    // 15초마다 종료 여부 체크 (라이브 중일 때만)
+    const endCheckTimer = setInterval(checkEnded, 15000);
+
+    return () => {
+      destroyed = true;
+      clearInterval(endCheckTimer);
+    };
+  }, [isLive]);
 
   // DB에서 콘텐츠 로딩
   useEffect(() => {
