@@ -133,16 +133,16 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
       {/* Header */}
       <header 
         className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}
-        style={{ zIndex: 9999 }}
+        style={{ position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 9999 }}
       >
         <div
           className={styles.logo}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           onDoubleClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
-          style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+          style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
         >
           <img src="/church-logo.png" alt="반석교회 로고" style={{ height: '60px', objectFit: 'contain' }} />
-          <span style={{ fontSize: '1.6rem', fontWeight: '800', color: '#1a365d', letterSpacing: '-1px' }}>
+          <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1a365d', letterSpacing: '-0.5px' }}>
             반석교회
           </span>
         </div>
