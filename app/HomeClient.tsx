@@ -120,7 +120,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
     };
 
     checkLive();
-    const timer = setInterval(checkLive, 15000);
+    const timer = setInterval(checkLive, 60000); // 60초 (API 할당량 보호)
     return () => clearInterval(timer);
   }, []);
 
