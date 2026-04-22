@@ -130,19 +130,39 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
 
   return (
     <div className={styles.mainContainer}>
-      {/* Header */}
+      {/* Header - 안개 현상 방지를 위해 z-index를 최고치로 설정 */}
       <header 
         className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}
-        style={{ position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 9999 }}
+        style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          width: '100%', 
+          zIndex: 99999, // 어떤 안개보다 위로 올라오게 설정
+          background: scrolled ? 'white' : 'transparent', // 스크롤 시 하얗게 변경
+          display: 'flex',
+          alignItems: 'center',
+          padding: '10px 5%'
+        }}
       >
         <div
           className={styles.logo}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           onDoubleClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
-          style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
+          style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '15px' }}
         >
-          <img src="/church-logo.png" alt="반석교회 로고" style={{ height: '60px', objectFit: 'contain' }} />
-          <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1a365d', letterSpacing: '-0.5px' }}>
+          {/* 로고 이미지 */}
+          <img src="/church-logo.png" alt="반석교회 로고" style={{ height: '50px', objectFit: 'contain' }} />
+          
+          {/* 교회 이름 - 안 보일 수 없도록 진한 색상과 큰 폰트 적용 */}
+          <span style={{ 
+            fontSize: '1.8rem', 
+            fontWeight: '900', 
+            color: '#1a365d', // 진한 남색
+            textShadow: '1px 1px 0px white', // 글자가 더 잘 보이게 외곽선 효과
+            whiteSpace: 'nowrap',
+            display: 'inline-block' 
+          }}>
             반석교회
           </span>
         </div>
@@ -153,13 +173,14 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
         >
           {menuOpen ? '✕' : '☰'}
         </button>
-        <nav className={`${styles.nav} ${menuOpen ? styles.navOpen : ''}`}>
-          <Link href="#about" className={styles.navLink} onClick={handleNavClick}>교회소개</Link>
-          <Link href="#vision" className={styles.navLink} onClick={handleNavClick}>비전과사명</Link>
-          <Link href="#sermon" className={styles.navLink} onClick={handleNavClick}>설교말씀</Link>
-          <Link href="#news" className={styles.navLink} onClick={handleNavClick}>교회소식</Link>
-          <Link href="#schedule" className={styles.navLink} onClick={handleNavClick}>예배안내</Link>
-          <Link href="#location" className={styles.navLink} onClick={handleNavClick}>오시는길</Link>
+        {/* 네비게이션 메뉴 */}
+        <nav className={`${styles.nav} ${menuOpen ? styles.navOpen : ''}`} style={{ marginLeft: 'auto' }}>
+          <Link href="#about" className={styles.navLink} onClick={handleNavClick} style={{ color: '#333', fontWeight: 'bold' }}>교회소개</Link>
+          <Link href="#vision" className={styles.navLink} onClick={handleNavClick} style={{ color: '#333', fontWeight: 'bold' }}>비전과사명</Link>
+          <Link href="#sermon" className={styles.navLink} onClick={handleNavClick} style={{ color: '#333', fontWeight: 'bold' }}>설교말씀</Link>
+          <Link href="#news" className={styles.navLink} onClick={handleNavClick} style={{ color: '#333', fontWeight: 'bold' }}>교회소식</Link>
+          <Link href="#schedule" className={styles.navLink} onClick={handleNavClick} style={{ color: '#333', fontWeight: 'bold' }}>예배안내</Link>
+          <Link href="#location" className={styles.navLink} onClick={handleNavClick} style={{ color: '#333', fontWeight: 'bold' }}>오시는길</Link>
         </nav>
       </header>
 
