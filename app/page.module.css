@@ -1821,3 +1821,24 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ======================================== */
+/*  헤더 안개 현상 방지 — 강제 오버라이드   */
+/* ======================================== */
+
+.header {
+  z-index: 99999 !important; /* 무조건 최상단 */
+  background-color: white !important; /* 배경을 하얗게 강제 고정 */
+}
+
+.logo span {
+  display: inline-block !important;
+  visibility: visible !important;
+  color: #1a365d !important;
+  font-weight: 900 !important;
+}
+
+/* 안개를 만드는 범인들을 강제로 뒤로 보냄 */
+.heroBg, .heroOverlay, .heroDecor {
+  z-index: 1 !important;
+}
