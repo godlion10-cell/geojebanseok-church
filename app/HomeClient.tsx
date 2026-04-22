@@ -92,15 +92,25 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
           display: 'flex', alignItems: 'center', padding: '0 5%'
         }}
       >
+        {/* 로고 영역 - 확인용 빨간 테두리/텍스트 */}
         <div
           className={styles.logo}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '15px', padding: '10px 0' }}
+          style={{
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '15px',
+            border: '2px solid red' // 확인용: 로고 주변에 빨간 테두리가 생겨야 합니다!
+          }}
         >
-          <img src="/church-logo.png" alt="반석교회 로고" style={{ height: '50px', width: 'auto', objectFit: 'contain' }} />
+          <img src="/church-logo.png" alt="로고" style={{ height: '50px', width: 'auto' }} />
+
           <span style={{
-            fontSize: '1.6rem', fontWeight: '900', color: '#1a365d',
-            letterSpacing: '-1px', whiteSpace: 'nowrap'
+            fontSize: '2rem',
+            fontWeight: 'bold',
+            color: 'red', // 일단 확인을 위해 빨간색으로 넣습니다!
+            display: 'inline-block'
           }}>
             반석교회
           </span>
