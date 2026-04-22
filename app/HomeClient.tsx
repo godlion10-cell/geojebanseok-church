@@ -133,7 +133,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
       {/* Header */}
       <header 
         className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}
-        style={{ position: 'relative', zIndex: 100 }}
+        style={{ zIndex: 9999 }}
       >
         <div
           className={styles.logo}

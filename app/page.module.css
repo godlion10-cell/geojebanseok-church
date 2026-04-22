@@ -157,7 +157,7 @@
 .heroBg {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
 }
 
 .heroBgImage {
@@ -183,7 +183,7 @@
 /* Floating decorative elements */
 .heroDecor {
   position: absolute;
-  z-index: 1;
+  z-index: 0;
   pointer-events: none;
 }
 
