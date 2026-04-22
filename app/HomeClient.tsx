@@ -63,7 +63,7 @@ const FALLBACK_SCHEDULES = [
 
 const WORSHIP_ORDERS: Record<string, any> = {};
 
-export default function Home() {
+export default function HomeClient() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<SectionKey>('about');
   const [isLive, setIsLive] = useState(false);
