@@ -254,18 +254,41 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
                   background: '#000',
                   overflow: 'hidden',
                 }}>
-                  <iframe
-                    width="100%" height="100%"
-                    src={liveVideoId 
-                      ? `https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=1&rel=0`
-                      : `https://www.youtube.com/embed/live_stream?channel=UCc_eP0i4YwSQmQ9du5-RHbA&autoplay=1&mute=1&rel=0`
-                    }
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    style={{ position: 'absolute', top: 0, left: 0 }}
-                    title="반석교회 실시간 예배"
-                  ></iframe>
+                  {liveVideoId ? (
+                    // 1. 영상 ID를 성공적으로 가져왔을 때 (정상 임베드)
+                    <iframe
+                      width="100%" height="100%"
+                      src={`https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=1&rel=0`}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ position: 'absolute', top: 0, left: 0 }}
+                      title="반석교회 실시간 예배"
+                    ></iframe>
+                  ) : (
+                    // 2. 영상 ID를 못 가져왔지만(API 제한 등) 예배 시간일 때 (에러 방지용 안내 화면)
+                    <div style={{
+                      position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      background: '#111', color: '#fff', textAlign: 'center', padding: '20px'
+                    }}>
+                      <h3 style={{ color: '#fff', marginBottom: '10px' }}>🔴 현재 실시간 예배 중입니다</h3>
+                      <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '20px' }}>
+                        원활한 시청을 위해 유튜브 앱이나 웹사이트에서 직접 시청해 주세요.
+                      </p>
+                      <a
+                        href="https://www.youtube.com/@petros-church/live"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          background: '#c00', color: '#fff', padding: '10px 20px',
+                          borderRadius: '5px', textDecoration: 'none', fontWeight: 'bold'
+                        }}
+                      >
+                        유튜브에서 예배 참여하기 ▶
+                      </a>
+                    </div>
+                  )}
                 </div>
                 <div className={styles.sermonMainInfo}>
                   <h3>🔴 실시간 예배 중</h3>
