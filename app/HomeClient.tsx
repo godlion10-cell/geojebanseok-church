@@ -43,15 +43,9 @@ function checkIsLive(): boolean {
   );
 }
 
-function getNextWorship(): string {
-  const days = ['일', '월', '화', '수', '목', '금', '토'];
-  return `주일 오전 9시 주일대예배`;
-}
-
 export default function HomeClient({ newsItems, sermons, schedules }: HomeClientProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [selectedWorship, setSelectedWorship] = useState('주일대예배 (1부)');
   const [isLive, setIsLive] = useState(false);
   const [liveVideoId, setLiveVideoId] = useState<string | null>(null);
 
@@ -86,12 +80,12 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
 
   return (
     <div className={styles.mainContainer}>
-      {/* 1. 헤더 영역 - 안개 현상 해결을 위해 z-index 99999 적용 */}
+      {/* 헤더 - z-index 99999로 안개 현상 방지 */}
       <header
         className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}
         style={{
           position: 'fixed', top: 0, left: 0, width: '100%',
-          zIndex: 99999, // 배경 안개보다 무조건 위로
+          zIndex: 99999,
           backgroundColor: scrolled ? 'rgba(255,255,255,0.95)' : 'rgba(255,250,240,0.8)',
           backdropFilter: 'blur(10px)',
           borderBottom: '1px solid rgba(0,0,0,0.05)',
@@ -103,8 +97,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '15px', padding: '10px 0' }}
         >
-          <img src="/church-logo.png" alt="로고" style={{ height: '50px', width: 'auto', objectFit: 'contain' }} />
-          {/* 교회 이름 추가 */}
+          <img src="/church-logo.png" alt="반석교회 로고" style={{ height: '50px', width: 'auto', objectFit: 'contain' }} />
           <span style={{
             fontSize: '1.6rem', fontWeight: '900', color: '#1a365d',
             letterSpacing: '-1px', whiteSpace: 'nowrap'
@@ -136,7 +129,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
         </div>
       </section>
 
-      {/* Sermon Section (라이브 영상 부분) */}
+      {/* Sermon Section */}
       <section className={styles.section} id="sermon">
         <h2 className={styles.sectionTitle}>설교 말씀</h2>
         <div className={styles.sermonMain}>
@@ -170,7 +163,7 @@ export default function HomeClient({ newsItems, sermons, schedules }: HomeClient
 
       {/* Footer */}
       <footer className={styles.footer} style={{ padding: '40px 0', textAlign: 'center', background: '#333', color: '#fff' }}>
-        <img src="/church-logo-white.png" alt="로고" style={{ height: '60px', marginBottom: '20px' }} />
+        <img src="/church-logo-white.png" alt="반석교회 로고" style={{ height: '60px', marginBottom: '20px' }} />
         <p>© 2026 거제 반석교회. 모든 권리 보유.</p>
       </footer>
     </div>
